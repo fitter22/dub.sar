@@ -1,13 +1,13 @@
 """DUB.SAR 1.0 — Command Line Interface (CLI).
 
-Implements Section 24:
-  dubsar run tablet.dub
-  dubsar check tablet.dub
-  dubsar compile tablet.dub --target=bytecode
-  dubsar compile tablet.dub --target=wasm
+Implements Section 24, CR-027, CR-028, CR-040, CR-041:
+  dubsar run tablet.dub [--backend=vm|ast] [--format=canonical|sexagesimal|decimal] [--mode=auto|tablet|scholar]
+  dubsar check tablet.dub [--mode=auto|tablet|scholar]
+  dubsar compile tablet.dub [--target=bytecode|wasm|wat|ir|json]
+  dubsar format tablet.dub [--mode=auto|tablet|scholar] [--inplace]
   dubsar transliterate tablet.dub
   dubsar cuneiform tablet.dub
-  dubsar render tablet.dub --style=tablet
+  dubsar render tablet.dub --style=tablet|svg|text
 """
 
 from __future__ import annotations
@@ -16,9 +16,11 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
+from dubsar.diagnostics import format_diagnostic
 from dubsar.errors import DubSarError
+from dubsar.formatter import detect_source_mode, format_source
 from dubsar.interpreter import Interpreter
 from dubsar.ir import Compiler
 from dubsar.lexer import Lexer
@@ -26,7 +28,6 @@ from dubsar.normalizer import cuneiformize, transliterate
 from dubsar.parser import Parser
 from dubsar.renderer import render_svg, render_terminal_tablet
 from dubsar.semantic import SemanticAnalyzer
-from dubsar.vm import VirtualMachine
 from dubsar.wasm import compile_to_wat
 
 
@@ -53,10 +54,22 @@ def build_parser() -> argparse.ArgumentParser:
         default="canonical",
         help="Number presentation formatting",
     )
+    run_p.add_argument(
+        "--mode",
+        choices=["auto", "tablet", "scholar", "mixed"],
+        default="auto",
+        help="Source language mode filter / detection",
+    )
 
     # check
     check_p = subparsers.add_parser("check", help="Parse and semantically validate a tablet")
     check_p.add_argument("file", type=str, help="Path to .dub source file")
+    check_p.add_argument(
+        "--mode",
+        choices=["auto", "tablet", "scholar", "mixed"],
+        default="auto",
+        help="Source language mode filter / detection",
+    )
 
     # compile
     comp_p = subparsers.add_parser("compile", help="Compile a tablet to bytecode, WASM, or IR")
@@ -67,7 +80,25 @@ def build_parser() -> argparse.ArgumentParser:
         default="bytecode",
         help="Compilation target format",
     )
+    comp_p.add_argument(
+        "--mode",
+        choices=["auto", "tablet", "scholar", "mixed"],
+        default="auto",
+        help="Source language mode filter / detection",
+    )
     comp_p.add_argument("-o", "--output", type=str, default=None, help="Output destination file")
+
+    # format
+    fmt_p = subparsers.add_parser("format", help="Format and canonicalize tablet source code")
+    fmt_p.add_argument("file", type=str, help="Path to .dub source file")
+    fmt_p.add_argument(
+        "--mode",
+        choices=["auto", "tablet", "scholar"],
+        default="auto",
+        help="Canonical target style (tablet cuneiform, scholar Latin, or auto)",
+    )
+    fmt_p.add_argument("-i", "--inplace", action="store_true", help="Format file in place")
+    fmt_p.add_argument("-o", "--output", type=str, default=None, help="Output destination file")
 
     # transliterate
     trans_p = subparsers.add_parser("transliterate", help="Convert Cuneiform/Tablet source to Scholar mode")
@@ -102,18 +133,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"Error: File not found: {file_path}", file=sys.stderr)
         return 1
 
+    source: str = ""
     try:
         source = file_path.read_text(encoding="utf-8")
     except Exception as e:
         print(f"Error reading file {file_path}: {e}", file=sys.stderr)
         return 1
 
+    detected_mode = detect_source_mode(source)
+
     try:
         if args.command == "run":
             tokens = Lexer(source, source_file=str(file_path)).tokenize()
             program = Parser(tokens, source_file=str(file_path)).parse()
 
-            # Set up input function
             input_val = args.input
             if input_val is not None:
                 in_fn = lambda prompt: input_val
@@ -121,6 +154,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 in_fn = input
 
             if args.backend == "vm":
+                from dubsar.vm import VirtualMachine
                 SemanticAnalyzer(source_file=str(file_path)).analyze(program)
                 compiler = Compiler()
                 compiled = compiler.compile(program)
@@ -135,7 +169,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             tokens = Lexer(source, source_file=str(file_path)).tokenize()
             program = Parser(tokens, source_file=str(file_path)).parse()
             SemanticAnalyzer(source_file=str(file_path)).analyze(program)
-            print(f"✓ Tablet '{file_path.name}' parsed and verified successfully.")
+            print(f"✓ Tablet '{file_path.name}' parsed and verified successfully (Mode: {detected_mode}).")
             return 0
 
         elif args.command == "compile":
@@ -166,6 +200,18 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(f"Compiled output written to: {args.output}")
             else:
                 print(out_str)
+            return 0
+
+        elif args.command == "format":
+            formatted = format_source(source, mode=args.mode)
+            if args.inplace:
+                file_path.write_text(formatted, encoding="utf-8")
+                print(f"Formatted {file_path}")
+            elif args.output:
+                Path(args.output).write_text(formatted, encoding="utf-8")
+                print(f"Formatted output written to: {args.output}")
+            else:
+                print(formatted)
             return 0
 
         elif args.command == "transliterate":
@@ -202,7 +248,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 0
 
     except DubSarError as err:
-        print(f"DUB.SAR Error: {err}", file=sys.stderr)
+        diag = format_diagnostic(err, source_text=source, source_file=str(file_path))
+        print(diag, file=sys.stderr)
         return 1
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)

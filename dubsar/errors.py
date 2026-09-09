@@ -77,10 +77,16 @@ class DubSarReturnError(DubSarError):
     pass
 
 
+class DubSarTypeError(DubSarError):
+    """Invalid operand or argument type."""
+    pass
+
+
 # Export standard names matching Section 19
 SyntaxError = DubSarSyntaxError
 NameError = DubSarNameError
 UnitError = DubSarUnitError
+TypeError = DubSarTypeError
 DivisionByZero = DubSarDivisionByZero
 RangeError = DubSarRangeError
 InputError = DubSarInputError
@@ -91,6 +97,7 @@ __all__ = [
     "DubSarSyntaxError",
     "DubSarNameError",
     "DubSarUnitError",
+    "DubSarTypeError",
     "DubSarDivisionByZero",
     "DubSarRangeError",
     "DubSarInputError",
@@ -98,6 +105,7 @@ __all__ = [
     "SyntaxError",
     "NameError",
     "UnitError",
+    "TypeError",
     "DivisionByZero",
     "RangeError",
     "InputError",

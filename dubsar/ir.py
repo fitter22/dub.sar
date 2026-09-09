@@ -115,39 +115,222 @@ class CompiledTablet:
         return "\n\n".join(chunks)
 
 
+from dubsar.semantic_ir import (
+    ApplyMathVerb,
+    AssignVerb,
+    ConcludeVerb,
+    DetermineVerb,
+    DiscardVerb,
+    EstablishVerb,
+    InscribeVerb,
+    ProcedureRecipe,
+    ReceiveInput,
+    RepeatVerb,
+    SemanticProgram,
+    SemanticVerb,
+    TakeLiteral,
+    TakeQuantity,
+    TakeText,
+    TuplePack,
+    VerbExpr,
+    ast_to_semantic_ir,
+)
+
+
 class Compiler:
-    """Compiles DUB.SAR AST to stack-oriented IR bytecode."""
+    """Compiles DUB.SAR AST or Semantic IR to stack-oriented IR bytecode."""
 
     def __init__(self) -> None:
         self.current_chunk: Optional[BytecodeChunk] = None
 
-    def compile(self, program: Program) -> CompiledTablet:
+    def compile(self, program: Union[Program, SemanticProgram]) -> CompiledTablet:
+        if isinstance(program, Program):
+            sem_prog = ast_to_semantic_ir(program)
+        else:
+            sem_prog = program
+
+        return self.compile_semantic_program(sem_prog)
+
+    def compile_semantic_program(self, sem_prog: SemanticProgram) -> CompiledTablet:
         # 1. Compile procedures
         procedures: Dict[str, BytecodeChunk] = {}
-        for proc in program.procedures:
+        for proc in sem_prog.procedures:
             proc_chunk = BytecodeChunk(name=f"proc:{proc.name}", parameters=proc.parameters)
             self.current_chunk = proc_chunk
-            for stmt in proc.body:
-                self._compile_statement(stmt)
-            # Default return if needed
+            for verb in proc.body:
+                self._compile_verb(verb)
             if not proc_chunk.instructions or proc_chunk.instructions[-1].op != OpCode.RETURN:
                 proc_chunk.emit(OpCode.CONST, Quantity(0, DIMENSIONLESS), proc.line)
                 proc_chunk.emit(OpCode.RETURN, 1, proc.line)
             procedures[proc.name] = proc_chunk
 
-        # 2. Compile main chunk (problem section followed by result section)
+        # 2. Compile main chunk
         main_chunk = BytecodeChunk(name="main")
         self.current_chunk = main_chunk
 
-        for stmt in program.problem.body:
-            self._compile_statement(stmt)
+        for verb in sem_prog.problem_verbs:
+            self._compile_verb(verb)
 
-        for stmt in program.result.body:
-            self._compile_statement(stmt)
+        for verb in sem_prog.result_verbs:
+            self._compile_verb(verb)
 
-        main_chunk.emit(OpCode.HALT, None, program.line)
+        main_chunk.emit(OpCode.HALT, None, sem_prog.line)
 
         return CompiledTablet(main_chunk=main_chunk, procedures=procedures)
+
+    def _compile_verb(self, verb: SemanticVerb) -> None:
+        assert self.current_chunk is not None
+        chunk = self.current_chunk
+
+        if isinstance(verb, EstablishVerb):
+            self._compile_verb_expr(verb.value)
+            if verb.unit is not None:
+                u = lookup_unit(verb.unit)
+                chunk.emit(OpCode.CONST, Quantity(1, u), verb.line)
+                chunk.emit(OpCode.MUL, None, verb.line)
+            chunk.emit(OpCode.STORE, verb.name, verb.line)
+
+        elif isinstance(verb, AssignVerb):
+            self._compile_verb_expr(verb.value)
+            if len(verb.targets) == 1:
+                chunk.emit(OpCode.STORE, verb.targets[0], verb.line)
+            else:
+                chunk.emit(OpCode.UNPACK, verb.targets, verb.line)
+
+        elif isinstance(verb, DetermineVerb):
+            self._compile_verb_expr(verb.condition)
+            jump_false_idx = chunk.emit(OpCode.JUMP_IF_FALSE, None, verb.line)
+            for v in verb.body:
+                self._compile_verb(v)
+
+            if verb.alternative:
+                jump_end_idx = chunk.emit(OpCode.JUMP, None, verb.line)
+                chunk.instructions[jump_false_idx].arg = len(chunk.instructions)
+                for v in verb.alternative:
+                    self._compile_verb(v)
+                chunk.instructions[jump_end_idx].arg = len(chunk.instructions)
+            else:
+                chunk.instructions[jump_false_idx].arg = len(chunk.instructions)
+
+        elif isinstance(verb, RepeatVerb):
+            if verb.start is not None:
+                self._compile_verb_expr(verb.start)
+            else:
+                chunk.emit(OpCode.CONST, Quantity(1, DIMENSIONLESS), verb.line)
+
+            chunk.emit(OpCode.STORE, verb.target, verb.line)
+            loop_start = len(chunk.instructions)
+
+            chunk.emit(OpCode.LOAD, verb.target, verb.line)
+            self._compile_verb_expr(verb.end)
+            chunk.emit(OpCode.CMP, "<=", verb.line)
+
+            jump_exit_idx = chunk.emit(OpCode.JUMP_IF_FALSE, None, verb.line)
+
+            for v in verb.body:
+                self._compile_verb(v)
+
+            chunk.emit(OpCode.LOAD, verb.target, verb.line)
+            chunk.emit(OpCode.CONST, Quantity(1, DIMENSIONLESS), verb.line)
+            chunk.emit(OpCode.ADD, None, verb.line)
+            chunk.emit(OpCode.STORE, verb.target, verb.line)
+            chunk.emit(OpCode.JUMP, loop_start, verb.line)
+
+            chunk.instructions[jump_exit_idx].arg = len(chunk.instructions)
+
+        elif isinstance(verb, ConcludeVerb):
+            for val in verb.values:
+                self._compile_verb_expr(val)
+            chunk.emit(OpCode.RETURN, len(verb.values), verb.line)
+
+        elif isinstance(verb, InscribeVerb):
+            self._compile_verb_expr(verb.value)
+            chunk.emit(OpCode.OUTPUT, None, verb.line)
+
+        elif isinstance(verb, DiscardVerb):
+            self._compile_verb_expr(verb.expr)
+            chunk.emit(OpCode.POP, None, verb.line)
+
+    def _compile_verb_expr(self, expr: VerbExpr) -> None:
+        assert self.current_chunk is not None
+        chunk = self.current_chunk
+
+        if isinstance(expr, TakeLiteral):
+            u = lookup_unit(expr.unit) if expr.unit else DIMENSIONLESS
+            chunk.emit(OpCode.CONST, Quantity(expr.value, u), expr.line)
+
+        elif isinstance(expr, TakeText):
+            chunk.emit(OpCode.CONST, expr.value, expr.line)
+
+        elif isinstance(expr, TakeQuantity):
+            chunk.emit(OpCode.LOAD, expr.name, expr.line)
+
+        elif isinstance(expr, ReceiveInput):
+            chunk.emit(OpCode.CONST, expr.prompt, expr.line)
+            chunk.emit(OpCode.INPUT, None, expr.line)
+
+        elif isinstance(expr, ApplyMathVerb):
+            if expr.verb in ("FLOOR", "CEIL", "NEAREST", "ABS"):
+                if expr.operands:
+                    self._compile_verb_expr(expr.operands[0])
+                op_code = getattr(OpCode, expr.verb)
+                chunk.emit(op_code, None, expr.line)
+            elif expr.verb == "INVOKE":
+                callee = expr.callee or ""
+                if callee == "floor" and len(expr.operands) == 1:
+                    self._compile_verb_expr(expr.operands[0])
+                    chunk.emit(OpCode.FLOOR, None, expr.line)
+                elif callee == "ceil" and len(expr.operands) == 1:
+                    self._compile_verb_expr(expr.operands[0])
+                    chunk.emit(OpCode.CEIL, None, expr.line)
+                elif callee == "nearest" and len(expr.operands) == 1:
+                    self._compile_verb_expr(expr.operands[0])
+                    chunk.emit(OpCode.NEAREST, None, expr.line)
+                elif callee == "abs" and len(expr.operands) == 1:
+                    self._compile_verb_expr(expr.operands[0])
+                    chunk.emit(OpCode.ABS, None, expr.line)
+                else:
+                    for op_arg in expr.operands:
+                        self._compile_verb_expr(op_arg)
+                    chunk.emit(OpCode.CALL, (callee, len(expr.operands)), expr.line)
+            elif expr.verb == "NEGATE":
+                self._compile_verb_expr(expr.operands[0])
+                chunk.emit(OpCode.NEG, None, expr.line)
+            elif expr.verb == "NOT":
+                self._compile_verb_expr(expr.operands[0])
+                chunk.emit(OpCode.NOT, None, expr.line)
+            elif expr.verb == "COMPARE":
+                self._compile_verb_expr(expr.operands[0])
+                self._compile_verb_expr(expr.operands[1])
+                chunk.emit(OpCode.CMP, expr.relation, expr.line)
+            elif expr.verb == "ADD":
+                self._compile_verb_expr(expr.operands[0])
+                self._compile_verb_expr(expr.operands[1])
+                chunk.emit(OpCode.ADD, None, expr.line)
+            elif expr.verb == "SUBTRACT":
+                self._compile_verb_expr(expr.operands[0])
+                self._compile_verb_expr(expr.operands[1])
+                chunk.emit(OpCode.SUB, None, expr.line)
+            elif expr.verb == "MULTIPLY":
+                self._compile_verb_expr(expr.operands[0])
+                self._compile_verb_expr(expr.operands[1])
+                chunk.emit(OpCode.MUL, None, expr.line)
+            elif expr.verb == "DIVIDE":
+                self._compile_verb_expr(expr.operands[0])
+                self._compile_verb_expr(expr.operands[1])
+                chunk.emit(OpCode.DIV, None, expr.line)
+            elif expr.verb == "MODULO":
+                self._compile_verb_expr(expr.operands[0])
+                self._compile_verb_expr(expr.operands[1])
+                chunk.emit(OpCode.REM, None, expr.line)
+            elif expr.verb == "POWER":
+                self._compile_verb_expr(expr.operands[0])
+                self._compile_verb_expr(expr.operands[1])
+                chunk.emit(OpCode.POW_INT, None, expr.line)
+
+        elif isinstance(expr, TuplePack):
+            for el in expr.elements:
+                self._compile_verb_expr(el)
 
     def _compile_statement(self, stmt: Statement) -> None:
         assert self.current_chunk is not None

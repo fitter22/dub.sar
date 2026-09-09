@@ -61,6 +61,21 @@ RESULT
         self.assertEqual(code, 0)
         self.assertTrue(out_svg.exists())
 
+    def test_cli_format(self):
+        out_fmt = Path(self.temp_dir.name) / "formatted.dub"
+        code = main(["format", str(self.dub_file), "--mode=scholar", "-o", str(out_fmt)])
+        self.assertEqual(code, 0)
+        self.assertTrue(out_fmt.exists())
+        content = out_fmt.read_text(encoding="utf-8")
+        self.assertIn("PROBLEM", content)
+        self.assertIn("a : 40", content)
+
+    def test_cli_error_diagnostic(self):
+        bad_file = Path(self.temp_dir.name) / "bad.dub"
+        bad_file.write_text("PROBLEM\n    x := 1 day + 2 year\nRESULT\n    output x\n", encoding="utf-8")
+        code = main(["check", str(bad_file)])
+        self.assertEqual(code, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

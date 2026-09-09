@@ -1,0 +1,123 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "DUB.SAR",
+  "scopeName": "source.dubsar",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#units" },
+    { "include": "#builtins" },
+    { "include": "#operators" },
+    { "include": "#procedures" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.dubsar",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.dubsar",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.dubsar",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.sexagesimal.dubsar",
+          "match": "\\b[0-9]+;[0-9]+(,[0-9]+)*\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.dubsar",
+          "match": "\\b[0-9]+\\.[0-9]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.dubsar",
+          "match": "\\b[0-9]+\\b"
+        },
+        {
+          "name": "constant.numeric.cuneiform.dubsar",
+          "match": "[\\u12400-\\u1247F]+"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.section.dubsar",
+          "match": "\\b(PROBLEM|RESULT|e-dis|e-diš|ka-dis|ka-diš)\\b|𒂊𒁹|𒅗𒁹"
+        },
+        {
+          "name": "keyword.control.dubsar",
+          "match": "\\b(if|else|repeat|for|return|e-a|nu-e-a|gi|ges|ĝeš|to|iti)\\b|𒂊𒀀|𒉡𒂊𒀀|𒄀|𒄑|𒌗"
+        },
+        {
+          "name": "keyword.other.io.dubsar",
+          "match": "\\b(output|print|input|dis-a|diš-a|a-dis|a-diš)\\b|𒁹𒀀|𒀀𒁹"
+        },
+        {
+          "name": "keyword.declaration.procedure.dubsar",
+          "match": "\\b(procedure|recipe|dub-sar)\\b|𒁾𒊬"
+        }
+      ]
+    },
+    "units": {
+      "patterns": [
+        {
+          "name": "entity.name.type.unit.dubsar",
+          "match": "\\b(second|sec|minute|min|hour|hr|day|ud|month|iti|year|mu)\\b|𒌓|𒌗|𒈬"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.dubsar",
+          "match": "\\b(abs|floor|ceil|nearest|min|max|gcd|lcm|convert)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.dubsar",
+          "match": ":=|:"
+        },
+        {
+          "name": "keyword.operator.comparison.dubsar",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.arithmetic.dubsar",
+          "match": "\\+|-|\\*\\*|\\*|/|%|\\b(zi|ta|sha|ša|ni|nu|not)\\b|𒍣|𒋫|𒊭|𒉌|𒉡"
+        }
+      ]
+    },
+    "procedures": {
+      "patterns": [
+        {
+          "match": "\\b(procedure|recipe|dub-sar|𒁾𒊬)\\s+([a-zA-Z0-9_\\-\\u12000-\\u1247F]+)",
+          "captures": {
+            "1": { "name": "keyword.declaration.procedure.dubsar" },
+            "2": { "name": "entity.name.function.dubsar" }
+          }
+        }
+      ]
+    }
+  }
+}

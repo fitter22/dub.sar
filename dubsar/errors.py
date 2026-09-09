@@ -1,0 +1,105 @@
+"""DUB.SAR 1.0 — Error definitions.
+
+As defined in Section 19 of the DUB.SAR 1.0 Specification:
+A conforming implementation MUST distinguish at least:
+- SyntaxError — malformed source;
+- NameError — unknown name;
+- UnitError — incompatible dimensions;
+- DivisionByZero — zero divisor;
+- RangeError — invalid repetition range;
+- InputError — invalid numeric input;
+- ReturnError — procedure does not return the declared result shape.
+"""
+
+from typing import Optional
+
+
+class DubSarError(Exception):
+    """Base exception for all DUB.SAR language errors."""
+
+    def __init__(
+        self,
+        message: str,
+        line: Optional[int] = None,
+        col: Optional[int] = None,
+        source_file: Optional[str] = None,
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.line = line
+        self.col = col
+        self.source_file = source_file
+
+    def __str__(self) -> str:
+        loc = []
+        if self.source_file:
+            loc.append(self.source_file)
+        if self.line is not None:
+            loc.append(f"line {self.line}")
+        if self.col is not None:
+            loc.append(f"col {self.col}")
+        loc_str = f" ({', '.join(loc)})" if loc else ""
+        return f"{self.__class__.__name__}{loc_str}: {self.message}"
+
+
+class DubSarSyntaxError(DubSarError):
+    """Malformed source."""
+    pass
+
+
+class DubSarNameError(DubSarError):
+    """Unknown or undefined name."""
+    pass
+
+
+class DubSarUnitError(DubSarError):
+    """Incompatible dimensions or invalid unit conversion."""
+    pass
+
+
+class DubSarDivisionByZero(DubSarError):
+    """Division or modulo by zero divisor."""
+    pass
+
+
+class DubSarRangeError(DubSarError):
+    """Invalid repetition range (e.g. non-integer or negative bound)."""
+    pass
+
+
+class DubSarInputError(DubSarError):
+    """Invalid numeric input from user/environment."""
+    pass
+
+
+class DubSarReturnError(DubSarError):
+    """Procedure does not return the declared result shape."""
+    pass
+
+
+# Export standard names matching Section 19
+SyntaxError = DubSarSyntaxError
+NameError = DubSarNameError
+UnitError = DubSarUnitError
+DivisionByZero = DubSarDivisionByZero
+RangeError = DubSarRangeError
+InputError = DubSarInputError
+ReturnError = DubSarReturnError
+
+__all__ = [
+    "DubSarError",
+    "DubSarSyntaxError",
+    "DubSarNameError",
+    "DubSarUnitError",
+    "DubSarDivisionByZero",
+    "DubSarRangeError",
+    "DubSarInputError",
+    "DubSarReturnError",
+    "SyntaxError",
+    "NameError",
+    "UnitError",
+    "DivisionByZero",
+    "RangeError",
+    "InputError",
+    "ReturnError",
+]

@@ -1,0 +1,52 @@
+# DUB.SAR 1.0 — Planetary Leap-Year Rule (Tablet Mode)
+# As specified in Section 26 of DUB.SAR 1.0 Language Specification
+
+𒂊𒁹
+
+    𒈬 := 𒀀𒁹("solar year in days")
+    maximum-cycle : 1000
+    cycle, leaps, error := leap-rule(𒈬, maximum-cycle)
+
+𒁾𒊬 leap-rule(solar, limit):
+
+    whole := floor(solar)
+    fraction := solar - whole
+    fraction-count := fraction / 1 𒌓
+
+    best-cycle := 1
+    best-leaps := 0
+    best-error := abs(solar - whole)
+
+    𒄀 cycle 1 𒌗 limit:
+
+        estimated-leaps := nearest(cycle * fraction-count)
+        candidate := whole + (estimated-leaps / cycle) * 1 𒌓
+        error := abs(solar - candidate)
+
+        𒂊𒀀 error < best-error:
+
+            best-error := error
+            best-cycle := cycle
+            best-leaps := estimated-leaps
+
+    𒄑 best-cycle, best-leaps, best-error
+
+𒅗𒁹
+
+    𒁹𒀀 "normal days:"
+    𒁹𒀀 floor(𒈬)
+
+    𒁹𒀀 "cycle years:"
+    𒁹𒀀 cycle
+
+    𒁹𒀀 "leap years:"
+    𒁹𒀀 leaps
+
+    𒁹𒀀 "common years:"
+    𒁹𒀀 cycle - leaps
+
+    𒁹𒀀 "mean calendar year:"
+    𒁹𒀀 floor(𒈬) + (leaps / cycle) * 1 𒌓
+
+    𒁹𒀀 "error in days/year:"
+    𒁹𒀀 error

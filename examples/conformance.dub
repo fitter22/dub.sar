@@ -1,0 +1,56 @@
+# DUB.SAR 1.0 — Conformance Suite
+# Directly verifies Section 29 test cases:
+# - Numbers: 1, 60, 1;0, 1;30, 365;14,31,55
+# - Arithmetic: 1;30 + 0;30 = 2, 2 * 0;30 = 1, 3 / 2 = 1;30
+# - Unit safety: 1 day + 2 day = 3 day
+# - Bounded repetition: repeat 1..1, repeat 1..1000
+# - Exactness: Equivalent rational values compare equal
+
+PROBLEM
+
+    # Numbers
+    n1 : 1
+    n60 : 60
+    n_one : 1;0
+    n_one_half : 1;30
+    solar : 365;14,31,55
+
+    # Arithmetic
+    sum_res := 1;30 + 0;30
+    mul_res := 2 * 0;30
+    div_res := 3 / 2
+
+    # Unit safety
+    d1 : 1 day
+    d2 : 2 day
+    d_total := d1 + d2
+
+    # Exactness check: 1;0 == 1, 1;30 == 3/2
+    exact_check_1 := (1;0 == 1)
+    exact_check_2 := (1;30 == 3 / 2)
+
+    # Repetition check
+    acc : 0
+    repeat i 1 to 5:
+        acc := acc + i
+
+RESULT
+
+    output "sum 1;30 + 0;30 (expected 2):"
+    output sum_res
+
+    output "mul 2 * 0;30 (expected 1):"
+    output mul_res
+
+    output "div 3 / 2 (expected 1;30):"
+    output div_res
+
+    output "unit sum 1 day + 2 day (expected 3 day):"
+    output d_total
+
+    output "exactness checks:"
+    output exact_check_1
+    output exact_check_2
+
+    output "bounded repetition 1..5 sum (expected 15):"
+    output acc

@@ -1,0 +1,31 @@
+# DUB.SAR 1.0 — Unit Conversions and Dimensional Safety
+# Implements Section 15 and Section 16 unit conversions
+
+PROBLEM
+
+    # Base quantities
+    t_sec : 7200 second
+    t_min : 180 minute
+    t_hr : 36 hour
+
+    # Explicit conversions via convert(value, target_unit)
+    c_hr := convert(t_sec, hour)
+    c_day := convert(t_hr, day)
+    c_min := convert(c_day, minute)
+
+    # Compatible addition
+    total_time := t_hr + 12 hour
+
+RESULT
+
+    output "7200 seconds converted to hours (expected 2 hour):"
+    output c_hr
+
+    output "36 hours converted to days (expected 1;30 day):"
+    output c_day
+
+    output "1;30 day converted to minutes (expected 2160 minute):"
+    output c_min
+
+    output "36 hour + 12 hour:"
+    output total_time

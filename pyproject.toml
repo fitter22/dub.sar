@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dubsar"
+version = "1.0.0"
+description = "DUB.SAR 1.0 — Executable Mesopotamian Mathematical Tablet Language"
+readme = "README.md"
+authors = [
+    { name = "DUB.SAR Contributors" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+keywords = ["mesopotamian", "cuneiform", "sexagesimal", "mathematics", "compiler", "vm"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = []
+
+[project.scripts]
+dubsar = "dubsar.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dubsar*"]

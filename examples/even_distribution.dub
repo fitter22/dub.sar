@@ -1,0 +1,38 @@
+# DUB.SAR 1.0 — Even Distribution of Leap Years
+# As specified in Section 27 of DUB.SAR 1.0 Language Specification
+
+𒂊𒁹
+
+    acc : 0
+    cycle : 4
+    leaps : 1
+
+    acc, y1 := next-leap(acc, cycle, leaps)
+    acc, y2 := next-leap(acc, cycle, leaps)
+    acc, y3 := next-leap(acc, cycle, leaps)
+    acc, y4 := next-leap(acc, cycle, leaps)
+
+𒁾𒊬 next-leap(accumulator, cycle, leaps):
+
+    new-accumulator := accumulator + leaps
+
+    𒂊𒀀 new-accumulator >= cycle:
+
+        new-accumulator := new-accumulator - cycle
+        𒄑 new-accumulator, 1
+
+    𒄑 new-accumulator, 0
+
+𒅗𒁹
+
+    𒁹𒀀 "year 1 extra day:"
+    𒁹𒀀 y1
+
+    𒁹𒀀 "year 2 extra day:"
+    𒁹𒀀 y2
+
+    𒁹𒀀 "year 3 extra day:"
+    𒁹𒀀 y3
+
+    𒁹𒀀 "year 4 extra day:"
+    𒁹𒀀 y4

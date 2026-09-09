@@ -1,0 +1,52 @@
+# DUB.SAR 1.0 — Planetary Leap-Year Rule (Scholar Mode)
+# Equivalent to Section 26 written in ASCII Latin transliteration
+
+PROBLEM
+
+    mu := input("solar year in days")
+    maximum-cycle : 1000
+    cycle, leaps, error := leap-rule(mu, maximum-cycle)
+
+procedure leap-rule(solar, limit):
+
+    whole := floor(solar)
+    fraction := solar - whole
+    fraction-count := fraction / 1 day
+
+    best-cycle := 1
+    best-leaps := 0
+    best-error := abs(solar - whole)
+
+    repeat cycle 1 to limit:
+
+        estimated-leaps := nearest(cycle * fraction-count)
+        candidate := whole + (estimated-leaps / cycle) * 1 day
+        error := abs(solar - candidate)
+
+        if error < best-error:
+
+            best-error := error
+            best-cycle := cycle
+            best-leaps := estimated-leaps
+
+    return best-cycle, best-leaps, best-error
+
+RESULT
+
+    output "normal days:"
+    output floor(mu)
+
+    output "cycle years:"
+    output cycle
+
+    output "leap years:"
+    output leaps
+
+    output "common years:"
+    output cycle - leaps
+
+    output "mean calendar year:"
+    output floor(mu) + (leaps / cycle) * 1 day
+
+    output "error in days/year:"
+    output error

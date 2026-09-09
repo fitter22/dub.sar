@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""DUB.SAR 1.0 Executable CLI Launcher."""
+
+import sys
+from pathlib import Path
+
+# Add repository root to sys.path
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from dubsar.cli import main
+
+if __name__ == "__main__":
+    sys.exit(main())

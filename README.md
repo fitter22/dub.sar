@@ -57,7 +57,6 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
 ### Tablet Mode (Canonical Cuneiform)
 ```text
 𒑰 DUB.SAR 1.0 — Planetary Leap-Year Rule (Tablet Mode)
-𒑰 As specified in Section 73 of DUB.SAR 1.0 Redesign
 
 𒂊𒁹
 
@@ -108,7 +107,6 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
 ### Scholar Mode (Academic Latin Transliteration)
 ```text
 # DUB.SAR 1.0 — Planetary Leap-Year Rule (Scholar Mode)
-# As specified in Section 72 of DUB.SAR 1.0 Redesign
 
 problem
 
@@ -319,7 +317,6 @@ You can also render directly to your terminal:
 ║                     TABLET: PLANETARY_LEAP                     ║
 ╠════════════════════════════════════════════════════════════════╣
 ║  𒑰 DUB.SAR 1.0 — Planetary Leap-Year Rule (Tablet Mode)       ║
-║  𒑰 As specified in Section 73 of DUB.SAR 1.0 Redesign         ║
 ║                                                                ║
 ║  𒂊𒁹                                                          ║
 ║                                                                ║

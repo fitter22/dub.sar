@@ -42,12 +42,12 @@ class TestPlanetaryLeapConformance(unittest.TestCase):
         # CR-046: AST Evaluator == VM
         self.assertEqual(interp_out, vm_out)
 
-        # Section 70 / CR-033: Benchmark values
+        # Section 26.3: Benchmark values
         self.assertIn("673", vm_out)
         self.assertIn("163 day", vm_out)
         self.assertIn("3/3365000 day", vm_out)
 
-        # Section 71: Independent Leap-Year Verification
+        # Independent continued-fraction / brute-force leap-year verification
         from fractions import Fraction
         solar_frac = Fraction(2422, 10000)
         best_cycle = 1

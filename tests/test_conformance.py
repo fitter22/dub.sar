@@ -55,7 +55,7 @@ class TestConformance(unittest.TestCase):
         interp = Interpreter(input_fn=lambda p: "365.2422", output_fn=lambda s: None)
         outputs = interp.run(program)
 
-        # Section 70 / Section 26.3 states:
+        # Section 26.3 states:
         # cycle = 673, leaps = 163 day, error = 3/3365000 day
         self.assertIn("673", outputs)
         self.assertIn("163 day", outputs)

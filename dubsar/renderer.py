@@ -3,13 +3,14 @@
 Implements Section 24 and Section 25:
 - Clay-tablet-style SVG artwork rendering with authentic case rulings and cuneiform styling
 - Terminal text tablet framing
+- Optional comment stripping for pure inscription display (--strip-comments)
 """
 
 from __future__ import annotations
 
 import html
 import unicodedata
-from typing import Optional
+from typing import List, Optional
 
 
 def get_char_width(ch: str) -> int:
@@ -39,9 +40,30 @@ def pad_to_display_width(text: str, target_width: int) -> str:
     return text + (" " * padding)
 
 
-def render_svg(source: str, title: str = "DUB.SAR TABLET — 𒁾𒊬") -> str:
+def filter_comment_lines(lines: List[str]) -> List[str]:
+    """Filters out comment lines starting with '#' or '𒑰'."""
+    filtered: List[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("#") or stripped.startswith("𒑰"):
+            continue
+        filtered.append(line)
+    # Strip leading blank lines
+    while filtered and not filtered[0].strip():
+        filtered.pop(0)
+    return filtered
+
+
+def render_svg(
+    source: str,
+    title: str = "DUB.SAR TABLET — 𒁾𒊬",
+    strip_comments: bool = False,
+) -> str:
     """Renders the DUB.SAR tablet source into an authentic Mesopotamian clay tablet SVG artwork."""
     lines = source.splitlines()
+    if strip_comments:
+        lines = filter_comment_lines(lines)
+
     line_height = 28
     header_height = 90
     padding_top = 40
@@ -99,12 +121,10 @@ def render_svg(source: str, title: str = "DUB.SAR TABLET — 𒁾𒊬") -> str:
     curr_y = header_height + padding_top
     for idx, line in enumerate(lines):
         escaped = html.escape(line)
-        # Register line below text
         rule_y = curr_y + 8
         svg_lines.append(
             f'    <line x1="{padding_x}" y1="{rule_y}" x2="{width - padding_x}" y2="{rule_y}" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />'
         )
-        # Text imprint (wedge shadow effect)
         svg_lines.append(
             f'    <text x="{padding_x + 10}" y="{curr_y}">{escaped}</text>'
         )
@@ -124,9 +144,15 @@ def render_svg(source: str, title: str = "DUB.SAR TABLET — 𒁾𒊬") -> str:
     return "\n".join(svg_lines)
 
 
-def render_terminal_tablet(source: str, title: str = "DUB.SAR TABLET — 𒁾𒊬 𒅎𒁍𒁕") -> str:
+def render_terminal_tablet(
+    source: str,
+    title: str = "DUB.SAR TABLET — 𒁾𒊬 𒅎𒁍𒁕",
+    strip_comments: bool = False,
+) -> str:
     """Renders the source code framed in an authentic terminal box-drawing tablet with straight borders."""
     lines = source.splitlines()
+    if strip_comments:
+        lines = filter_comment_lines(lines)
 
     content_widths = [get_display_width(f"  {l}") for l in lines]
     max_content_w = max(content_widths, default=20)

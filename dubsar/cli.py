@@ -119,6 +119,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="tablet",
         help="Rendering presentation style: clay tablet SVG or terminal box text",
     )
+    rend_p.add_argument(
+        "--strip-comments",
+        action="store_true",
+        help="Omit comment lines ('#' and '𒑰') from the rendered tablet artwork",
+    )
     rend_p.add_argument("-o", "--output", type=str, default=None, help="Output destination file")
 
     return parser
@@ -234,12 +239,20 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         elif args.command == "render":
             if args.style in ("tablet", "svg"):
-                rendered = render_svg(source, title=f"TABLET: {file_path.stem.upper()}")
+                rendered = render_svg(
+                    source,
+                    title=f"TABLET: {file_path.stem.upper()}",
+                    strip_comments=args.strip_comments,
+                )
                 out_dest = args.output if args.output else f"{file_path.stem}_tablet.svg"
                 Path(out_dest).write_text(rendered, encoding="utf-8")
                 print(f"Clay tablet SVG artwork rendered to: {out_dest}")
             else:
-                rendered = render_terminal_tablet(source, title=f"TABLET: {file_path.stem.upper()}")
+                rendered = render_terminal_tablet(
+                    source,
+                    title=f"TABLET: {file_path.stem.upper()}",
+                    strip_comments=args.strip_comments,
+                )
                 if args.output:
                     Path(args.output).write_text(rendered, encoding="utf-8")
                     print(f"Text tablet rendered to: {args.output}")

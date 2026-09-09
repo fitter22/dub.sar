@@ -49,6 +49,9 @@ Modern programming languages are built upon Von Neumann variables, arbitrary loo
 
 ### Tablet Mode (Canonical Cuneiform)
 ```text
+𒑰 DUB.SAR 1.0 — Planetary Leap-Year Rule (Tablet Mode)
+𒑰 As specified in Section 26 of DUB.SAR 1.0 Language Specification
+
 𒂊𒁹
 
     𒈬 := 𒀀𒁹("solar year in days")
@@ -212,6 +215,8 @@ python3 -m dubsar cuneiform examples/planetary_leap_scholar.dub
 # 8. Render Clay Tablet Artwork (CR-036)
 python3 -m dubsar render examples/planetary_leap.dub --style=tablet -o tablet.svg
 python3 -m dubsar render examples/planetary_leap.dub --style=text
+# Or omit comment lines for pure inscribed tablet artwork:
+python3 -m dubsar render examples/planetary_leap.dub --style=tablet --strip-comments -o tablet_clean.svg
 ```
 
 ---
@@ -306,28 +311,28 @@ python3 -m dubsar render examples/planetary_leap.dub --style=tablet -o tablet.sv
 
 You can also render directly to your terminal:
 ```text
-╔════════════════════════════════════════════════════════════════════════╗
-║                         TABLET: PLANETARY_LEAP                         ║
-╠════════════════════════════════════════════════════════════════════════╣
-║  # DUB.SAR 1.0 — Planetary Leap-Year Rule (Tablet Mode)                ║
-║  # As specified in Section 26 of DUB.SAR 1.0 Language Specification    ║
-║                                                                        ║
-║  𒂊𒁹                                                                    ║
-║                                                                        ║
-║      𒈬 := 𒀀𒁹("solar year in days")                                    ║
-║      maximum-cycle : 1000                                              ║
-║      cycle, leaps, error := leap-rule(𒈬, maximum-cycle)                 ║
-║                                                                        ║
-║  𒁾𒊬 leap-rule(solar, limit):                                           ║
-║                                                                        ║
-║      whole := floor(solar)                                             ║
-║      fraction := solar - whole                                         ║
+╔═════════════════════════════════════════════════════════════════════════╗
+║                         TABLET: PLANETARY_LEAP                          ║
+╠═════════════════════════════════════════════════════════════════════════╣
+║  𒑰 DUB.SAR 1.0 — Planetary Leap-Year Rule (Tablet Mode)                ║
+║  𒑰 As specified in Section 26 of DUB.SAR 1.0 Language Specification    ║
+║                                                                         ║
+║  𒂊𒁹                                                                   ║
+║                                                                         ║
+║      𒈬 := 𒀀𒁹("solar year in days")                                   ║
+║      maximum-cycle : 1000                                               ║
+║      cycle, leaps, error := leap-rule(𒈬, maximum-cycle)                ║
+║                                                                         ║
+║  𒁾𒊬 leap-rule(solar, limit):                                          ║
+║                                                                         ║
+║      whole := floor(solar)                                              ║
+║      fraction := solar - whole                                          ║
 ║      fraction-count := fraction / 1 𒌓                                  ║
-║                                                                        ║
-║      best-cycle := 1                                                   ║
-║      best-leaps := 0                                                   ║
-║      best-error := abs(solar - whole)                                  ║
-╚════════════════════════════════════════════════════════════════════════╝
+║                                                                         ║
+║      best-cycle := 1                                                    ║
+║      best-leaps := 0                                                    ║
+║      best-error := abs(solar - whole)                                   ║
+╚═════════════════════════════════════════════════════════════════════════╝
 ```
 
 ---

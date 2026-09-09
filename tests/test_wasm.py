@@ -65,6 +65,31 @@ RESULT
         self.assertIn("╝", text)
         self.assertIn("TERMINAL TABLET", text)
 
+    def test_render_strip_comments(self):
+        source_with_comments = """# Scholar comment
+𒑰 Cuneiform comment
+PROBLEM
+    a : 10
+RESULT
+    output a
+"""
+        # Test text renderer
+        full_text = render_terminal_tablet(source_with_comments)
+        self.assertIn("# Scholar comment", full_text)
+        self.assertIn("𒑰 Cuneiform comment", full_text)
+
+        stripped_text = render_terminal_tablet(source_with_comments, strip_comments=True)
+        self.assertNotIn("# Scholar comment", stripped_text)
+        self.assertNotIn("𒑰 Cuneiform comment", stripped_text)
+        self.assertIn("PROBLEM", stripped_text)
+
+        # Test SVG renderer
+        full_svg = render_svg(source_with_comments)
+        self.assertIn("# Scholar comment", full_svg)
+        stripped_svg = render_svg(source_with_comments, strip_comments=True)
+        self.assertNotIn("# Scholar comment", stripped_svg)
+        self.assertNotIn("𒑰 Cuneiform comment", stripped_svg)
+
 
 if __name__ == "__main__":
     unittest.main()

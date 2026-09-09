@@ -1,0 +1,50 @@
+[
+  {
+    "name": "second",
+    "cuneiform": "second",
+    "dimension": "time",
+    "category": "physical_duration",
+    "scale": "1",
+    "description": "Base physical time unit"
+  },
+  {
+    "name": "minute",
+    "cuneiform": "minute",
+    "dimension": "time",
+    "category": "physical_duration",
+    "scale": "60",
+    "description": "Sexagesimal physical minute (60 seconds)"
+  },
+  {
+    "name": "hour",
+    "cuneiform": "hour",
+    "dimension": "time",
+    "category": "physical_duration",
+    "scale": "3600",
+    "description": "Sexagesimal physical hour (60 minutes)"
+  },
+  {
+    "name": "day",
+    "cuneiform": "𒌓",
+    "dimension": "time",
+    "category": "physical_duration",
+    "scale": "86400",
+    "description": "Astronomical/solar day duration (ud / 𒌓)"
+  },
+  {
+    "name": "month",
+    "cuneiform": "𒌗",
+    "dimension": "month",
+    "category": "calendar_count",
+    "scale": "1",
+    "description": "Abstract calendar lunar/intercalary month count (iti / 𒌗)"
+  },
+  {
+    "name": "year",
+    "cuneiform": "𒈬",
+    "dimension": "year",
+    "category": "calendar_count",
+    "scale": "1",
+    "description": "Abstract calendar year cycle count (mu / 𒈬)"
+  }
+]

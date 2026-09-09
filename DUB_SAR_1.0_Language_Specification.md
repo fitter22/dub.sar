@@ -812,58 +812,102 @@ L = \operatorname{nearest}(C(Y-\lfloor Y\rfloor)).
 
 ### 26.2 Valid DUB.SAR 1.0 source
 
-In 1.0, procedures are declared at tablet level, between the problem and result sections. They are registered before execution of the problem section.
+#### Tablet Mode (Cuneiform)
 
 ```text
 𒂊𒁹
 
-    𒈬 := 𒀀𒁹("solar year in days")
-    maximum-cycle : 1000
-    cycle, leaps, error := leap-rule(𒈬, maximum-cycle)
+    solar-year : 𒀀𒁹 "solar year in days"
+    limit : 1000
 
-𒁾𒊬 leap-rule(solar, limit):
+    whole-days :
+        solar-year
+        gur
 
-    whole := floor(solar)
-    fraction := solar - whole
-    fraction-count := fraction / 1 𒌓
+    fraction :
+        solar-year
+        whole-days
+        ta
 
-    best-cycle := 1
-    best-leaps := 0
-    best-error := abs(solar - whole)
+    best : 𒉡
 
-    𒄀 cycle 1 𒌗 limit:
+    𒄀 cycle 𒋫 1 𒌗 limit:
 
-        estimated-leaps := nearest(cycle * fraction-count)
-        candidate := whole + (estimated-leaps / cycle) * 1 𒌓
-        error := abs(solar - candidate)
+        leaps :
+            cycle
+            fraction
+            sha
+            ri
 
-        𒂊𒀀 error < best-error:
+        error :
+            whole-days
+            leaps
+            cycle
+            ni
+            zi
+            solar-year
+            ta
+            te
 
-            best-error := error
-            best-cycle := cycle
-            best-leaps := estimated-leaps
+        candidate :
+            cycle
+            leaps
+            error
 
-    𒄑 best-cycle, best-leaps, best-error
+        𒋼 candidate 𒂊𒀀 error 𒌉 best.error
 
 𒅗𒁹
 
-    𒁹𒀀 "normal days:"
-    𒁹𒀀 floor(𒈬)
+    best
+```
 
-    𒁹𒀀 "cycle years:"
-    𒁹𒀀 cycle
+#### Scholar Mode (Latin Transliteration)
 
-    𒁹𒀀 "leap years:"
-    𒁹𒀀 leaps
+```text
+problem
 
-    𒁹𒀀 "common years:"
-    𒁹𒀀 cycle - leaps
+    solar-year : ask "solar year in days"
+    limit : 1000
 
-    𒁹𒀀 "mean calendar year:"
-    𒁹𒀀 floor(𒈬) + (leaps / cycle) * 1 𒌓
+    whole-days :
+        solar-year
+        floor
 
-    𒁹𒀀 "error in days/year:"
-    𒁹𒀀 error
+    fraction :
+        solar-year
+        whole-days
+        subtract
+
+    best : empty
+
+    consider cycle from 1 through limit:
+
+        leaps :
+            cycle
+            fraction
+            multiply
+            nearest
+
+        error :
+            whole-days
+            leaps
+            cycle
+            divide
+            add
+            solar-year
+            subtract
+            absolute
+
+        candidate :
+            cycle
+            leaps
+            error
+
+        retain candidate when error is lesser than best.error
+
+result
+
+    best
 ```
 
 ### 26.3 Semantic result for Earth-like input

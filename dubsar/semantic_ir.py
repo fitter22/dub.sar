@@ -15,17 +15,27 @@ from dubsar.ast import (
     Assignment,
     BinaryOp,
     CallExpr,
+    CompareExpr,
     Conditional,
     Declaration,
+    Determination,
+    DomainRepetition,
+    EmptyLiteral,
     Expression,
     ExpressionStatement,
+    FieldAccess,
     Identifier,
     InputExpr,
+    IsExpr,
     NumberLiteral,
     OutputStatement,
+    PostfixExpr,
     Procedure,
     Program,
+    Recipe,
     Repetition,
+    ResultSection,
+    RetainStatement,
     ReturnStatement,
     Statement,
     StringLiteral,
@@ -84,6 +94,25 @@ class ApplyMathVerb(VerbExpr):
 class TuplePack(VerbExpr):
     """Pack ordered tuple of values."""
     elements: List[VerbExpr] = field(default_factory=list)
+
+
+@dataclass
+class TakeEmpty(VerbExpr):
+    """TAKE empty determination literal."""
+    pass
+
+
+@dataclass
+class FieldLookup(VerbExpr):
+    """LOOKUP field on determination/record."""
+    record: VerbExpr = field(default_factory=VerbExpr)
+    field: str = ""
+
+
+@dataclass
+class PostfixCalc(VerbExpr):
+    """Postfix calculation sequence."""
+    steps: List[Any] = field(default_factory=list)
 
 
 # ==============================================================================
@@ -145,6 +174,21 @@ class InscribeVerb(SemanticVerb):
 class DiscardVerb(SemanticVerb):
     """Evaluate expression verb for side-effects (e.g. standalone invocation)."""
     expr: VerbExpr = field(default_factory=VerbExpr)
+
+
+@dataclass
+class MakeDetermination(SemanticVerb):
+    """MAKE determination record."""
+    name: str = ""
+    fields: List[str] = field(default_factory=list)
+
+
+@dataclass
+class RetainVerb(SemanticVerb):
+    """RETAIN candidate when condition."""
+    candidate: str = ""
+    condition: VerbExpr = field(default_factory=VerbExpr)
+    target: str = "best"
 
 
 # ==============================================================================
@@ -220,16 +264,34 @@ def lower_expression_to_sem_ir(expr: Expression) -> VerbExpr:
     elif isinstance(expr, TupleExpr):
         el_irs = [lower_expression_to_sem_ir(e) for e in expr.elements]
         return TuplePack(elements=el_irs, line=expr.line, col=expr.col)
+    elif isinstance(expr, EmptyLiteral):
+        return TakeEmpty(line=expr.line, col=expr.col)
+    elif isinstance(expr, FieldAccess):
+        return FieldLookup(record=lower_expression_to_sem_ir(expr.record), field=expr.field, line=expr.line, col=expr.col)
+    elif isinstance(expr, PostfixExpr):
+        steps = [lower_expression_to_sem_ir(s) if isinstance(s, Expression) else s for s in expr.steps]
+        return PostfixCalc(steps=steps, line=expr.line, col=expr.col)
+    elif isinstance(expr, CompareExpr):
+        ops = [lower_expression_to_sem_ir(expr.left)]
+        if expr.right:
+            ops.append(lower_expression_to_sem_ir(expr.right))
+        return ApplyMathVerb(verb="COMPARE", operands=ops, relation=expr.relation, line=expr.line, col=expr.col)
+    elif isinstance(expr, IsExpr):
+        return ApplyMathVerb(verb="IS", operands=[lower_expression_to_sem_ir(expr.target)], relation=expr.predicate, line=expr.line, col=expr.col)
     return VerbExpr(line=expr.line, col=expr.col)
 
 
 def lower_statement_to_sem_ir(stmt: Statement) -> SemanticVerb:
     """Lowers an AST statement into a Semantic IR verb."""
     if isinstance(stmt, Declaration):
+        val_ir = lower_expression_to_sem_ir(stmt.value)
+        unit_to_apply = stmt.unit
+        if isinstance(val_ir, TakeLiteral) and val_ir.unit:
+            unit_to_apply = None
         return EstablishVerb(
             name=stmt.name,
-            value=lower_expression_to_sem_ir(stmt.value),
-            unit=stmt.unit,
+            value=val_ir,
+            unit=unit_to_apply,
             line=stmt.line,
             col=stmt.col,
         )
@@ -272,6 +334,25 @@ def lower_statement_to_sem_ir(stmt: Statement) -> SemanticVerb:
     elif isinstance(stmt, ExpressionStatement):
         return DiscardVerb(
             expr=lower_expression_to_sem_ir(stmt.expr),
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, Determination):
+        return MakeDetermination(name=stmt.name, fields=list(stmt.fields), line=stmt.line, col=stmt.col)
+    elif isinstance(stmt, RetainStatement):
+        return RetainVerb(
+            candidate=stmt.candidate,
+            condition=lower_expression_to_sem_ir(stmt.condition),
+            target=stmt.target,
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, DomainRepetition):
+        return RepeatVerb(
+            target=stmt.target,
+            start=lower_expression_to_sem_ir(stmt.start),
+            end=lower_expression_to_sem_ir(stmt.end),
+            body=[lower_statement_to_sem_ir(s) for s in stmt.body],
             line=stmt.line,
             col=stmt.col,
         )

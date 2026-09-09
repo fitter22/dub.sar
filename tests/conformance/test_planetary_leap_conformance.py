@@ -42,12 +42,31 @@ class TestPlanetaryLeapConformance(unittest.TestCase):
         # CR-046: AST Evaluator == VM
         self.assertEqual(interp_out, vm_out)
 
-        # CR-033: Benchmark values
+        # Section 70 / CR-033: Benchmark values
         self.assertIn("673", vm_out)
-        self.assertIn("163", vm_out)
-        self.assertIn("510", vm_out)
-        self.assertIn("365 + 163/673 day", vm_out)
+        self.assertIn("163 day", vm_out)
         self.assertIn("3/3365000 day", vm_out)
+
+        # Section 71: Independent Leap-Year Verification
+        from fractions import Fraction
+        solar_frac = Fraction(2422, 10000)
+        best_cycle = 1
+        best_leaps = 0
+        best_err = abs(Fraction(0) - solar_frac)
+        for q in range(1, 1001):
+            p = round(q * solar_frac)
+            err = abs(Fraction(p, q) - solar_frac)
+            if err < best_err:
+                best_err = err
+                best_cycle = q
+                best_leaps = p
+
+        self.assertEqual(best_cycle, 673)
+        self.assertEqual(best_leaps, 163)
+        self.assertEqual(best_err, Fraction(3, 3365000))
+        self.assertEqual(str(best_cycle), vm_out[0])
+        self.assertEqual(f"{best_leaps} day", vm_out[1])
+        self.assertEqual(f"{best_err.numerator}/{best_err.denominator} day", vm_out[2])
 
     def test_even_distribution_both_engines(self):
         source = self.dist_path.read_text(encoding="utf-8")

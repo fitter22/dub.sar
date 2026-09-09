@@ -15,18 +15,27 @@ from dubsar.ast import (
     Assignment,
     BinaryOp,
     CallExpr,
+    CompareExpr,
     Conditional,
     Declaration,
+    Determination,
+    DomainRepetition,
+    EmptyLiteral,
     Expression,
     ExpressionStatement,
+    FieldAccess,
     Identifier,
     InputExpr,
+    IsExpr,
     NumberLiteral,
     OutputStatement,
+    PostfixExpr,
     Procedure,
     Program,
+    Recipe,
     Repetition,
     ResultSection,
+    RetainStatement,
     ReturnStatement,
     Statement,
     StringLiteral,
@@ -114,6 +123,27 @@ class Formatter:
                     res.append(self._format_statement(s, indent + 4, is_tablet))
             return "\n".join(res)
 
+        elif isinstance(stmt, Determination):
+            fields_str = ", ".join(stmt.fields)
+            return f"{pad}{stmt.name} : {fields_str}"
+
+        elif isinstance(stmt, RetainStatement):
+            ret_kw = "𒋼" if is_tablet else "retain"
+            when_kw = "𒂊𒀀" if is_tablet else "when"
+            cond_str = self._format_expression(stmt.condition, is_tablet)
+            return f"{pad}{ret_kw} {stmt.candidate} {when_kw} {cond_str}"
+
+        elif isinstance(stmt, DomainRepetition):
+            rep_kw = "𒄀" if is_tablet else "consider"
+            from_kw = "𒋫 " if is_tablet else "from "
+            to_kw = "𒌗" if is_tablet else "through"
+            start_str = f"{from_kw}{self._format_expression(stmt.start, is_tablet)} {to_kw} " if stmt.start else ""
+            end_str = self._format_expression(stmt.end, is_tablet)
+            res = [f"{pad}{rep_kw} {stmt.target} {start_str}{end_str}:"]
+            for s in stmt.body:
+                res.append(self._format_statement(s, indent + 4, is_tablet))
+            return "\n".join(res)
+
         elif isinstance(stmt, Repetition):
             rep_kw = "𒄀" if is_tablet else "repeat"
             to_kw = "𒌗" if is_tablet else "to"
@@ -147,6 +177,51 @@ class Formatter:
                 return f"{val_str}{u_str}"
             return val_str
 
+        elif isinstance(expr, EmptyLiteral):
+            return "𒉡" if is_tablet else "empty"
+
+        elif isinstance(expr, FieldAccess):
+            rec_str = self._format_expression(expr.record, is_tablet)
+            return f"{rec_str}.{expr.field}"
+
+        elif isinstance(expr, PostfixExpr):
+            parts = []
+            for step in expr.steps:
+                if isinstance(step, str):
+                    if is_tablet:
+                        tablet_ops = {
+                            "floor": "gur", "ceil": "nim", "nearest": "ri",
+                            "absolute": "te", "add": "zi", "subtract": "ta",
+                            "multiply": "sha", "divide": "ni", "lesser": "tur",
+                            "greater": "gal", "equal": "sa",
+                        }
+                        parts.append(tablet_ops.get(step.lower(), step))
+                    else:
+                        parts.append(step)
+                elif isinstance(step, Expression):
+                    parts.append(self._format_expression(step, is_tablet))
+                else:
+                    parts.append(str(step))
+            return " ".join(parts)
+
+        elif isinstance(expr, CompareExpr):
+            left_str = self._format_expression(expr.left, is_tablet)
+            right_str = self._format_expression(expr.right, is_tablet) if expr.right else ""
+            rel = getattr(expr, "relation", getattr(expr, "op", "lesser"))
+            if is_tablet:
+                cmp_kw = {"lesser": "𒌉", "greater": "𒃲", "equal": "𒊓", "not-equal": "nu-sa"}.get(rel, rel)
+                return f"{left_str} {cmp_kw} {right_str}"
+            else:
+                return f"{left_str} is {rel} than {right_str}"
+
+        elif isinstance(expr, IsExpr):
+            target_str = self._format_expression(expr.target, is_tablet)
+            if is_tablet:
+                pred_kw = "𒉡" if expr.predicate == "empty" else "la-nu"
+                return f"{target_str} e {pred_kw}"
+            else:
+                return f"{target_str} is {expr.predicate}"
+
         elif isinstance(expr, StringLiteral):
             return f'"{expr.value}"'
 
@@ -154,8 +229,8 @@ class Formatter:
             return expr.name
 
         elif isinstance(expr, InputExpr):
-            in_kw = "𒀀𒁹" if is_tablet else "input"
-            return f'{in_kw}("{expr.prompt}")'
+            in_kw = "𒀀𒁹" if is_tablet else "ask"
+            return f'{in_kw} "{expr.prompt}"'
 
         elif isinstance(expr, CallExpr):
             args_str = ", ".join(self._format_expression(a, is_tablet) for a in expr.arguments)
@@ -172,6 +247,9 @@ class Formatter:
             left_str = self._format_expression(expr.left, is_tablet)
             right_str = self._format_expression(expr.right, is_tablet)
             op_str = expr.op
+            if is_tablet:
+                tablet_ops = {"<": "𒌉", ">": "𒃲", "==": "𒊓"}
+                op_str = tablet_ops.get(expr.op, expr.op)
             return f"{left_str} {op_str} {right_str}"
 
         elif isinstance(expr, TupleExpr):

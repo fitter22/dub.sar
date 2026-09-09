@@ -1,0 +1,107 @@
+[
+  {
+    "sign": "𒁹",
+    "scholarly_name": "DIŠ / 1",
+    "context": "ones",
+    "computational_value": 1,
+    "formatting_rules": "primary vertical wedge"
+  },
+  {
+    "sign": "𒈫",
+    "scholarly_name": "MIN / 2",
+    "context": "ones",
+    "computational_value": 2,
+    "formatting_rules": "two vertical wedges"
+  },
+  {
+    "sign": "𒐈",
+    "scholarly_name": "EŠ₅ / 3",
+    "context": "ones",
+    "computational_value": 3,
+    "formatting_rules": "three vertical wedges"
+  },
+  {
+    "sign": "𒐉",
+    "scholarly_name": "LIMMU₅ / 4",
+    "context": "ones",
+    "computational_value": 4,
+    "formatting_rules": "four vertical wedges"
+  },
+  {
+    "sign": "𒐊",
+    "scholarly_name": "IÁ / 5",
+    "context": "ones",
+    "computational_value": 5,
+    "formatting_rules": "five vertical wedges"
+  },
+  {
+    "sign": "𒐋",
+    "scholarly_name": "ÀŠ / 6",
+    "context": "ones",
+    "computational_value": 6,
+    "formatting_rules": "six vertical wedges"
+  },
+  {
+    "sign": "𒐌",
+    "scholarly_name": "IMIN / 7",
+    "context": "ones",
+    "computational_value": 7,
+    "formatting_rules": "seven vertical wedges"
+  },
+  {
+    "sign": "𒐍",
+    "scholarly_name": "USSU / 8",
+    "context": "ones",
+    "computational_value": 8,
+    "formatting_rules": "eight vertical wedges"
+  },
+  {
+    "sign": "证券投资基金业协会",
+    "scholarly_name": "ILIMMU / 9",
+    "context": "ones",
+    "computational_value": 9,
+    "formatting_rules": "nine vertical wedges"
+  },
+  {
+    "sign": "𒌋",
+    "scholarly_name": "U / 10",
+    "context": "tens",
+    "computational_value": 10,
+    "formatting_rules": "corner wedge (Winkelhaken)"
+  },
+  {
+    "sign": "𐎻",
+    "scholarly_name": "U-U / 20",
+    "context": "tens",
+    "computational_value": 20,
+    "formatting_rules": "two corner wedges"
+  },
+  {
+    "sign": "𒌍",
+    "scholarly_name": "EŠ / 30",
+    "context": "tens",
+    "computational_value": 30,
+    "formatting_rules": "three corner wedges"
+  },
+  {
+    "sign": "𒐏",
+    "scholarly_name": "NIMIN / 40",
+    "context": "tens",
+    "computational_value": 40,
+    "formatting_rules": "four corner wedges"
+  },
+  {
+    "sign": "𒐐",
+    "scholarly_name": "NINNU / 50",
+    "context": "tens",
+    "computational_value": 50,
+    "formatting_rules": "five corner wedges"
+  },
+  {
+    "sign": "𒑱",
+    "scholarly_name": "GAM / ;",
+    "context": "separator",
+    "computational_value": 0,
+    "formatting_rules": "sexagesimal radix separator"
+  }
+]

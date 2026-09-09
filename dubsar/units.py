@@ -330,6 +330,9 @@ class Quantity:
     def __abs__(self) -> Quantity:
         return Quantity(abs(self._value), self._unit)
 
+    def abs(self) -> Quantity:
+        return abs(self)
+
     # Comparisons
     def _check_cmp_compat(self, other: Quantity) -> None:
         if not self._unit.is_compatible_with(other._unit):
@@ -375,12 +378,8 @@ class Quantity:
         return Quantity(Rational(self._value.ceil(), 1), self._unit)
 
     def nearest(self) -> Quantity:
-        """Returns the nearest integer.
-
-        Section 14.1: If the argument is a quantity, the result is the corresponding
-        integer count and is DIMENSIONLESS.
-        """
-        return Quantity(Rational(self._value.nearest(), 1), DIMENSIONLESS)
+        """Returns the nearest integer, retaining the quantity's unit."""
+        return Quantity(Rational(self._value.nearest(), 1), self._unit)
 
 
 def to_quantity(val: Union[Quantity, Rational, int, str, float]) -> Quantity:

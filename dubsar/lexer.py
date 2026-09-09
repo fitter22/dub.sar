@@ -148,6 +148,18 @@ class Lexer:
                 i += 2
                 continue
 
+            # Dot '.'
+            if ch == ".":
+                if i + 1 < n and line[i + 1].isdigit():
+                    num_tok, consumed = self._scan_number(line[i:], line_num, col)
+                    tokens.append(num_tok)
+                    i += consumed
+                    continue
+                else:
+                    tokens.append(Token(TokenType.DOT, ".", line_num, col))
+                    i += 1
+                    continue
+
             # Single-character operators & punctuation
             if ch == ":":
                 tokens.append(Token(TokenType.COLON, ":", line_num, col))

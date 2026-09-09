@@ -17,19 +17,28 @@ from dubsar.ast import (
     Assignment,
     BinaryOp,
     CallExpr,
+    CompareExpr,
     Conditional,
     Declaration,
+    Determination,
+    DomainRepetition,
+    EmptyLiteral,
     Expression,
     ExpressionStatement,
+    FieldAccess,
     Identifier,
     InputExpr,
+    IsExpr,
     NumberLiteral,
     OutputStatement,
+    PostfixExpr,
     ProblemSection,
     Procedure,
     Program,
+    Recipe,
     Repetition,
     ResultSection,
+    RetainStatement,
     ReturnStatement,
     Statement,
     StringLiteral,
@@ -49,11 +58,13 @@ from dubsar.numbers import Rational, parse_number
 from dubsar.semantic import SemanticAnalyzer
 from dubsar.units import (
     DIMENSIONLESS,
+    UNIT_TABLE,
     Quantity,
     Unit,
     lookup_unit,
     to_quantity,
 )
+from dubsar.values import DeterminationValue, EmptySentinel
 
 
 class ReturnSignal(Exception):
@@ -158,9 +169,26 @@ class Interpreter:
                     val = Quantity(val.value, u)
                 else:
                     val = Quantity(val, u)
-            elif not isinstance(val, (Quantity, str)):
+            elif not isinstance(val, (Quantity, str, EmptySentinel, DeterminationValue)):
                 val = Quantity(val, DIMENSIONLESS)
             self.current_env.set(stmt.name, val)
+
+        elif isinstance(stmt, Determination):
+            vals = {}
+            for fname in stmt.fields:
+                if self.current_env.has(fname):
+                    vals[fname] = self.current_env.get(fname)
+                else:
+                    vals[fname] = DeterminationValue({}, is_empty=True)
+            self.current_env.update(stmt.name, DeterminationValue(vals))
+
+        elif isinstance(stmt, RetainStatement):
+            cand_val = self.current_env.get(stmt.candidate) if self.current_env.has(stmt.candidate) else DeterminationValue({}, is_empty=True)
+            target_val = self.current_env.get(stmt.target) if self.current_env.has(stmt.target) else DeterminationValue({}, is_empty=True)
+            cond_val = self._eval_expression(stmt.condition)
+            if bool(cond_val) or (isinstance(target_val, DeterminationValue) and target_val.is_empty):
+                if isinstance(cand_val, DeterminationValue):
+                    self.current_env.update(stmt.target, cand_val.clone())
 
         elif isinstance(stmt, Assignment):
             val = self._eval_expression(stmt.value)
@@ -252,15 +280,21 @@ class Interpreter:
 
         elif isinstance(stmt, OutputStatement):
             val = self._eval_expression(stmt.value)
-            if isinstance(val, str):
-                out_str = val
-            elif isinstance(val, Quantity):
-                out_str = val.format(format_mode=self.format_mode)
-            elif isinstance(val, Rational):
-                out_str = val.format_canonical()
+            if isinstance(val, DeterminationValue):
+                for line in val.format_lines(format_mode=self.format_mode):
+                    self._write_output(line)
             else:
-                out_str = str(val)
-            self._write_output(out_str)
+                if isinstance(val, EmptySentinel):
+                    out_str = "empty"
+                elif isinstance(val, str):
+                    out_str = val
+                elif isinstance(val, Quantity):
+                    out_str = val.format(format_mode=self.format_mode)
+                elif isinstance(val, Rational):
+                    out_str = val.format_canonical()
+                else:
+                    out_str = str(val)
+                self._write_output(out_str)
 
         elif isinstance(stmt, ExpressionStatement):
             self._eval_expression(stmt.expr)
@@ -345,10 +379,131 @@ class Interpreter:
             right_val = self._eval_expression(expr.right)
             return self._eval_binary(expr.op, left_val, right_val, expr.line, expr.col)
 
+        elif isinstance(expr, EmptyLiteral):
+            return EmptySentinel()
+
+        elif isinstance(expr, FieldAccess):
+            rec_val = self._eval_expression(expr.record)
+            if isinstance(rec_val, DeterminationValue):
+                return rec_val.get(expr.field)
+            elif isinstance(rec_val, EmptySentinel):
+                return EmptySentinel()
+            raise DubSarNameError(f"Cannot access field '{expr.field}' on non-determination value: {rec_val}")
+
+        elif isinstance(expr, PostfixExpr):
+            stack: List[Any] = []
+            for step in expr.steps:
+                if isinstance(step, str):
+                    op = step.lower()
+                    if op in ("floor", "gur", "гур"):
+                        v = to_quantity(stack.pop())
+                        stack.append(v.floor())
+                    elif op in ("ceil", "nim", "𒉏"):
+                        v = to_quantity(stack.pop())
+                        stack.append(v.ceil())
+                    elif op in ("nearest", "round", "ri", "𒊑"):
+                        v = to_quantity(stack.pop())
+                        stack.append(v.nearest())
+                    elif op in ("absolute", "abs", "te", "𒋼"):
+                        v = to_quantity(stack.pop())
+                        stack.append(v.abs())
+                    elif op in ("add", "zi", "𒍣", "+"):
+                        b = to_quantity(stack.pop())
+                        a = to_quantity(stack.pop())
+                        stack.append(a + b)
+                    elif op in ("subtract", "sub", "ta", "𒋫", "-"):
+                        b = to_quantity(stack.pop())
+                        a = to_quantity(stack.pop())
+                        stack.append(a - b)
+                    elif op in ("multiply", "mul", "sha", "ša", "𒊭", "*"):
+                        b = to_quantity(stack.pop())
+                        a = to_quantity(stack.pop())
+                        stack.append(a * b)
+                    elif op in ("divide", "div", "ni", "𒉌", "/"):
+                        b = to_quantity(stack.pop())
+                        a = to_quantity(stack.pop())
+                        stack.append(a / b)
+                    elif op in ("modulo", "%"):
+                        b = to_quantity(stack.pop())
+                        a = to_quantity(stack.pop())
+                        stack.append(a % b)
+                    elif op in ("power", "^", "**"):
+                        b = to_quantity(stack.pop())
+                        a = to_quantity(stack.pop())
+                        stack.append(a ** int(b.value.numerator))
+                    elif op in ("lesser", "tur", "𒌉", "<"):
+                        b = stack.pop()
+                        a = stack.pop()
+                        stack.append(self._eval_lesser(a, b))
+                    elif op in ("greater", "gal", "𒃲", ">"):
+                        b = stack.pop()
+                        a = stack.pop()
+                        stack.append(self._eval_greater(a, b))
+                    elif op in ("equal", "sa", "sá", "𒊓", "=="):
+                        b = stack.pop()
+                        a = stack.pop()
+                        stack.append(a == b)
+                    else:
+                        raise DubSarSyntaxError(f"Unknown postfix operation: {op}")
+                elif isinstance(step, Expression):
+                    stack.append(self._eval_expression(step))
+                else:
+                    stack.append(step)
+            return stack[-1] if stack else None
+
+        elif isinstance(expr, CompareExpr):
+            left_val = self._eval_expression(expr.left)
+            right_val = self._eval_expression(expr.right) if expr.right else None
+            rel = getattr(expr, "relation", getattr(expr, "op", "lesser"))
+            if rel in ("lesser", "tur", "𒌉", "<"):
+                return self._eval_lesser(left_val, right_val)
+            elif rel in ("greater", "gal", "𒃲", ">"):
+                return self._eval_greater(left_val, right_val)
+            elif rel in ("equal", "sa", "sá", "𒊓", "=="):
+                return left_val == right_val
+            elif rel in ("not-equal", "!="):
+                return left_val != right_val
+            else:
+                return self._eval_binary(rel, left_val, right_val, expr.line, expr.col)
+
+        elif isinstance(expr, IsExpr):
+            target_val = self._eval_expression(expr.target)
+            if expr.predicate in ("empty", "nu", "none", "𒉡"):
+                if isinstance(target_val, EmptySentinel):
+                    return True
+                if isinstance(target_val, DeterminationValue):
+                    return target_val.is_empty
+                return False
+            elif expr.predicate in ("not-empty", "!empty"):
+                if isinstance(target_val, EmptySentinel):
+                    return False
+                if isinstance(target_val, DeterminationValue):
+                    return not target_val.is_empty
+                return True
+            raise DubSarSyntaxError(f"Unknown predicate: {expr.predicate}")
+
         elif isinstance(expr, TupleExpr):
             return [self._eval_expression(e) for e in expr.elements]
 
         raise DubSarSyntaxError(f"Cannot evaluate expression: {expr}", line=expr.line, col=expr.col)
+
+    def _eval_lesser(self, a: Any, b: Any) -> bool:
+        if isinstance(b, EmptySentinel):
+            return True
+        if isinstance(a, EmptySentinel):
+            return False
+        if isinstance(a, DeterminationValue) or isinstance(b, DeterminationValue):
+            return False
+        return to_quantity(a) < to_quantity(b)
+
+    def _eval_greater(self, a: Any, b: Any) -> bool:
+        if isinstance(b, EmptySentinel):
+            return False
+        if isinstance(a, EmptySentinel):
+            return True
+        if isinstance(a, DeterminationValue) or isinstance(b, DeterminationValue):
+            return False
+        return to_quantity(a) > to_quantity(b)
 
     def _eval_call(self, call: CallExpr) -> Any:
         # Check builtins first
@@ -417,6 +572,19 @@ class Interpreter:
     def _eval_binary(self, op: str, left: Any, right: Any, line: int, col: int) -> Any:
         # Comparison operators
         if op in ("==", "!=", "<", "<=", ">", ">="):
+            if isinstance(left, EmptySentinel) or isinstance(right, EmptySentinel):
+                if op == "<":
+                    return self._eval_lesser(left, right)
+                elif op == "<=":
+                    return isinstance(right, EmptySentinel) or left == right
+                elif op == ">":
+                    return self._eval_greater(left, right)
+                elif op == ">=":
+                    return isinstance(left, EmptySentinel) or left == right
+                elif op == "==":
+                    return isinstance(left, EmptySentinel) and isinstance(right, EmptySentinel)
+                elif op == "!=":
+                    return not (isinstance(left, EmptySentinel) and isinstance(right, EmptySentinel))
             ql = to_quantity(left)
             qr = to_quantity(right)
             if op == "==":

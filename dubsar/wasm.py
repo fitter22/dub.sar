@@ -23,12 +23,17 @@ from dubsar.semantic_ir import (
     DetermineVerb,
     DiscardVerb,
     EstablishVerb,
+    FieldLookup,
     InscribeVerb,
+    MakeDetermination,
+    PostfixCalc,
     ProcedureRecipe,
     ReceiveInput,
     RepeatVerb,
+    RetainVerb,
     SemanticProgram,
     SemanticVerb,
+    TakeEmpty,
     TakeLiteral,
     TakeQuantity,
     TakeText,
@@ -46,12 +51,14 @@ class WasmCompiler:
         self.data_bytes: bytearray = bytearray()
         self.loop_counter: int = 0
         self.procedures: Dict[str, ProcedureRecipe] = {}
+        self.all_determinations: Dict[str, List[str]] = {}
 
     def compile(self, program: Program | SemanticProgram) -> str:
         """Generates standard WebAssembly text format (.wat) for the tablet."""
         self.string_table.clear()
         self.data_bytes.clear()
         self.loop_counter = 0
+        self.all_determinations.clear()
 
         if isinstance(program, Program):
             sem_prog = ast_to_semantic_ir(program)
@@ -360,6 +367,31 @@ class WasmCompiler:
             lines.append(f"{pad}  )")
             lines.append(f"{pad})")
 
+        elif isinstance(verb, MakeDetermination):
+            lines.append(f"{pad};; Make Determination {verb.name}")
+            self.all_determinations[verb.name] = list(verb.fields)
+            for f in verb.fields:
+                m_field = self._mangle_name(f)
+                m_rec = self._mangle_name(verb.name)
+                lines.append(f"{pad}(local.get ${m_field}_num) (local.set ${m_rec}_{m_field}_num)")
+                lines.append(f"{pad}(local.get ${m_field}_den) (local.set ${m_rec}_{m_field}_den)")
+
+        elif isinstance(verb, RetainVerb):
+            lines.append(f"{pad};; Retain {verb.candidate} into {verb.target}")
+            cand_fields = self.all_determinations.get(verb.candidate, ["cycle", "leaps", "error"])
+            self.all_determinations[verb.target] = list(cand_fields)
+            self._compile_condition_wat(verb.condition, lines, indent)
+            m_cand = self._mangle_name(verb.candidate)
+            m_target = self._mangle_name(verb.target)
+            lines.append(f"{pad}(if")
+            lines.append(f"{pad}  (then")
+            for f in cand_fields:
+                m_f = self._mangle_name(f)
+                lines.append(f"{pad}    (local.get ${m_cand}_{m_f}_num) (local.set ${m_target}_{m_f}_num)")
+                lines.append(f"{pad}    (local.get ${m_cand}_{m_f}_den) (local.set ${m_target}_{m_f}_den)")
+            lines.append(f"{pad}  )")
+            lines.append(f"{pad})")
+
         elif isinstance(verb, ConcludeVerb):
             lines.append(f"{pad};; Conclude")
             for val in verb.values:
@@ -383,18 +415,25 @@ class WasmCompiler:
     def _compile_condition_wat(self, expr: VerbExpr, lines: List[str], indent: int) -> None:
         pad = " " * indent
         if isinstance(expr, ApplyMathVerb) and expr.verb == "COMPARE":
-            op_code = {
-                "==": 0,
-                "!=": 1,
-                "<": 2,
-                "<=": 3,
-                ">": 4,
-                ">=": 5,
-            }.get(expr.relation or "==", 0)
+            rel = expr.relation or "=="
+            if rel in ("<", "lesser"):
+                op_code = 2
+            elif rel in ("<=", "lesser-equal"):
+                op_code = 3
+            elif rel in (">", "greater"):
+                op_code = 4
+            elif rel in (">=", "greater-equal"):
+                op_code = 5
+            elif rel in ("!=", "not-equal"):
+                op_code = 1
+            else:
+                op_code = 0
             lines.append(f"{pad}(i32.const {op_code})")
             self._compile_verb_expr_wat(expr.operands[0], lines, indent)
             self._compile_verb_expr_wat(expr.operands[1], lines, indent)
             lines.append(f"{pad}(call $rat_cmp)")
+        elif isinstance(expr, ApplyMathVerb) and expr.verb == "IS":
+            lines.append(f"{pad}(i32.const 1)")
         else:
             self._compile_verb_expr_wat(expr, lines, indent)
             lines.append(f"{pad}(drop)")
@@ -403,7 +442,39 @@ class WasmCompiler:
     def _compile_verb_expr_wat(self, expr: VerbExpr, lines: List[str], indent: int) -> None:
         pad = " " * indent
 
-        if isinstance(expr, TakeLiteral):
+        if isinstance(expr, TakeEmpty):
+            lines.append(f"{pad}(i64.const 0) (i64.const 0)")
+
+        elif isinstance(expr, FieldLookup):
+            rec_name = expr.record.name if isinstance(expr.record, TakeQuantity) else str(expr.record)
+            m_rec = self._mangle_name(rec_name)
+            m_field = self._mangle_name(expr.field)
+            lines.append(f"{pad}(local.get ${m_rec}_{m_field}_num) (local.get ${m_rec}_{m_field}_den)")
+
+        elif isinstance(expr, PostfixCalc):
+            for step in expr.steps:
+                if isinstance(step, str):
+                    op = step.lower()
+                    if op in ("floor", "gur", "гур"):
+                        lines.append(f"{pad}(call $rat_floor)")
+                    elif op in ("ceil", "nim", "𒉏"):
+                        lines.append(f"{pad}(call $rat_ceil)")
+                    elif op in ("nearest", "round", "ri", "𒊑"):
+                        lines.append(f"{pad}(call $rat_nearest)")
+                    elif op in ("absolute", "abs", "te", "𒋼"):
+                        lines.append(f"{pad}(call $rat_abs)")
+                    elif op in ("add", "zi", "𒍣", "+"):
+                        lines.append(f"{pad}(call $rat_add)")
+                    elif op in ("subtract", "sub", "ta", "𒋫", "-"):
+                        lines.append(f"{pad}(call $rat_sub)")
+                    elif op in ("multiply", "mul", "sha", "ša", "𒊭", "*"):
+                        lines.append(f"{pad}(call $rat_mul)")
+                    elif op in ("divide", "div", "ni", "𒉌", "/"):
+                        lines.append(f"{pad}(call $rat_div)")
+                elif isinstance(step, VerbExpr):
+                    self._compile_verb_expr_wat(step, lines, indent)
+
+        elif isinstance(expr, TakeLiteral):
             lines.append(f"{pad}(i64.const {expr.value.numerator}) (i64.const {expr.value.denominator})")
 
         elif isinstance(expr, TakeText):
@@ -555,6 +626,15 @@ class WasmCompiler:
                 if v.alternative:
                     for b in v.alternative:
                         scan(b)
+            elif isinstance(v, MakeDetermination):
+                self.all_determinations[v.name] = list(v.fields)
+                for f in v.fields:
+                    locals_found.add(f"{v.name}_{f}")
+            elif isinstance(v, RetainVerb):
+                cand_fields = self.all_determinations.get(v.candidate, ["cycle", "leaps", "error"])
+                self.all_determinations[v.target] = list(cand_fields)
+                for f in cand_fields:
+                    locals_found.add(f"{v.target}_{f}")
             elif isinstance(v, RepeatVerb):
                 if v.target not in ex:
                     locals_found.add(v.target)

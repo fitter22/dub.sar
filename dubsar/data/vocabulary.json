@@ -1,0 +1,428 @@
+[
+  {
+    "canonical": "PROBLEM",
+    "cuneiform": "𒂊𒁹",
+    "scholar": "problem",
+    "aliases": [
+      "problem",
+      "e-dis",
+      "e-diš",
+      "given"
+    ],
+    "historical_values": [
+      "e-diš",
+      "first clause / premise"
+    ],
+    "semantic_class": "tablet_structure"
+  },
+  {
+    "canonical": "RESULT",
+    "cuneiform": "𒅗𒁹",
+    "scholar": "result",
+    "aliases": [
+      "result",
+      "ka-dis",
+      "ka-diš"
+    ],
+    "historical_values": [
+      "ka-diš",
+      "mouth / final finding / utterance"
+    ],
+    "semantic_class": "tablet_structure"
+  },
+  {
+    "canonical": "RECIPE",
+    "cuneiform": "𒁾𒊬",
+    "scholar": "recipe",
+    "aliases": [
+      "recipe",
+      "procedure",
+      "dub-sar"
+    ],
+    "historical_values": [
+      "dub-sar",
+      "scribe / tablet writing / prescription"
+    ],
+    "semantic_class": "tablet_structure"
+  },
+  {
+    "canonical": "CONSIDER",
+    "cuneiform": "𒄀",
+    "scholar": "consider",
+    "aliases": [
+      "consider",
+      "gi",
+      "repeat",
+      "for"
+    ],
+    "historical_values": [
+      "gi",
+      "reed / turn / traverse"
+    ],
+    "semantic_class": "domain_repetition"
+  },
+  {
+    "canonical": "FROM",
+    "cuneiform": "𒋫",
+    "scholar": "from",
+    "aliases": [
+      "from",
+      "ta"
+    ],
+    "historical_values": [
+      "ta",
+      "from / starting out of"
+    ],
+    "semantic_class": "domain_range"
+  },
+  {
+    "canonical": "THROUGH",
+    "cuneiform": "𒌗",
+    "scholar": "through",
+    "aliases": [
+      "through",
+      "to",
+      "..",
+      "iti"
+    ],
+    "historical_values": [
+      "iti",
+      "month / span / interval / duration"
+    ],
+    "semantic_class": "domain_range"
+  },
+  {
+    "canonical": "RETAIN",
+    "cuneiform": "𒋼",
+    "scholar": "retain",
+    "aliases": [
+      "retain",
+      "tu",
+      "keep",
+      "select"
+    ],
+    "historical_values": [
+      "te / tu",
+      "approach / take hold / receive"
+    ],
+    "semantic_class": "selection"
+  },
+  {
+    "canonical": "WHEN",
+    "cuneiform": "𒂊𒀀",
+    "scholar": "when",
+    "aliases": [
+      "when",
+      "if",
+      "e-a"
+    ],
+    "historical_values": [
+      "e-a",
+      "if / upon condition"
+    ],
+    "semantic_class": "condition"
+  },
+  {
+    "canonical": "LESSER",
+    "cuneiform": "𒌉",
+    "scholar": "lesser",
+    "aliases": [
+      "lesser",
+      "<",
+      "tur"
+    ],
+    "historical_values": [
+      "tur",
+      "small / youthful / lesser"
+    ],
+    "semantic_class": "comparison"
+  },
+  {
+    "canonical": "GREATER",
+    "cuneiform": "𒃲",
+    "scholar": "greater",
+    "aliases": [
+      "greater",
+      ">",
+      "gal"
+    ],
+    "historical_values": [
+      "gal",
+      "great / large / superior"
+    ],
+    "semantic_class": "comparison"
+  },
+  {
+    "canonical": "EQUAL",
+    "cuneiform": "𒊓",
+    "scholar": "equal",
+    "aliases": [
+      "equal",
+      "==",
+      "sa",
+      "sá"
+    ],
+    "historical_values": [
+      "sa / sá",
+      "equal / rival / balance"
+    ],
+    "semantic_class": "comparison"
+  },
+  {
+    "canonical": "NOT_EQUAL",
+    "cuneiform": "𒉡",
+    "scholar": "not-equal",
+    "aliases": [
+      "not-equal",
+      "!=",
+      "nu"
+    ],
+    "historical_values": [
+      "nu",
+      "not / negative / different"
+    ],
+    "semantic_class": "comparison"
+  },
+  {
+    "canonical": "THAN",
+    "cuneiform": "𒋫",
+    "scholar": "than",
+    "aliases": [
+      "than",
+      "ta"
+    ],
+    "historical_values": [
+      "ta",
+      "ablative comparator particle"
+    ],
+    "semantic_class": "comparison_particle"
+  },
+  {
+    "canonical": "IS",
+    "cuneiform": "𒈨",
+    "scholar": "is",
+    "aliases": [
+      "is",
+      "me"
+    ],
+    "historical_values": [
+      "me",
+      "to be / being"
+    ],
+    "semantic_class": "copula"
+  },
+  {
+    "canonical": "EMPTY",
+    "cuneiform": "𒉡",
+    "scholar": "empty",
+    "aliases": [
+      "empty",
+      "none",
+      "nu"
+    ],
+    "historical_values": [
+      "nu",
+      "not / void / absent"
+    ],
+    "semantic_class": "determination_literal"
+  },
+  {
+    "canonical": "OF",
+    "cuneiform": "𒊭",
+    "scholar": "of",
+    "aliases": [
+      "of",
+      "ša",
+      "sha"
+    ],
+    "historical_values": [
+      "ša",
+      "genitive relative marker / of"
+    ],
+    "semantic_class": "field_access"
+  },
+  {
+    "canonical": "TAKE",
+    "cuneiform": "𒋗",
+    "scholar": "take",
+    "aliases": [
+      "take",
+      "šu",
+      "shu"
+    ],
+    "historical_values": [
+      "šu",
+      "hand / receive / take"
+    ],
+    "semantic_class": "field_access"
+  },
+  {
+    "canonical": "DETERMINE",
+    "cuneiform": "𒉆",
+    "scholar": "determine",
+    "aliases": [
+      "determine",
+      "nam"
+    ],
+    "historical_values": [
+      "nam",
+      "determination / decree / nature"
+    ],
+    "semantic_class": "determination"
+  },
+  {
+    "canonical": "ADD",
+    "cuneiform": "𒍣",
+    "scholar": "add",
+    "aliases": [
+      "add",
+      "zi",
+      "+"
+    ],
+    "historical_values": [
+      "zi",
+      "breath, life, raise, rise, increase"
+    ],
+    "semantic_class": "binary_operation"
+  },
+  {
+    "canonical": "SUBTRACT",
+    "cuneiform": "𒋫",
+    "scholar": "subtract",
+    "aliases": [
+      "subtract",
+      "sub",
+      "ta",
+      "-"
+    ],
+    "historical_values": [
+      "ta",
+      "from, take away, diminish"
+    ],
+    "semantic_class": "binary_operation"
+  },
+  {
+    "canonical": "MULTIPLY",
+    "cuneiform": "𒊭",
+    "scholar": "multiply",
+    "aliases": [
+      "multiply",
+      "mul",
+      "ša",
+      "sha",
+      "*"
+    ],
+    "historical_values": [
+      "ša",
+      "times, replicate, multiply"
+    ],
+    "semantic_class": "binary_operation"
+  },
+  {
+    "canonical": "DIVIDE",
+    "cuneiform": "𒉌",
+    "scholar": "divide",
+    "aliases": [
+      "divide",
+      "div",
+      "ni",
+      "/"
+    ],
+    "historical_values": [
+      "ni",
+      "portion, share, break down, divide"
+    ],
+    "semantic_class": "binary_operation"
+  },
+  {
+    "canonical": "FLOOR",
+    "cuneiform": "гур",
+    "scholar": "floor",
+    "aliases": [
+      "floor",
+      "gur"
+    ],
+    "historical_values": [
+      "gur",
+      "return to base, ground, down"
+    ],
+    "semantic_class": "unary_operation"
+  },
+  {
+    "canonical": "CEIL",
+    "cuneiform": "𒉏",
+    "scholar": "ceil",
+    "aliases": [
+      "ceil",
+      "nim"
+    ],
+    "historical_values": [
+      "nim",
+      "high, above, ceiling"
+    ],
+    "semantic_class": "unary_operation"
+  },
+  {
+    "canonical": "NEAREST",
+    "cuneiform": "𒊑",
+    "scholar": "nearest",
+    "aliases": [
+      "nearest",
+      "ri",
+      "round"
+    ],
+    "historical_values": [
+      "ri",
+      "adjunct, close, rounded count"
+    ],
+    "semantic_class": "unary_operation"
+  },
+  {
+    "canonical": "ABSOLUTE",
+    "cuneiform": "𒋼",
+    "scholar": "absolute",
+    "aliases": [
+      "absolute",
+      "abs",
+      "te"
+    ],
+    "historical_values": [
+      "te",
+      "magnitude, boundary, absolute span"
+    ],
+    "semantic_class": "unary_operation"
+  },
+  {
+    "canonical": "INSCRIBE",
+    "cuneiform": "𒁹𒀀",
+    "scholar": "inscribe",
+    "aliases": [
+      "inscribe",
+      "output",
+      "print",
+      "diš-a",
+      "dis-a"
+    ],
+    "historical_values": [
+      "diš-a",
+      "record on tablet, inscribe"
+    ],
+    "semantic_class": "inscription"
+  },
+  {
+    "canonical": "ASK",
+    "cuneiform": "𒀀𒁹",
+    "scholar": "ask",
+    "aliases": [
+      "ask",
+      "input",
+      "a-diš",
+      "a-dis"
+    ],
+    "historical_values": [
+      "a-diš",
+      "inquire, prompt for given measure"
+    ],
+    "semantic_class": "input"
+  }
+]

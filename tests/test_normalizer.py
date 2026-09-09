@@ -21,7 +21,7 @@ class TestNormalizer(unittest.TestCase):
         scholar_src = transliterate(cun_src)
         self.assertIn("PROBLEM", scholar_src)
         self.assertIn("day", scholar_src)
-        self.assertIn("if", scholar_src)
+        self.assertTrue("when" in scholar_src or "if" in scholar_src)
         self.assertIn("return", scholar_src)
         self.assertIn("RESULT", scholar_src)
         self.assertIn("output", scholar_src)

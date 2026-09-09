@@ -84,6 +84,40 @@ class TupleExpr(Expression):
     elements: List[Expression] = field(default_factory=list)
 
 
+@dataclass
+class EmptyLiteral(Expression):
+    """An empty determination literal: empty / none / nu / 𒉡."""
+    value: str = "empty"
+
+
+@dataclass
+class FieldAccess(Expression):
+    """Record / determination field access: record.field or field of record."""
+    record: Expression = field(default_factory=Expression)
+    field: str = ""
+
+
+@dataclass
+class PostfixExpr(Expression):
+    """A postfix calculation sequence composed of operands and operators."""
+    steps: List[Any] = field(default_factory=list)
+
+
+@dataclass
+class CompareExpr(Expression):
+    """Mathematical comparison: left is relation [than right] (e.g. error is lesser than best.error)."""
+    left: Expression = field(default_factory=Expression)
+    relation: str = "lesser"
+    right: Optional[Expression] = None
+
+
+@dataclass
+class IsExpr(Expression):
+    """State / emptiness predicate: target is predicate (e.g. best is empty)."""
+    target: Expression = field(default_factory=Expression)
+    predicate: str = "empty"
+
+
 # ==============================================================================
 # Statements / Prescriptions
 # ==============================================================================
@@ -142,6 +176,37 @@ class OutputStatement(Statement):
 class ExpressionStatement(Statement):
     """Expression evaluated for side effects (e.g. call)."""
     expr: Expression = field(default_factory=Expression)
+
+
+@dataclass
+class Determination(Statement):
+    """Determination record declaration: name : field1, field2, ..."""
+    name: str = ""
+    fields: List[str] = field(default_factory=list)
+    field_values: Optional[Dict[str, Expression]] = None
+
+
+@dataclass
+class RetainStatement(Statement):
+    """Atomic determination selection: retain candidate when condition."""
+    candidate: str = ""
+    condition: Expression = field(default_factory=Expression)
+    target: str = "best"
+    comparator: Optional[str] = None
+
+
+@dataclass
+class DomainRepetition(Repetition):
+    """Finite mathematical search domain: consider target from start through end: body."""
+    pass
+
+
+@dataclass
+class Recipe(Statement):
+    """Mathematical procedure recipe: recipe name param1 param2: body."""
+    name: str = ""
+    parameters: List[str] = field(default_factory=list)
+    body: List[Statement] = field(default_factory=list)
 
 
 # ==============================================================================

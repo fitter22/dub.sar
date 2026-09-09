@@ -65,6 +65,10 @@ class OpCode(Enum):
     ABS = auto()            # Pop a; push abs(a)
     INPUT = auto()          # Pop prompt; push input quantity
     OUTPUT = auto()         # Pop a; output it
+    EMPTY = auto()          # Push empty determination onto stack
+    DETERMINE = auto()      # Create determination record: arg = (name, fields)
+    FIELD_GET = auto()      # Pop record; push field value: arg = field_name
+    RETAIN = auto()         # Pop condition; retain candidate into target if condition is True: arg = (candidate, target)
     HALT = auto()           # End execution
 
 
@@ -122,12 +126,17 @@ from dubsar.semantic_ir import (
     DetermineVerb,
     DiscardVerb,
     EstablishVerb,
+    FieldLookup,
     InscribeVerb,
+    MakeDetermination,
+    PostfixCalc,
     ProcedureRecipe,
     ReceiveInput,
     RepeatVerb,
+    RetainVerb,
     SemanticProgram,
     SemanticVerb,
+    TakeEmpty,
     TakeLiteral,
     TakeQuantity,
     TakeText,
@@ -251,6 +260,15 @@ class Compiler:
             self._compile_verb_expr(verb.expr)
             chunk.emit(OpCode.POP, None, verb.line)
 
+        elif isinstance(verb, MakeDetermination):
+            for fname in verb.fields:
+                chunk.emit(OpCode.LOAD, fname, verb.line)
+            chunk.emit(OpCode.DETERMINE, (verb.name, verb.fields), verb.line)
+
+        elif isinstance(verb, RetainVerb):
+            self._compile_verb_expr(verb.condition)
+            chunk.emit(OpCode.RETAIN, (verb.candidate, verb.target), verb.line)
+
     def _compile_verb_expr(self, expr: VerbExpr) -> None:
         assert self.current_chunk is not None
         chunk = self.current_chunk
@@ -300,9 +318,26 @@ class Compiler:
                 self._compile_verb_expr(expr.operands[0])
                 chunk.emit(OpCode.NOT, None, expr.line)
             elif expr.verb == "COMPARE":
+                cmp_map = {"lesser": "<", "greater": ">", "equal": "==", "not-equal": "!="}
+                cmp_op = cmp_map.get(expr.relation, expr.relation or "<")
+                if len(expr.operands) == 1:
+                    self._compile_verb_expr(expr.operands[0])
+                    if isinstance(expr.operands[0], TakeQuantity):
+                        chunk.emit(OpCode.LOAD, "best", expr.line)
+                        chunk.emit(OpCode.FIELD_GET, expr.operands[0].name, expr.line)
+                    chunk.emit(OpCode.CMP, cmp_op, expr.line)
+                elif len(expr.operands) >= 2:
+                    self._compile_verb_expr(expr.operands[0])
+                    self._compile_verb_expr(expr.operands[1])
+                    chunk.emit(OpCode.CMP, cmp_op, expr.line)
+            elif expr.verb == "IS":
+                if expr.relation in ("empty", "none"):
+                    self._compile_verb_expr(expr.operands[0])
+                    chunk.emit(OpCode.EMPTY, None, expr.line)
+                    chunk.emit(OpCode.CMP, "==", expr.line)
+            elif expr.verb == "GET_FIELD":
                 self._compile_verb_expr(expr.operands[0])
-                self._compile_verb_expr(expr.operands[1])
-                chunk.emit(OpCode.CMP, expr.relation, expr.line)
+                chunk.emit(OpCode.FIELD_GET, expr.callee, expr.line)
             elif expr.verb == "ADD":
                 self._compile_verb_expr(expr.operands[0])
                 self._compile_verb_expr(expr.operands[1])
@@ -331,6 +366,43 @@ class Compiler:
         elif isinstance(expr, TuplePack):
             for el in expr.elements:
                 self._compile_verb_expr(el)
+
+        elif isinstance(expr, TakeEmpty):
+            chunk.emit(OpCode.EMPTY, None, expr.line)
+
+        elif isinstance(expr, FieldLookup):
+            self._compile_verb_expr(expr.record)
+            chunk.emit(OpCode.FIELD_GET, expr.field, expr.line)
+
+        elif isinstance(expr, PostfixCalc):
+            for step in expr.steps:
+                if isinstance(step, VerbExpr):
+                    self._compile_verb_expr(step)
+                elif isinstance(step, str):
+                    if step == "add":
+                        chunk.emit(OpCode.ADD, None, expr.line)
+                    elif step == "subtract":
+                        chunk.emit(OpCode.SUB, None, expr.line)
+                    elif step == "multiply":
+                        chunk.emit(OpCode.MUL, None, expr.line)
+                    elif step == "divide":
+                        chunk.emit(OpCode.DIV, None, expr.line)
+                    elif step == "floor":
+                        chunk.emit(OpCode.FLOOR, None, expr.line)
+                    elif step == "ceil":
+                        chunk.emit(OpCode.CEIL, None, expr.line)
+                    elif step == "nearest":
+                        chunk.emit(OpCode.NEAREST, None, expr.line)
+                    elif step == "absolute":
+                        chunk.emit(OpCode.ABS, None, expr.line)
+                    elif step == "lesser":
+                        chunk.emit(OpCode.CMP, "<", expr.line)
+                    elif step == "greater":
+                        chunk.emit(OpCode.CMP, ">", expr.line)
+                    elif step == "equal":
+                        chunk.emit(OpCode.CMP, "==", expr.line)
+                    elif step == "not-equal":
+                        chunk.emit(OpCode.CMP, "!=", expr.line)
 
     def _compile_statement(self, stmt: Statement) -> None:
         assert self.current_chunk is not None

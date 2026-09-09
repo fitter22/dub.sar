@@ -17,19 +17,28 @@ from dubsar.ast import (
     Assignment,
     BinaryOp,
     CallExpr,
+    CompareExpr,
     Conditional,
     Declaration,
+    Determination,
+    DomainRepetition,
+    EmptyLiteral,
     Expression,
     ExpressionStatement,
+    FieldAccess,
     Identifier,
     InputExpr,
+    IsExpr,
     NumberLiteral,
     OutputStatement,
+    PostfixExpr,
     ProblemSection,
     Procedure,
     Program,
+    Recipe,
     Repetition,
     ResultSection,
+    RetainStatement,
     ReturnStatement,
     Statement,
     StringLiteral,
@@ -267,6 +276,41 @@ class SemanticAnalyzer:
             finally:
                 self.current_scope = old_scope
 
+        elif isinstance(stmt, DomainRepetition):
+            self._analyze_expression(stmt.start)
+            self._analyze_expression(stmt.end)
+            loop_scope = Scope(parent=self.current_scope, name="domain")
+            loop_scope.define(stmt.target, DIMENSIONLESS)
+            old_scope = self.current_scope
+            self.current_scope = loop_scope
+            try:
+                for s in stmt.body:
+                    self._analyze_statement(s)
+            finally:
+                self.current_scope = old_scope
+
+        elif isinstance(stmt, Determination):
+            for f in stmt.fields:
+                if not self.current_scope.is_defined(f):
+                    raise DubSarNameError(
+                        f"Field '{f}' in determination '{stmt.name}' is not established",
+                        line=stmt.line,
+                        col=stmt.col,
+                        source_file=self.source_file,
+                    )
+            self.current_scope.define(stmt.name, None)
+
+        elif isinstance(stmt, RetainStatement):
+            if not self.current_scope.is_defined(stmt.candidate):
+                raise DubSarNameError(
+                    f"Candidate '{stmt.candidate}' in retain statement is not established",
+                    line=stmt.line,
+                    col=stmt.col,
+                    source_file=self.source_file,
+                )
+            self._analyze_expression(stmt.condition)
+            self.current_scope.define(stmt.target, None)
+
         elif isinstance(stmt, ReturnStatement):
             if not self.in_procedure:
                 raise DubSarSyntaxError(
@@ -437,4 +481,31 @@ class SemanticAnalyzer:
                 self._analyze_expression(e)
             return None
 
+        elif isinstance(expr, EmptyLiteral):
+            return None
+
+        elif isinstance(expr, FieldAccess):
+            self._analyze_expression(expr.record)
+            return None
+
+        elif isinstance(expr, PostfixExpr):
+            last_u = None
+            for step in expr.steps:
+                if isinstance(step, Expression):
+                    u = self._analyze_expression(step)
+                    if u is not None:
+                        last_u = u
+            return last_u
+
+        elif isinstance(expr, CompareExpr):
+            self._analyze_expression(expr.left)
+            if expr.right:
+                self._analyze_expression(expr.right)
+            return DIMENSIONLESS
+
+        elif isinstance(expr, IsExpr):
+            self._analyze_expression(expr.target)
+            return DIMENSIONLESS
+
         return None
+

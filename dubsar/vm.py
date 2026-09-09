@@ -32,6 +32,9 @@ from dubsar.units import (
 )
 
 
+from dubsar.values import DeterminationValue, EmptySentinel
+
+
 class CallFrame:
     """A call frame on the VM call stack."""
 
@@ -153,24 +156,86 @@ class VirtualMachine:
                 self.operand_stack.append(a ** int(b.value.numerator))
 
             elif op == OpCode.CMP:
-                b = to_quantity(self.operand_stack.pop())
-                a = to_quantity(self.operand_stack.pop())
+                b_raw = self.operand_stack.pop()
+                a_raw = self.operand_stack.pop()
                 cmp_op = arg
-                if cmp_op == "==":
-                    res = (a == b)
-                elif cmp_op == "!=":
-                    res = (a != b)
-                elif cmp_op == "<":
-                    res = (a < b)
-                elif cmp_op == "<=":
-                    res = (a <= b)
-                elif cmp_op == ">":
-                    res = (a > b)
-                elif cmp_op == ">=":
-                    res = (a >= b)
+                if isinstance(b_raw, EmptySentinel):
+                    if cmp_op in ("<", "<="):
+                        res = True
+                    elif cmp_op in (">", ">="):
+                        res = False
+                    elif cmp_op == "==":
+                        res = False
+                    elif cmp_op == "!=":
+                        res = True
+                    else:
+                        res = True
+                elif isinstance(a_raw, EmptySentinel):
+                    if cmp_op in ("<", "<="):
+                        res = False
+                    elif cmp_op in (">", ">="):
+                        res = True
+                    elif cmp_op == "==":
+                        res = False
+                    elif cmp_op == "!=":
+                        res = True
+                    else:
+                        res = False
+                elif isinstance(a_raw, DeterminationValue) or isinstance(b_raw, DeterminationValue):
+                    if cmp_op == "==":
+                        res = (isinstance(a_raw, DeterminationValue) and a_raw.is_empty and isinstance(b_raw, DeterminationValue) and b_raw.is_empty)
+                    elif cmp_op == "!=":
+                        res = not (isinstance(a_raw, DeterminationValue) and a_raw.is_empty and isinstance(b_raw, DeterminationValue) and b_raw.is_empty)
+                    else:
+                        res = False
                 else:
-                    raise DubSarUnitError(f"Unknown comparison operator: {cmp_op}")
+                    b = to_quantity(b_raw)
+                    a = to_quantity(a_raw)
+                    if cmp_op == "==":
+                        res = (a == b)
+                    elif cmp_op == "!=":
+                        res = (a != b)
+                    elif cmp_op == "<":
+                        res = (a < b)
+                    elif cmp_op == "<=":
+                        res = (a <= b)
+                    elif cmp_op == ">":
+                        res = (a > b)
+                    elif cmp_op == ">=":
+                        res = (a >= b)
+                    else:
+                        raise DubSarUnitError(f"Unknown comparison operator: {cmp_op}")
                 self.operand_stack.append(res)
+
+            elif op == OpCode.EMPTY:
+                self.operand_stack.append(DeterminationValue({}))
+
+            elif op == OpCode.DETERMINE:
+                name, fields = arg
+                popped = [self.operand_stack.pop() for _ in range(len(fields))]
+                popped.reverse()
+                vals = {fname: v for fname, v in zip(fields, popped)}
+                det = DeterminationValue(vals)
+                frame.env.update(name, det)
+
+            elif op == OpCode.FIELD_GET:
+                rec = self.operand_stack.pop()
+                field_name = arg
+                if isinstance(rec, DeterminationValue):
+                    self.operand_stack.append(rec.get(field_name))
+                else:
+                    self.operand_stack.append(rec)
+
+            elif op == OpCode.RETAIN:
+                cand_name, target_name = arg
+                cond = self.operand_stack.pop()
+                target_val = frame.env.get(target_name) if frame.env.has(target_name) else DeterminationValue({})
+                if bool(cond) or (isinstance(target_val, DeterminationValue) and target_val.is_empty):
+                    cand_val = frame.env.get(cand_name)
+                    if isinstance(cand_val, DeterminationValue):
+                        frame.env.update(target_name, cand_val.clone())
+                    else:
+                        frame.env.update(target_name, cand_val)
 
             elif op == OpCode.NOT:
                 a = self.operand_stack.pop()
@@ -280,16 +345,21 @@ class VirtualMachine:
 
             elif op == OpCode.OUTPUT:
                 val = self.operand_stack.pop()
-                if isinstance(val, str):
-                    out_str = val
-                elif isinstance(val, Quantity):
-                    out_str = val.format(format_mode=self.format_mode)
-                elif isinstance(val, Rational):
-                    out_str = val.format_canonical()
+                if isinstance(val, DeterminationValue):
+                    for line in val.format_lines(format_mode=self.format_mode):
+                        self.outputs.append(line)
+                        self.output_fn(line)
                 else:
-                    out_str = str(val)
-                self.outputs.append(out_str)
-                self.output_fn(out_str)
+                    if isinstance(val, str):
+                        out_str = val
+                    elif isinstance(val, Quantity):
+                        out_str = val.format(format_mode=self.format_mode)
+                    elif isinstance(val, Rational):
+                        out_str = val.format_canonical()
+                    else:
+                        out_str = str(val)
+                    self.outputs.append(out_str)
+                    self.output_fn(out_str)
 
             elif op == OpCode.HALT:
                 break

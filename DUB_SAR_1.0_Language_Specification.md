@@ -110,21 +110,32 @@ The following tokens are part of DUB.SAR 1.0. Their programming meanings are **D
 | Token | Scholarly value | DUB.SAR role |
 |---|---|---|
 | `𒂊𒁹` | e-diš | problem/tablet start |
-| `𒁾𒊬` | dub-sar | procedure declaration |
+| `𒁾𒊬` | dub-sar | procedure / recipe declaration |
 | `𒅗𒁹` | ka-diš | result section |
 | `𒈬` | mu | year/unit symbol |
 | `𒌓` | ud | day/unit symbol |
-| `𒌗` | iti | month/unit symbol |
-| `𒍣` | zi | addition verb |
-| `𒋫` | ta | subtraction verb |
-| `𒊭` | ša | multiplication verb |
-| `𒉌` | ni | division verb |
-| `𒄀` | gi | bounded repetition |
-| `𒂊𒀀` | e-a | conditional |
-| `𒉡𒂊𒀀` | nu-e-a | alternative branch |
+| `𒌗` | iti | month/unit symbol / through |
+| `𒍣` | zi | addition verb / postfix add |
+| `𒋫` | ta | subtraction verb / postfix subtract / from |
+| `𒊭` | ša | multiplication verb / postfix multiply |
+| `𒉌` | ni | division verb / postfix divide |
+| `𒄥` | gur | floor / integer part |
+| `𒉏` | nim | ceiling |
+| `𒊑` | ri | nearest rounding |
+| `𒋼` | te | absolute value / retain selection |
+| `𒌉` | tur | lesser than (`<`) |
+| `𒃲` | gal | greater than (`>`) |
+| `𒊓` | sa | equal (`==`) |
+| `𒈨` | me | copula is |
+| `nu` / `𒉡` | nu | empty sentinel / negation |
+| `shu` / `𒋗` | šu | take operand |
+| `nam` / `𒉆` | nam | determine record |
+| `𒄀` | gi | bounded repetition / domain |
+| `𒂊𒀀` | e-a | conditional / when |
+| `𒉡𒂊𒀀` | nu-e-a | alternative branch / else |
 | `𒄑` | ĝeš | return |
-| `𒁹𒀀` | diš-a | output |
-| `𒀀𒁹` | a-diš | input |
+| `𒁹𒀀` | diš-a | output / inscribe |
+| `𒀀𒁹` | a-diš | input / ask |
 | `𒑰` | — | comment marker |
 
 The vocabulary is intentionally small. Where a modern programming concept has no defensible historical Sumerian equivalent, DUB.SAR assigns a transparent technical convention instead of pretending the term is ancient.
@@ -157,59 +168,83 @@ The normative grammar is:
 ```ebnf
 tablet           ::= problem-section procedure-section* result-section ;
 
-problem-section  ::= "𒂊𒁹" block ;
-result-section   ::= "𒅗𒁹" block ;
+problem-section  ::= ("𒂊𒁹" | "problem" | "given") block ;
+result-section   ::= ("𒅗𒁹" | "result") block ;
 procedure-section ::= procedure ;
 
-procedure        ::= "𒁾𒊬" identifier "(" parameters? ")" ":" block ;
+procedure        ::= ("𒁾𒊬" | "recipe" | "procedure") identifier "(" parameters? ")" ":" block ;
 parameters       ::= parameter ("," parameter)* ;
 parameter        ::= identifier ;
 
 block            ::= NEWLINE INDENT statement+ DEDENT ;
 
 statement        ::= declaration
+                   | determination
+                   | retain-statement
                    | assignment
-                   | expression-statement
                    | conditional
                    | repetition
                    | return-statement
                    | output-statement
-                   | input-expression
+                   | expression-statement
                    | expression ;
 
-declaration      ::= identifier ":" expression unit? ;
+declaration      ::= identifier ":" expression unit?
+                   | identifier ":" NEWLINE INDENT postfix-step+ DEDENT
+                   | identifier ":" ("𒉡" | "empty") ;
+
+determination    ::= identifier ":" identifier ("," identifier)+ ;
+
+retain-statement ::= ("𒋼" | "retain") identifier (("𒂊𒀀" | "when") expression)? ;
+
 assignment       ::= identifier ":=" expression
                    | identifier ("," identifier)+ ":=" expression-list ;
 expression-list  ::= expression ("," expression)+ ;
 
-conditional      ::= "𒂊𒀀" expression ":" block alternative? ;
-alternative      ::= "𒉡𒂊𒀀" ":" block ;
+conditional      ::= ("𒂊𒀀" | "when" | "if") expression ":" block alternative? ;
+alternative      ::= ("𒉡𒂊𒀀" | "else") ":" block ;
 
-repetition       ::= "𒄀" identifier range ":" block ;
-range            ::= expression
-                   | expression "𒌗" expression ;
+repetition       ::= ("𒄀" | "consider" | "repeat") identifier range ":" block ;
+range            ::= (("𒋫" | "from")? expression)? ("𒌗" | "through" | "to" | "..") expression
+                   | expression ;
 
-return-statement ::= "𒄑" expression ("," expression)* ;
-output-statement ::= "𒁹𒀀" expression ;
-input-expression ::= "𒀀𒁹" "(" string ")" ;
+return-statement ::= ("𒄑" | "return") expression ("," expression)* ;
+output-statement ::= ("𒁹𒀀" | "output" | "inscribe") expression ;
+input-expression ::= ("𒀀𒁹" | "ask" | "input") ("(" string ")" | string) ;
 
 expression       ::= comparison ;
-comparison       ::= sum (comparison-op sum)* ;
+comparison       ::= sum (comparison-op sum)*
+                   | sum "is" ("lesser" | "greater" | "equal") "than" sum
+                   | sum "is" ("empty" | "not" "empty") ;
+comparison-op    ::= "==" | "!=" | "<" | "<=" | ">" | ">=" | "𒌉" | "𒃲" | "𒊓" ;
+
 sum              ::= product (("+"|"-"|"𒍣"|"𒋫") product)* ;
 product          ::= power (("*"|"/"|"%"|"𒊭"|"𒉌") power)* ;
 power            ::= unary ("**" unary)? ;
-unary            ::= ("-"|"𒉡")? primary ;
+unary            ::= ("-" | "𒉡" | "not")? primary ;
+
+postfix-step     ::= primary | postfix-op ;
+postfix-op       ::= "floor" | "ceil" | "nearest" | "absolute"
+                   | "add" | "subtract" | "multiply" | "divide"
+                   | "𒄥" | "𒉏" | "𒊑" | "𒋼" | "𒍣" | "𒋫" | "𒊭" | "𒉌" ;
+
 primary          ::= number quantity-unit?
+                   | field-access
                    | identifier
                    | string
+                   | ("𒉡" | "empty")
                    | call
+                   | input-expression
                    | "(" expression ")" ;
+
+field-access     ::= primary "." identifier
+                   | identifier "of" primary ;
+
 quantity-unit    ::= unit ;
 unit             ::= identifier | cuneiform-unit ;
 call             ::= identifier "(" arguments? ")" ;
 arguments        ::= expression ("," expression)* ;
-comparison-op    ::= "=="|"!="|"<"|"<="|">"|">=" ;
-identifier       ::= cuneiform-identifier|ascii-identifier ;
+identifier       ::= cuneiform-identifier | ascii-identifier ;
 ```
 
 Scholar/ASCII aliases MAY be provided by an implementation, but they MUST normalize to the same AST as their canonical DUB.SAR counterparts.
@@ -244,7 +279,66 @@ The first has a day unit, the second a month unit, and the third is dimensionles
 
 establishes the named quantity `𒈬` with value `365;14,31,55` days.
 
-### 7.2 Derived quantities
+### 7.2 Postfix calculation pipelines
+
+A quantity may be established via an indented postfix calculation block:
+
+```text
+whole-days :
+    solar-year
+    𒄥
+
+fraction :
+    solar-year
+    whole-days
+    𒋫
+```
+
+In Scholar Mode:
+
+```text
+whole-days :
+    solar-year
+    floor
+
+fraction :
+    solar-year
+    whole-days
+    subtract
+```
+
+Operands and intermediate values are pushed to the calculation stack; trailing postfix operators reduce the stack.
+
+### 7.3 Mathematical determinations and empty sentinels
+
+A **determination** is a typed record combining multiple named quantities:
+
+```text
+candidate : cycle, leaps, error
+```
+
+A record may be initialized to the **empty sentinel** before searching:
+
+```text
+best : 𒉡
+```
+
+or in Scholar Mode:
+
+```text
+best : empty
+```
+
+### 7.4 Field access
+
+Fields of a determination record are accessed via dot notation or prepositional syntax:
+
+```text
+best.error
+error of best
+```
+
+### 7.5 Derived quantities
 
 ```text
 fraction := 𒈬 - 365 𒌓
@@ -405,13 +499,33 @@ Valid comparison operators:
 == != < <= > >=
 ```
 
+Cuneiform comparative operators:
+
+```text
+𒌉   lesser than (<)
+𒃲   greater than (>)
+𒊓   equal to (==)
+```
+
+Scholar Mode also supports verbal comparative expressions:
+
+```text
+error is lesser than best.error
+error is greater than best.error
+error is equal to target
+target is empty
+target is not empty
+```
+
 Compared quantities MUST be dimensionally compatible.
 
 Comparisons yield an internal Boolean value used for control flow.
 
 ---
 
-## 11. Conditions
+## 11. Conditions and atomic selection
+
+### 11.1 Block conditions
 
 Native form:
 
@@ -438,11 +552,47 @@ or ASCII `else:`.
 
 Booleans are primarily control values. DUB.SAR 1.0 does not require Boolean variables as a core mathematical abstraction.
 
+### 11.2 Atomic retain selection
+
+Rather than branching imperatively with mutable assignments, mathematical optimization uses atomic retention:
+
+```text
+𒋼 candidate 𒂊𒀀 error 𒌉 best.error
+```
+
+Scholar Mode:
+
+```text
+retain candidate when error is lesser than best.error
+```
+
+If the target determination (`best`) holds the empty sentinel (`𒉡` / `empty`), the candidate is retained immediately without evaluating the comparison.
+
 ---
 
 ## 12. Repetition
 
 DUB.SAR uses **bounded mathematical repetition**, not an unrestricted `while` loop.
+
+### 12.1 Bounded search domains
+
+The canonical mathematical search domain specifies an inclusive lower and upper bound:
+
+```text
+𒄀 cycle 𒋫 1 𒌗 limit:
+    ...
+```
+
+Scholar Mode:
+
+```text
+consider cycle from 1 through limit:
+    ...
+```
+
+The bound marker `𒋫` (`from`) and separator `𒌗` (`through`, `to`, `..`) delineate the finite search range.
+
+### 12.2 Single-bound and range variants
 
 Single-bound form:
 
@@ -453,10 +603,17 @@ Single-bound form:
 
 means `cycle = 1, 2, ..., 1000`.
 
-Explicit-range form:
+Explicit range without lower marker:
 
 ```text
 𒄀 cycle 1 𒌗 1000:
+    ...
+```
+
+Scholar Mode alias:
+
+```text
+repeat cycle 1 to 1000:
     ...
 ```
 
@@ -533,6 +690,21 @@ Returns mathematical floor. For a quantity, the result retains the same unit and
 
 Returns mathematical ceiling. For a quantity, the result retains the same unit and has an integer-valued magnitude.
 
+### 14.4 Dual syntax: prefix procedures and postfix verbs
+
+All primary mathematical operations can be written either as prefix functional calls or as postfix reduction verbs within calculation pipelines:
+
+| Operation | Prefix form | Scholar postfix | Tablet postfix |
+|---|---|---|---|
+| Floor | `floor(x)` | `floor` | `𒄥` |
+| Ceiling | `ceil(x)` | `ceil` | `𒉏` |
+| Round to nearest | `nearest(x)` | `nearest` | `𒊑` |
+| Absolute value | `abs(x)` | `absolute` | `𒋼` |
+| Addition | `a + b` | `add` | `𒍣` |
+| Subtraction | `a - b` | `subtract` | `𒋫` |
+| Multiplication | `a * b` | `multiply` | `𒊭` |
+| Division | `a / b` | `divide` | `𒉌` |
+
 ---
 
 ## 15. Units
@@ -588,22 +760,50 @@ This is essential for planetary-calendar programs because the unknown solar year
 
 ## 17. Input and output
 
-### Input
+### 17.1 Input
+
+Prompted input establishes a quantity:
+
+```text
+solar-year : 𒀀𒁹 "solar year in days"
+```
+
+or parenthesized:
 
 ```text
 𒈬 := 𒀀𒁹("solar year in days")
 ```
 
+Scholar Mode:
+
+```text
+solar-year : ask "solar year in days"
+```
+
 The runtime accepts an exact integer, sexagesimal value, or decimal input and immediately converts it to the exact rational representation.
 
-### Output
+### 17.2 Output and inscription
+
+#### Explicit inscription
 
 ```text
 𒁹𒀀 "cycle:"
 𒁹𒀀 cycle
 ```
 
-Strings are Unicode strings.
+Scholar Mode: `output "cycle:"`.
+
+#### Implicit result inscription
+
+Listing a quantity, determination record, or expression on its own line within the `result` (`𒅗𒁹`) section automatically inscribes and emits its values in order:
+
+```text
+𒅗𒁹
+
+    best
+```
+
+If `best` is a determination `candidate : cycle, leaps, error`, its constituent values are emitted sequentially. Strings are Unicode strings.
 
 ---
 
@@ -760,18 +960,30 @@ The first release SHOULD be an interpreter. Once the interpreter passes the lang
 
 ## 24. CLI
 
-Reference command:
+Reference commands:
 
 ```text
-dubsar run tablet.dub
+dubsar run tablet.dub [--backend=vm|ast] [--input=...]
 dubsar check tablet.dub
+dubsar format tablet.dub [--mode=tablet|scholar]
 dubsar compile tablet.dub --target=bytecode
 dubsar compile tablet.dub --target=wasm
-dubsar compile tablet.dub --target=native
+dubsar compile tablet.dub --target=wat
+dubsar compile tablet.dub --target=ir
+dubsar compile tablet.dub --target=json
 dubsar transliterate tablet.dub
 dubsar cuneiform tablet.dub
 dubsar render tablet.dub --style=tablet
+dubsar render tablet.dub --style=text
+dubsar render tablet.dub --style=tablet --strip-comments
 ```
+
+Supported compilation targets:
+- `bytecode` — Stack bytecode chunk for the DUB.SAR VM;
+- `wasm` / `wat` — WebAssembly text format with 64-bit rational runtime;
+- `ir` — High-level mathematical Semantic IR;
+- `json` — Abstract syntax tree serialized as JSON;
+- `native` — Native LLVM machine code (planned Stage 4).
 
 `render` is a presentation feature; case lines, tablet borders and similar visual features do not affect program semantics.
 
@@ -783,12 +995,14 @@ Unicode documents cuneiform case ruling and similar lines as formatting rather t
 
 A DUB.SAR implementation SHOULD be able to render source as:
 
-- Unicode text;
+- Unicode text (terminal double-line border box);
 - transliterated scholar text;
-- SVG;
+- SVG (authentic Mesopotamian clay tablet artwork with bevels, texture gradients, case rulings, and drop shadows);
 - PNG;
 - PDF;
 - clay-tablet-style artwork.
+
+The renderer MAY provide an option (`--strip-comments`) to omit transliteration annotations and comments for pure museum-grade cuneiform presentation.
 
 The renderer consumes the canonical AST/sign stream. It does not reinterpret program semantics.
 

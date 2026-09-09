@@ -9,40 +9,40 @@
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
 [![Tests: 110 Passing](https://img.shields.io/badge/Tests-110%2F110%20Passing-brightgreen.svg)](tests/)
 [![Architecture: VM + WASM](https://img.shields.io/badge/Architecture-Interpreter%20%7C%20VM%20%7C%20WASM-purple.svg)](dubsar/)
-[![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#-vibe-coded-to-perfection)
+[![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#vibe-coded-to-perfection)
 
 <p align="center">
   <b>What if ancient Babylonian scribes had designed a modern programming language?</b><br>
   DUB.SAR is not a Python dialect in cuneiform costume. It is an executable Mesopotamian mathematical tablet language engineered from first principles — featuring exact arbitrary-precision rational arithmetic, algebraic dimensional unit safety, bounded mathematical search domains, postfix calculation pipelines, atomic selections, a high-level Semantic IR, a stack bytecode virtual machine, and a WebAssembly compiler.
 </p>
 
-[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#-compiler--runtime-architecture) • [Quickstart](#-quickstart) • [Examples](examples/) • [Clay Tablet Rendering](#-clay-tablet-rendering)
+[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
 
 ---
 
 </div>
 
-## 🏺 Why DUB.SAR?
+## Why DUB.SAR?
 
 Modern programming languages are encumbered with Von Neumann memory mutations, uncontrolled `while` loops, assignment operators (`=`, `:=`), subroutine returns (`def`, `return`), and IEEE 754 binary floating-point roundoff errors.
 
 **DUB.SAR (Sumerian: *dub-sar*, "scribe") reimagines computation as an excavated mathematical clay tablet:**
 
-- 📜 **The Tablet Paradigm**: Programs are computational tablets (`IM.GID.DA`) structured in authentic scribal sections: a **Problem Statement** (`𒂊𒁹` / `problem`), reusable **Prescription Recipes** (`𒁾𒊬` / `recipe`), and an **Inscribed Result** (`𒅗𒁹` / `result`).
-- 🚫 **No Imperative Gimmicks**: Say goodbye to `:=`, `=`, `def`, `return`, `for`, `while`, `if`, `else`, and `class`. DUB.SAR expresses computation purely through **Quantity Establishment** (`name : expression`), **Mathematical Determinations** (`candidate : cycle, leaps, error`), **Finite Search Domains** (`consider cycle from 1 through limit:`), and **Atomic Selection** (`retain candidate when error is lesser than best.error`).
-- 🧮 **Exact Sexagesimal Rational Engine**: Every numeric value is an exact arbitrary-precision rational fraction, natively written, computed, and displayed in canonical Mesopotamian sexagesimal notation (`365;14,31,55`). Floating-point inaccuracies simply do not exist.
-- 📐 **Algebraic Dimensional Safety**: Units are first-class mathematical entities. Quantities multiply and divide algebraically (`2 day * 3 day = 6 day^2`). Incompatible dimensional operations (`1 day + 2 year`) are statically rejected at compile time.
-- 🔄 **Postfix Calculation Pipelines**: Calculations unfold through clear mathematical reductions:
+- **The Tablet Paradigm**: Programs are computational tablets (`IM.GID.DA`) structured in authentic scribal sections: a **Problem Statement** (`𒂊𒁹` / `problem`), reusable **Prescription Recipes** (`𒁾𒊬` / `recipe`), and an **Inscribed Result** (`𒅗𒁹` / `result`).
+- **No Imperative Gimmicks**: Say goodbye to `:=`, `=`, `def`, `return`, `for`, `while`, `if`, `else`, and `class`. DUB.SAR expresses computation purely through **Quantity Establishment** (`name : expression`), **Mathematical Determinations** (`candidate : cycle, leaps, error`), **Finite Search Domains** (`consider cycle from 1 through limit:`), and **Atomic Selection** (`retain candidate when error is lesser than best.error`).
+- **Exact Sexagesimal Rational Engine**: Every numeric value is an exact arbitrary-precision rational fraction, natively written, computed, and displayed in canonical Mesopotamian sexagesimal notation (`365;14,31,55`). Floating-point inaccuracies simply do not exist.
+- **Algebraic Dimensional Safety**: Units are first-class mathematical entities. Quantities multiply and divide algebraically (`2 day * 3 day = 6 day^2`). Incompatible dimensional operations (`1 day + 2 year`) are statically rejected at compile time.
+- **Postfix Calculation Pipelines**: Calculations unfold through clear mathematical reductions:
   ```text
   whole-days : solar-year floor
   fraction : solar-year whole-days subtract
   ```
-- 🪶 **Trimodal Source Flexibility**: Write in authentic Unicode cuneiform (**Tablet Mode**), academic Latin transliteration (**Scholar Mode**), or intermix both (**Mixed Mode**). All three representations normalize into an identical abstract syntax tree and Semantic IR.
-- 🎨 **Clay Artwork Generator**: Compile any tablet directly to a vector SVG rendering of an inscribed, case-ruled Mesopotamian clay tablet with bevels, drop shadows, and wedge impressions.
+- **Trimodal Source Flexibility**: Write in authentic Unicode cuneiform (**Tablet Mode**), academic Latin transliteration (**Scholar Mode**), or intermix both (**Mixed Mode**). All three representations normalize into an identical abstract syntax tree and Semantic IR.
+- **Clay Artwork Generator**: Compile any tablet directly to a vector SVG rendering of an inscribed, case-ruled Mesopotamian clay tablet with bevels, drop shadows, and wedge impressions.
 
 ---
 
-## ⚡ Vibe Coded to Perfection
+## Vibe Coded to Perfection
 
 > **This entire repository was 100% vibe coded.**
 >
@@ -50,7 +50,7 @@ Modern programming languages are encumbered with Von Neumann memory mutations, u
 
 ---
 
-## 🏛️ Trimodal Source Experience
+## Trimodal Source Experience
 
 DUB.SAR provides dual canonical representations of the same mathematical tablet:
 
@@ -174,7 +174,7 @@ result
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
 ### Prerequisites
 - Python 3.9 or higher (zero external dependencies required for the compiler, VM, and interpreter).
@@ -204,7 +204,7 @@ bin/dubsar run examples/planetary_leap.dub --input="365.2422"
 
 ---
 
-## 🛠️ CLI Toolkit
+## CLI Toolkit
 
 The `dubsar` command-line tool provides end-to-end capabilities:
 
@@ -241,7 +241,7 @@ bin/dubsar render examples/planetary_leap.dub --style=tablet --strip-comments -o
 
 ---
 
-## 🏗️ Compiler & Runtime Architecture
+## Compiler & Runtime Architecture
 
 ```text
                .dub source (Tablet / Scholar / Mixed)
@@ -298,13 +298,13 @@ bin/dubsar render examples/planetary_leap.dub --style=tablet --strip-comments -o
 
 ---
 
-## 📜 Historical Foundations vs. Modern Inventions
+## Historical Foundations vs. Modern Inventions
 
 DUB.SAR bridges genuine ancient scribal traditions with 21st-century compiler construction:
 
 ### 1. Historically Grounded
 - **Cuneiform Inscriptions**: Authentic Unicode cuneiform signs ($U+12000 \dots U+1247F$) and punctuation marks ($U+12480 \dots U+1254F$).
-- **Sumerian Mathematical Vocabulary**: Keywords (`𒂊𒁹` *e-diš*, `𒁾𒊬` *dub-sar*, `𒅗𒁹` *ka-diš*, `𒄀` *gi*, `𒋫` *ta*, `𒌗` *iti*, `𒋼` *te*, `𒂊𒀀` *e-a*, `𒌉` *tur*, `𒃲` *gal*, `𒊓` *sa*, `𒉡` *nu*, `gur`, `nim`, `ri`, `zi`, `sha`, `ni`) reflect genuine Old Babylonian mathematical phrasing.
+- **Sumerian Mathematical Vocabulary**: Keywords (`𒂊𒁹` *e-diš*, `𒁾𒊬` *dub-sar*, `𒅗𒁹` *ka-diš*, `𒄀` *gi*, `𒋫` *ta*, `𒂗` *en*, `𒌗` *iti*, `𒋼` *te*, `𒂊𒀀` *e-a*, `𒌉` *tur*, `𒃲` *gal*, `𒊓` *sa*, `𒈨` *me*, `𒉡` *nu*, `𒄥` *gur*, `𒉏` *nim*, `𒊑` *ri*, `𒍣` *zi*, `𒊭` *ša*, `𒉌` *ni*, `𒀝` *ak*, `𒉆` *nam*, `𒁹𒀀` *diš-a*, `𒀀𒁹` *a-diš*) reflect genuine Old Babylonian mathematical phrasing and scribal conventions.
 - **Sexagesimal Positional System**: Positional base-60 representation for fractions and integers (`365;14,31,55`).
 - **Tablet Organization**: The tripartite division of Problem Statement, Computational Prescriptions, and Inscribed Results mirrors Old Babylonian tablets (such as BM 13901 and YBC 7289).
 
@@ -321,7 +321,7 @@ DUB.SAR bridges genuine ancient scribal traditions with 21st-century compiler co
 
 ---
 
-## 🎨 Clay Tablet Rendering
+## Clay Tablet Rendering
 
 DUB.SAR transforms your mathematical tablet code into an authentic Mesopotamian clay tablet SVG artwork complete with clay texture gradients, bevels, drop shadows, horizontal case rulings, and wedge impressions:
 
@@ -394,29 +394,29 @@ You can also render directly to your terminal:
 
 ---
 
-## 📚 Included Examples
+## Included Examples
 
 Explore the [`examples/`](examples/) directory for complete, verified tablets available in both **Canonical Cuneiform (Tablet Mode)** and **Scholar Mode (Latin Transliteration)**:
 
-- 🪐 **Planetary Leap-Year Rule**:
+- **Planetary Leap-Year Rule**:
   - [`planetary_leap.dub`](examples/planetary_leap.dub) (Canonical Cuneiform)
   - [`planetary_leap_scholar.dub`](examples/planetary_leap_scholar.dub) (Scholar Mode)
-- 📐 **Babylonian Square Diagonal ($\sqrt{2} \approx 1;24,51,10$ / Tablet YBC 7289)**:
+- **Babylonian Square Diagonal ($\sqrt{2} \approx 1;24,51,10$ / Tablet YBC 7289)**:
   - [`babylonian_sqrt2.dub`](examples/babylonian_sqrt2.dub) (Canonical Cuneiform)
   - [`babylonian_sqrt2_scholar.dub`](examples/babylonian_sqrt2_scholar.dub) (Scholar Mode)
-- ⚖️ **Even Distribution of Leap Years**:
+- **Even Distribution of Leap Years**:
   - [`even_distribution.dub`](examples/even_distribution.dub) (Canonical Cuneiform)
   - [`even_distribution_scholar.dub`](examples/even_distribution_scholar.dub) (Scholar Mode)
-- ⏱️ **Unit Conversions & Dimensional Safety**:
+- **Unit Conversions & Dimensional Safety**:
   - [`unit_conversion.dub`](examples/unit_conversion.dub) (Canonical Cuneiform)
   - [`unit_conversion_scholar.dub`](examples/unit_conversion_scholar.dub) (Scholar Mode)
-- ✅ **Language Conformance Suite**:
+- **Language Conformance Suite**:
   - [`conformance.dub`](examples/conformance.dub) (Canonical Cuneiform)
   - [`conformance_scholar.dub`](examples/conformance_scholar.dub) (Scholar Mode)
 
 ---
 
-## 🧪 Comprehensive Conformance & Testing
+## Comprehensive Conformance & Testing
 
 Run the full automated test suite:
 ```bash
@@ -436,7 +436,7 @@ python3 -m unittest discover -s tests -p "test_*.py"
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
 

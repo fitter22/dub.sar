@@ -531,7 +531,7 @@ class Parser:
             "subtract", "sub", "ta", "𒋫", "-",
             "multiply", "mul", "sha", "ša", "𒊭", "*",
             "divide", "div", "ni", "𒉌", "/",
-            "floor", "gur", "гур",
+            "floor", "gur", "𒄥", "гур",
             "ceil", "nim", "𒉏",
             "nearest", "round", "ri", "𒊑",
             "absolute", "abs", "te", "𒋼",
@@ -550,7 +550,7 @@ class Parser:
             return "multiply"
         if r in ("divide", "div", "ni", "𒉌", "/"):
             return "divide"
-        if r in ("floor", "gur", "гур"):
+        if r in ("floor", "gur", "𒄥", "гур"):
             return "floor"
         if r in ("ceil", "nim", "𒉏"):
             return "ceil"

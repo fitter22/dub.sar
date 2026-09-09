@@ -60,7 +60,7 @@
     <line x1="55" y1="390" x2="811" y2="390" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="382">        solar-year</text>
     <line x1="55" y1="418" x2="811" y2="418" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="410">        gur</text>
+    <text x="65" y="410">        𒄥</text>
     <line x1="55" y1="446" x2="811" y2="446" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="438"></text>
     <line x1="55" y1="474" x2="811" y2="474" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
@@ -70,7 +70,7 @@
     <line x1="55" y1="530" x2="811" y2="530" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="522">        whole-days</text>
     <line x1="55" y1="558" x2="811" y2="558" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="550">        ta</text>
+    <text x="65" y="550">        𒋫</text>
     <line x1="55" y1="586" x2="811" y2="586" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="578"></text>
     <line x1="55" y1="614" x2="811" y2="614" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
@@ -88,9 +88,9 @@
     <line x1="55" y1="782" x2="811" y2="782" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="774">            fraction</text>
     <line x1="55" y1="810" x2="811" y2="810" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="802">            sha</text>
+    <text x="65" y="802">            𒊭</text>
     <line x1="55" y1="838" x2="811" y2="838" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="830">            ri</text>
+    <text x="65" y="830">            𒊑</text>
     <line x1="55" y1="866" x2="811" y2="866" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="858"></text>
     <line x1="55" y1="894" x2="811" y2="894" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
@@ -102,15 +102,15 @@
     <line x1="55" y1="978" x2="811" y2="978" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="970">            cycle</text>
     <line x1="55" y1="1006" x2="811" y2="1006" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="998">            ni</text>
+    <text x="65" y="998">            𒉌</text>
     <line x1="55" y1="1034" x2="811" y2="1034" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1026">            zi</text>
+    <text x="65" y="1026">            𒍣</text>
     <line x1="55" y1="1062" x2="811" y2="1062" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1054">            solar-year</text>
     <line x1="55" y1="1090" x2="811" y2="1090" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1082">            ta</text>
+    <text x="65" y="1082">            𒋫</text>
     <line x1="55" y1="1118" x2="811" y2="1118" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1110">            te</text>
+    <text x="65" y="1110">            𒋼</text>
     <line x1="55" y1="1146" x2="811" y2="1146" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1138"></text>
     <line x1="55" y1="1174" x2="811" y2="1174" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />

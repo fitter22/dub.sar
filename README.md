@@ -66,12 +66,12 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
 
     whole-days :
         solar-year
-        gur
+        𒄥
 
     fraction :
         solar-year
         whole-days
-        ta
+        𒋫
 
     best : 𒉡
 
@@ -80,18 +80,18 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
         leaps :
             cycle
             fraction
-            sha
-            ri
+            𒊭
+            𒊑
 
         error :
             whole-days
             leaps
             cycle
-            ni
-            zi
+            𒉌
+            𒍣
             solar-year
-            ta
-            te
+            𒋫
+            𒋼
 
         candidate :
             cycle
@@ -328,12 +328,12 @@ You can also render directly to your terminal:
 ║                                                                ║
 ║      whole-days :                                              ║
 ║          solar-year                                            ║
-║          gur                                                   ║
+║          𒄥                                                    ║
 ║                                                                ║
 ║      fraction :                                                ║
 ║          solar-year                                            ║
 ║          whole-days                                            ║
-║          ta                                                    ║
+║          𒋫                                                    ║
 ║                                                                ║
 ║      best : 𒉡                                                 ║
 ║                                                                ║
@@ -342,18 +342,18 @@ You can also render directly to your terminal:
 ║          leaps :                                               ║
 ║              cycle                                             ║
 ║              fraction                                          ║
-║              sha                                               ║
-║              ri                                                ║
+║              𒊭                                                ║
+║              𒊑                                                ║
 ║                                                                ║
 ║          error :                                               ║
 ║              whole-days                                        ║
 ║              leaps                                             ║
 ║              cycle                                             ║
-║              ni                                                ║
-║              zi                                                ║
+║              𒉌                                                ║
+║              𒍣                                                ║
 ║              solar-year                                        ║
-║              ta                                                ║
-║              te                                                ║
+║              𒋫                                                ║
+║              𒋼                                                ║
 ║                                                                ║
 ║          candidate :                                           ║
 ║              cycle                                             ║

@@ -190,10 +190,10 @@ class Formatter:
                 if isinstance(step, str):
                     if is_tablet:
                         tablet_ops = {
-                            "floor": "gur", "ceil": "nim", "nearest": "ri",
-                            "absolute": "te", "add": "zi", "subtract": "ta",
-                            "multiply": "sha", "divide": "ni", "lesser": "tur",
-                            "greater": "gal", "equal": "sa",
+                            "floor": "𒄥", "ceil": "𒉏", "nearest": "𒊑",
+                            "absolute": "𒋼", "add": "𒍣", "subtract": "𒋫",
+                            "multiply": "𒊭", "divide": "𒉌", "lesser": "𒌉",
+                            "greater": "𒃲", "equal": "𒊓",
                         }
                         parts.append(tablet_ops.get(step.lower(), step))
                     else:

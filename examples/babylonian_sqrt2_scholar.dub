@@ -1,0 +1,29 @@
+# DUB.SAR 1.0 — Tablet YBC 7289: The Diagonal of the Square
+# Calculates the Babylonian approximation of sqrt(2): 1;24,51,10
+
+problem
+
+    initial-estimate : 1;30
+    steps : 3
+    approx := babylonian-sqrt(initial-estimate, steps)
+    target-diagonal : 30
+    diagonal := target-diagonal * approx
+
+procedure babylonian-sqrt(start, iterations):
+
+    x := start
+    two : 2
+    half : 0;30
+
+    repeat step 1 to iterations:
+        x := (x + two / x) * half
+
+    return x
+
+result
+
+    output "Babylonian sqrt(2) approximation:"
+    output approx
+
+    output "Square with side 30 has diagonal:"
+    output diagonal

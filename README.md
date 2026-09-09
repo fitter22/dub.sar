@@ -369,14 +369,23 @@ You can also render directly to your terminal:
 
 ## 📚 Included Examples
 
-Explore the [`examples/`](examples/) directory for complete, verified tablets:
+Explore the [`examples/`](examples/) directory for complete, verified tablets available in both **Canonical Cuneiform (Tablet Mode)** and **Scholar Mode (Latin Transliteration)**:
 
-- 🪐 **[`planetary_leap.dub`](examples/planetary_leap.dub)**: The canonical planetary leap-year rule in full cuneiform Tablet Mode.
-- 📜 **[`planetary_leap_scholar.dub`](examples/planetary_leap_scholar.dub)**: The planetary leap-year rule in Scholar Mode Latin transliteration.
-- ⚖️ **[`even_distribution.dub`](examples/even_distribution.dub)**: Section 27 Bresenham leap-year accumulator distributing leap days evenly over a calendar cycle.
-- 📐 **[`babylonian_sqrt2.dub`](examples/babylonian_sqrt2.dub)**: Tablet YBC 7289 calculation of the diagonal of a square ($\sqrt{2} pprox 1;24,51,10$).
-- ⏱️ **[`unit_conversion.dub`](examples/unit_conversion.dub)**: Explicit unit conversions across `second`, `minute`, `hour`, and `day`.
-- ✅ **[`conformance.dub`](examples/conformance.dub)**: Formal language conformance test suite.
+- 🪐 **Planetary Leap-Year Rule**:
+  - [`planetary_leap.dub`](examples/planetary_leap.dub) (Canonical Cuneiform)
+  - [`planetary_leap_scholar.dub`](examples/planetary_leap_scholar.dub) (Scholar Mode)
+- 📐 **Babylonian Square Diagonal ($\sqrt{2} \approx 1;24,51,10$ / Tablet YBC 7289)**:
+  - [`babylonian_sqrt2.dub`](examples/babylonian_sqrt2.dub) (Canonical Cuneiform)
+  - [`babylonian_sqrt2_scholar.dub`](examples/babylonian_sqrt2_scholar.dub) (Scholar Mode)
+- ⚖️ **Even Distribution of Leap Years (Section 27)**:
+  - [`even_distribution.dub`](examples/even_distribution.dub) (Canonical Cuneiform)
+  - [`even_distribution_scholar.dub`](examples/even_distribution_scholar.dub) (Scholar Mode)
+- ⏱️ **Unit Conversions & Dimensional Safety (Sections 15 & 16)**:
+  - [`unit_conversion.dub`](examples/unit_conversion.dub) (Canonical Cuneiform)
+  - [`unit_conversion_scholar.dub`](examples/unit_conversion_scholar.dub) (Scholar Mode)
+- ✅ **Language Conformance Suite (Section 29)**:
+  - [`conformance.dub`](examples/conformance.dub) (Canonical Cuneiform)
+  - [`conformance_scholar.dub`](examples/conformance_scholar.dub) (Scholar Mode)
 
 ---
 

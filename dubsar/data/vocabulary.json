@@ -336,7 +336,7 @@
   },
   {
     "canonical": "FLOOR",
-    "cuneiform": "гур",
+    "cuneiform": "𒄥",
     "scholar": "floor",
     "aliases": [
       "floor",
@@ -424,5 +424,22 @@
       "inquire, prompt for given measure"
     ],
     "semantic_class": "input"
+  },
+  {
+    "canonical": "APPLY",
+    "cuneiform": "𒀝",
+    "scholar": "apply",
+    "aliases": [
+      "apply",
+      "ak",
+      "du",
+      "dù",
+      "𒆕"
+    ],
+    "historical_values": [
+      "ak",
+      "act, make, calculate, execute, apply"
+    ],
+    "semantic_class": "recipe_invocation"
   }
 ]

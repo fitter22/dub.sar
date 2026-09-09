@@ -12,6 +12,7 @@ import re
 from typing import List, Optional
 
 from dubsar.ast import (
+    ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
@@ -81,15 +82,15 @@ class Formatter:
         # 2. Procedures
         for proc in program.procedures:
             lines.append("")
-            proc_kw = "𒁾𒊬" if is_tablet else "procedure"
-            params_str = ", ".join(proc.parameters)
-            lines.append(f"{proc_kw} {proc.name}({params_str}):")
+            proc_kw = "𒁾𒊬" if is_tablet else "recipe"
+            params_str = " ".join(proc.parameters)
+            lines.append(f"{proc_kw} {proc.name} {params_str}:")
             for stmt in proc.body:
                 lines.append(self._format_statement(stmt, indent=4, is_tablet=is_tablet))
 
         # 3. Result Section
         lines.append("")
-        res_kw = "𒅗𒁹" if is_tablet else "RESULT"
+        res_kw = "𒅗𒁹" if is_tablet else "result"
         lines.append(res_kw)
         for stmt in program.result.body:
             lines.append(self._format_statement(stmt, indent=4, is_tablet=is_tablet))
@@ -101,6 +102,26 @@ class Formatter:
         pad = " " * indent
 
         if isinstance(stmt, Declaration):
+            if isinstance(stmt.value, PostfixExpr) and len(stmt.value.steps) > 1:
+                step_lines = [f"{pad}{stmt.name} :"]
+                for step in stmt.value.steps:
+                    if isinstance(step, str):
+                        if is_tablet:
+                            tablet_ops = {
+                                "floor": "𒄥", "ceil": "𒉏", "nearest": "𒊑",
+                                "absolute": "𒋼", "add": "𒍣", "subtract": "𒋫",
+                                "multiply": "𒊭", "divide": "𒉌", "lesser": "𒌉",
+                                "greater": "𒃲", "equal": "𒊓",
+                            }
+                            s_str = tablet_ops.get(step.lower(), step)
+                        else:
+                            s_str = step
+                    elif isinstance(step, Expression):
+                        s_str = self._format_expression(step, is_tablet)
+                    else:
+                        s_str = str(step)
+                    step_lines.append(f"{pad}    {s_str}")
+                return "\n".join(step_lines)
             val_str = self._format_expression(stmt.value, is_tablet)
             unit_str = f" {stmt.unit}" if stmt.unit else ""
             return f"{pad}{stmt.name} : {val_str}{unit_str}"
@@ -111,7 +132,7 @@ class Formatter:
             return f"{pad}{targets_str} := {val_str}"
 
         elif isinstance(stmt, Conditional):
-            if_kw = "𒂊𒀀" if is_tablet else "if"
+            if_kw = "𒂊𒀀" if is_tablet else "when"
             cond_str = self._format_expression(stmt.condition, is_tablet)
             res = [f"{pad}{if_kw} {cond_str}:"]
             for s in stmt.body:
@@ -124,19 +145,21 @@ class Formatter:
             return "\n".join(res)
 
         elif isinstance(stmt, Determination):
-            fields_str = ", ".join(stmt.fields)
-            return f"{pad}{stmt.name} : {fields_str}"
+            det_lines = [f"{pad}{stmt.name} :"]
+            for f in stmt.fields:
+                det_lines.append(f"{pad}    {f}")
+            return "\n".join(det_lines)
 
         elif isinstance(stmt, RetainStatement):
             ret_kw = "𒋼" if is_tablet else "retain"
             when_kw = "𒂊𒀀" if is_tablet else "when"
             cond_str = self._format_expression(stmt.condition, is_tablet)
-            return f"{pad}{ret_kw} {stmt.candidate} {when_kw} {cond_str}"
+            return f"{pad}{ret_kw} {stmt.candidate}\n{pad}    {when_kw} {cond_str}"
 
         elif isinstance(stmt, DomainRepetition):
             rep_kw = "𒄀" if is_tablet else "consider"
             from_kw = "𒋫 " if is_tablet else "from "
-            to_kw = "𒌗" if is_tablet else "through"
+            to_kw = "𒂗" if is_tablet else "through"
             start_str = f"{from_kw}{self._format_expression(stmt.start, is_tablet)} {to_kw} " if stmt.start else ""
             end_str = self._format_expression(stmt.end, is_tablet)
             res = [f"{pad}{rep_kw} {stmt.target} {start_str}{end_str}:"]
@@ -146,7 +169,7 @@ class Formatter:
 
         elif isinstance(stmt, Repetition):
             rep_kw = "𒄀" if is_tablet else "repeat"
-            to_kw = "𒌗" if is_tablet else "to"
+            to_kw = "𒂗" if is_tablet else "through"
             start_str = f"{self._format_expression(stmt.start, is_tablet)} {to_kw} " if stmt.start else ""
             end_str = self._format_expression(stmt.end, is_tablet)
             res = [f"{pad}{rep_kw} {stmt.target} {start_str}{end_str}:"]
@@ -155,9 +178,9 @@ class Formatter:
             return "\n".join(res)
 
         elif isinstance(stmt, ReturnStatement):
-            ret_kw = "𒄑" if is_tablet else "return"
+            ret_kw = "𒉆" if is_tablet else "determine"
             vals_str = ", ".join(self._format_expression(v, is_tablet) for v in stmt.values)
-            return f"{pad}{ret_kw} {vals_str}"
+            return f"{pad}{ret_kw} {vals_str}" if vals_str else f"{pad}{ret_kw}"
 
         elif isinstance(stmt, OutputStatement):
             out_kw = "𒁹𒀀" if is_tablet else "output"
@@ -235,6 +258,10 @@ class Formatter:
         elif isinstance(expr, CallExpr):
             args_str = ", ".join(self._format_expression(a, is_tablet) for a in expr.arguments)
             return f"{expr.callee}({args_str})"
+
+        elif isinstance(expr, ApplyRecipe):
+            ak_kw = "𒀝" if is_tablet else "apply"
+            return f"{ak_kw} {expr.recipe}"
 
         elif isinstance(expr, UnaryOp):
             if expr.op in ("not", "nu", "𒉡"):

@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
 from dubsar.ast import (
+    ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
@@ -261,6 +262,9 @@ def lower_expression_to_sem_ir(expr: Expression) -> VerbExpr:
     elif isinstance(expr, CallExpr):
         arg_irs = [lower_expression_to_sem_ir(a) for a in expr.arguments]
         return ApplyMathVerb(verb="INVOKE", operands=arg_irs, callee=expr.callee, line=expr.line, col=expr.col)
+    elif isinstance(expr, ApplyRecipe):
+        arg_irs = [lower_expression_to_sem_ir(a) for a in expr.arguments]
+        return ApplyMathVerb(verb="INVOKE", operands=arg_irs, callee=expr.recipe, line=expr.line, col=expr.col)
     elif isinstance(expr, TupleExpr):
         el_irs = [lower_expression_to_sem_ir(e) for e in expr.elements]
         return TuplePack(elements=el_irs, line=expr.line, col=expr.col)

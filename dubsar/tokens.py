@@ -141,11 +141,15 @@ CUNEIFORM_KEYWORDS: Dict[str, TokenType] = {
     "𒊓": TokenType.EQUAL,
     "𒈨": TokenType.IS,
     "𒋗": TokenType.TAKE,
+    "ナム": TokenType.DETERMINE,
     "𒉆": TokenType.DETERMINE,
     "𒄥": TokenType.FLOOR,
     "гур": TokenType.FLOOR,
     "𒉏": TokenType.CEIL,
     "𒊑": TokenType.NEAREST,
+    "𒀝": TokenType.APPLY,
+    "𒆕": TokenType.APPLY,
+    "𒂗": TokenType.THROUGH,
 }
 
 # Scholar / Transliteration keyword mappings (§2.2, §4, §6, §60)
@@ -168,6 +172,7 @@ SCHOLAR_KEYWORDS: Dict[str, TokenType] = {
     "through": TokenType.THROUGH,
     "to": TokenType.THROUGH,
     "..": TokenType.THROUGH,
+    "en": TokenType.THROUGH,
     "iti": TokenType.THROUGH,
     "retain": TokenType.RETAIN,
     "keep": TokenType.RETAIN,
@@ -205,7 +210,11 @@ SCHOLAR_KEYWORDS: Dict[str, TokenType] = {
     "of": TokenType.OF,
     "take": TokenType.TAKE,
     "determine": TokenType.DETERMINE,
+    "nam": TokenType.DETERMINE,
     "apply": TokenType.APPLY,
+    "ak": TokenType.APPLY,
+    "du": TokenType.APPLY,
+    "dù": TokenType.APPLY,
     "add": TokenType.PLUS,
     "zi": TokenType.PLUS,
     "subtract": TokenType.MINUS,
@@ -261,6 +270,9 @@ TOKEN_TO_CUNEIFORM: Dict[TokenType, str] = {
     TokenType.ABSOLUTE: "𒋼",
     TokenType.TAKE: "𒋗",
     TokenType.DETERMINE: "𒉆",
+    TokenType.APPLY: "𒀝",
+    TokenType.OF: "𒊭",
+    TokenType.FROM: "𒋫",
 }
 
 TOKEN_TO_SCHOLAR: Dict[TokenType, str] = {

@@ -118,6 +118,13 @@ class IsExpr(Expression):
     predicate: str = "empty"
 
 
+@dataclass
+class ApplyRecipe(Expression):
+    """Apply a mathematical recipe: [operands...] apply recipe_name."""
+    recipe: str = ""
+    arguments: List[Expression] = field(default_factory=list)
+
+
 # ==============================================================================
 # Statements / Prescriptions
 # ==============================================================================
@@ -239,3 +246,26 @@ class Program(ASTNode):
     problem: ProblemSection = field(default_factory=ProblemSection)
     procedures: List[Procedure] = field(default_factory=list)
     result: ResultSection = field(default_factory=ResultSection)
+
+
+# ==============================================================================
+# Section 37 — Mathematical AST Aliases & Concepts
+# ==============================================================================
+Tablet = Program
+Problem = ProblemSection
+Result = ResultSection
+Recipe = Procedure
+Establish = Declaration
+Reference = Identifier
+Literal = Expression
+QuantityLiteral = NumberLiteral
+PostfixExpression = PostfixExpr
+BinaryOperation = BinaryOp
+UnaryOperation = UnaryOp
+Domain = DomainRepetition
+Consider = DomainRepetition
+Comparison = CompareExpr
+Retain = RetainStatement
+Inscription = OutputStatement
+Input = InputExpr
+Determine = ReturnStatement

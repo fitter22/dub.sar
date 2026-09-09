@@ -151,6 +151,7 @@ class Compiler:
 
     def __init__(self) -> None:
         self.current_chunk: Optional[BytecodeChunk] = None
+        self.proc_param_counts: Dict[str, int] = {}
 
     def compile(self, program: Union[Program, SemanticProgram]) -> CompiledTablet:
         if isinstance(program, Program):
@@ -161,6 +162,7 @@ class Compiler:
         return self.compile_semantic_program(sem_prog)
 
     def compile_semantic_program(self, sem_prog: SemanticProgram) -> CompiledTablet:
+        self.proc_param_counts = {proc.name: len(proc.parameters) for proc in sem_prog.procedures}
         # 1. Compile procedures
         procedures: Dict[str, BytecodeChunk] = {}
         for proc in sem_prog.procedures:
@@ -308,9 +310,17 @@ class Compiler:
                     self._compile_verb_expr(expr.operands[0])
                     chunk.emit(OpCode.ABS, None, expr.line)
                 else:
-                    for op_arg in expr.operands:
-                        self._compile_verb_expr(op_arg)
-                    chunk.emit(OpCode.CALL, (callee, len(expr.operands)), expr.line)
+                    argc = len(expr.operands)
+                    if argc > 0:
+                        for op_arg in expr.operands:
+                            self._compile_verb_expr(op_arg)
+                    else:
+                        if callee in BUILTINS:
+                            import inspect
+                            argc = len(inspect.signature(BUILTINS[callee]).parameters)
+                        else:
+                            argc = self.proc_param_counts.get(callee, 0)
+                    chunk.emit(OpCode.CALL, (callee, argc), expr.line)
             elif expr.verb == "NEGATE":
                 self._compile_verb_expr(expr.operands[0])
                 chunk.emit(OpCode.NEG, None, expr.line)

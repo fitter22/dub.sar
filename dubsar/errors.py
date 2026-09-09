@@ -82,15 +82,33 @@ class DubSarTypeError(DubSarError):
     pass
 
 
-# Export standard names matching Section 19
+class DubSarDomainError(DubSarError):
+    """Invalid finite mathematical domain."""
+    pass
+
+
+class DubSarRecipeError(DubSarError):
+    """Recipe definition, invocation, or determination error."""
+    pass
+
+
+class DubSarDeterminationError(DubSarError):
+    """Invalid determination record, field access, or retention error."""
+    pass
+
+
+# Export standard names matching Section 19 & Section 59
 SyntaxError = DubSarSyntaxError
 NameError = DubSarNameError
 UnitError = DubSarUnitError
 TypeError = DubSarTypeError
 DivisionByZero = DubSarDivisionByZero
 RangeError = DubSarRangeError
+DomainError = DubSarDomainError
 InputError = DubSarInputError
 ReturnError = DubSarReturnError
+RecipeError = DubSarRecipeError
+DeterminationError = DubSarDeterminationError
 
 __all__ = [
     "DubSarError",
@@ -100,14 +118,20 @@ __all__ = [
     "DubSarTypeError",
     "DubSarDivisionByZero",
     "DubSarRangeError",
+    "DubSarDomainError",
     "DubSarInputError",
     "DubSarReturnError",
+    "DubSarRecipeError",
+    "DubSarDeterminationError",
     "SyntaxError",
     "NameError",
     "UnitError",
     "TypeError",
     "DivisionByZero",
     "RangeError",
+    "DomainError",
     "InputError",
     "ReturnError",
+    "RecipeError",
+    "DeterminationError",
 ]

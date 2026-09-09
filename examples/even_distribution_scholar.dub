@@ -1,27 +1,64 @@
 # DUB.SAR 1.0 — Even Distribution of Leap Years
-# As specified in Section 27 of DUB.SAR 1.0 Language Specification
+# Deterministic distribution of leap days over a calendar cycle
 
 problem
 
-    acc : 0
     cycle : 4
     leaps : 1
 
-    acc, y1 := next-leap(acc, cycle, leaps)
-    acc, y2 := next-leap(acc, cycle, leaps)
-    acc, y3 := next-leap(acc, cycle, leaps)
-    acc, y4 := next-leap(acc, cycle, leaps)
+    y1 :
+        1
+        cycle
+        leaps
+        apply leap-for-year
 
-procedure next-leap(accumulator, cycle, leaps):
+    y2 :
+        2
+        cycle
+        leaps
+        apply leap-for-year
 
-    new-accumulator := accumulator + leaps
+    y3 :
+        3
+        cycle
+        leaps
+        apply leap-for-year
 
-    if new-accumulator >= cycle:
+    y4 :
+        4
+        cycle
+        leaps
+        apply leap-for-year
 
-        new-accumulator := new-accumulator - cycle
-        return new-accumulator, 1
+recipe leap-for-year year cycle leaps:
 
-    return new-accumulator, 0
+    prev-year :
+        year
+        1
+        -
+
+    cur-count :
+        year
+        leaps
+        *
+        cycle
+        /
+        floor
+
+    prev-count :
+        prev-year
+        leaps
+        *
+        cycle
+        /
+        floor
+
+    is-leap :
+        cur-count
+        prev-count
+        -
+
+    determine is-leap
 
 result
 

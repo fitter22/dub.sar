@@ -5,20 +5,36 @@ problem
 
     initial-estimate : 1;30
     steps : 3
-    approx := babylonian-sqrt(initial-estimate, steps)
     target-diagonal : 30
-    diagonal := target-diagonal * approx
 
-procedure babylonian-sqrt(start, iterations):
+    approx :
+        initial-estimate
+        steps
+        apply babylonian-sqrt
 
-    x := start
+    diagonal :
+        target-diagonal
+        approx
+        multiply
+
+recipe babylonian-sqrt start iterations:
+
+    x : start
     two : 2
     half : 0;30
 
-    repeat step 1 to iterations:
-        x := (x + two / x) * half
+    consider step from 1 through iterations:
+        next-x :
+            x
+            two
+            x
+            divide
+            add
+            half
+            multiply
+        x : next-x
 
-    return x
+    determine x
 
 result
 

@@ -19,11 +19,11 @@ class TestNormalizer(unittest.TestCase):
     𒁹𒀀 cycle
 """
         scholar_src = transliterate(cun_src)
-        self.assertIn("PROBLEM", scholar_src)
+        self.assertTrue("problem" in scholar_src.lower())
         self.assertIn("day", scholar_src)
         self.assertTrue("when" in scholar_src or "if" in scholar_src)
         self.assertIn("return", scholar_src)
-        self.assertIn("RESULT", scholar_src)
+        self.assertTrue("result" in scholar_src.lower())
         self.assertIn("output", scholar_src)
 
         # Ensure transliterated source is valid and parses

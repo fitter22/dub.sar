@@ -455,7 +455,7 @@ class WasmCompiler:
             for step in expr.steps:
                 if isinstance(step, str):
                     op = step.lower()
-                    if op in ("floor", "gur", "гур"):
+                    if op in ("floor", "gur", "𒄥", "гур"):
                         lines.append(f"{pad}(call $rat_floor)")
                     elif op in ("ceil", "nim", "𒉏"):
                         lines.append(f"{pad}(call $rat_ceil)")

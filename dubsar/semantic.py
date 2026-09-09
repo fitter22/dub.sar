@@ -17,6 +17,7 @@ from dubsar.ast import (
     Assignment,
     BinaryOp,
     CallExpr,
+    ApplyRecipe,
     CompareExpr,
     Conditional,
     Declaration,
@@ -342,18 +343,20 @@ class SemanticAnalyzer:
             return None
 
         elif isinstance(expr, Identifier):
+            if self.current_scope.is_defined(expr.name):
+                return self.current_scope.get_unit(expr.name)
+
             if expr.name in UNIT_TABLE:
                 return lookup_unit(expr.name)
 
-            if not self.current_scope.is_defined(expr.name):
-                if expr.name not in BUILTINS:
-                    raise DubSarNameError(
-                        f"Undefined quantity or variable: '{expr.name}'",
-                        line=expr.line,
-                        col=expr.col,
-                        source_file=self.source_file,
-                    )
-            return self.current_scope.get_unit(expr.name)
+            if expr.name not in BUILTINS:
+                raise DubSarNameError(
+                    f"Undefined quantity or variable: '{expr.name}'",
+                    line=expr.line,
+                    col=expr.col,
+                    source_file=self.source_file,
+                )
+            return None
 
         elif isinstance(expr, CallExpr):
             if expr.callee not in self.procedures and expr.callee not in BUILTINS:
@@ -489,13 +492,72 @@ class SemanticAnalyzer:
             return None
 
         elif isinstance(expr, PostfixExpr):
-            last_u = None
+            unit_stack: List[Optional[Unit]] = []
             for step in expr.steps:
                 if isinstance(step, Expression):
                     u = self._analyze_expression(step)
-                    if u is not None:
-                        last_u = u
-            return last_u
+                    unit_stack.append(u)
+                elif isinstance(step, ApplyRecipe):
+                    if step.recipe not in self.procedures and step.recipe not in BUILTINS:
+                        raise DubSarNameError(
+                            f"Undefined recipe: '{step.recipe}'",
+                            line=step.line,
+                            col=step.col,
+                            source_file=self.source_file,
+                        )
+                    if step.recipe in self.procedures:
+                        argc = len(self.procedures[step.recipe].parameters)
+                    elif step.recipe in BUILTINS:
+                        import inspect
+                        argc = len(inspect.signature(BUILTINS[step.recipe]).parameters)
+                    else:
+                        argc = 0
+                    for _ in range(min(argc, len(unit_stack))):
+                        unit_stack.pop()
+                    unit_stack.append(None)
+                elif isinstance(step, str):
+                    if step in ("+", "-", "zi", "ta", "𒍣", "𒋫", "add", "subtract"):
+                        right_u = unit_stack.pop() if unit_stack else None
+                        left_u = unit_stack.pop() if unit_stack else None
+                        if left_u is not None and right_u is not None:
+                            if not left_u.is_compatible_with(right_u):
+                                raise DubSarUnitError(
+                                    f"Cannot perform '{step}' between incompatible units: '{left_u}' and '{right_u}'",
+                                    line=expr.line,
+                                    col=expr.col,
+                                    source_file=self.source_file,
+                                )
+                            unit_stack.append(left_u)
+                        else:
+                            unit_stack.append(left_u or right_u)
+                    elif step in ("*", "ša", "sha", "𒊭", "multiply"):
+                        right_u = unit_stack.pop() if unit_stack else None
+                        left_u = unit_stack.pop() if unit_stack else None
+                        if left_u is not None and right_u is not None:
+                            unit_stack.append(left_u * right_u)
+                        else:
+                            unit_stack.append(None)
+                    elif step in ("/", "ni", "𒉌", "divide"):
+                        right_u = unit_stack.pop() if unit_stack else None
+                        left_u = unit_stack.pop() if unit_stack else None
+                        if left_u is not None and right_u is not None:
+                            unit_stack.append(left_u / right_u)
+                        else:
+                            unit_stack.append(None)
+                    elif step in ("floor", "ceil", "nearest", "absolute", "abs", "gur", "nim", "ri", "te", "𒄥", "𒉏", "𒊑", "𒋼"):
+                        pass
+                    elif step in ("<", "<=", ">", ">=", "==", "!=", "lesser", "greater", "equal", "not-equal"):
+                        right_u = unit_stack.pop() if unit_stack else None
+                        left_u = unit_stack.pop() if unit_stack else None
+                        if left_u is not None and right_u is not None and not left_u.is_compatible_with(right_u):
+                            raise DubSarUnitError(
+                                f"Cannot compare incompatible units: '{left_u}' and '{right_u}'",
+                                line=expr.line,
+                                col=expr.col,
+                                source_file=self.source_file,
+                            )
+                        unit_stack.append(DIMENSIONLESS)
+            return unit_stack[-1] if unit_stack else None
 
         elif isinstance(expr, CompareExpr):
             self._analyze_expression(expr.left)

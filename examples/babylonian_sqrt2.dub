@@ -5,20 +5,36 @@
 
     initial-estimate : 1;30
     steps : 3
-    approx := babylonian-sqrt(initial-estimate, steps)
     target-diagonal : 30
-    diagonal := target-diagonal * approx
 
-𒁾𒊬 babylonian-sqrt(start, iterations):
+    approx :
+        initial-estimate
+        steps
+        𒀝 babylonian-sqrt
 
-    x := start
+    diagonal :
+        target-diagonal
+        approx
+        𒊭
+
+𒁾𒊬 babylonian-sqrt start iterations:
+
+    x : start
     two : 2
     half : 0;30
 
-    𒄀 step 1 𒌗 iterations:
-        x := (x + two / x) * half
+    𒄀 step 𒋫 1 𒂗 iterations:
+        next-x :
+            x
+            two
+            x
+            𒉌
+            𒍣
+            half
+            𒊭
+        x : next-x
 
-    𒄑 x
+    𒉆 x
 
 𒅗𒁹
 

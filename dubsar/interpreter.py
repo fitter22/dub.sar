@@ -14,6 +14,7 @@ import sys
 from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
 
 from dubsar.ast import (
+    ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
@@ -171,7 +172,7 @@ class Interpreter:
                     val = Quantity(val, u)
             elif not isinstance(val, (Quantity, str, EmptySentinel, DeterminationValue)):
                 val = Quantity(val, DIMENSIONLESS)
-            self.current_env.set(stmt.name, val)
+            self.current_env.update(stmt.name, val)
 
         elif isinstance(stmt, Determination):
             vals = {}
@@ -395,7 +396,7 @@ class Interpreter:
             for step in expr.steps:
                 if isinstance(step, str):
                     op = step.lower()
-                    if op in ("floor", "gur", "гур"):
+                    if op in ("floor", "gur", "𒄥", "гур"):
                         v = to_quantity(stack.pop())
                         stack.append(v.floor())
                     elif op in ("ceil", "nim", "𒉏"):
@@ -445,6 +446,25 @@ class Interpreter:
                         stack.append(a == b)
                     else:
                         raise DubSarSyntaxError(f"Unknown postfix operation: {op}")
+                elif isinstance(step, ApplyRecipe):
+                    rec_name = step.recipe
+                    if rec_name in self.procedures:
+                        proc = self.procedures[rec_name]
+                        num_params = len(proc.parameters)
+                        args = [stack.pop() for _ in range(num_params)]
+                        args.reverse()
+                        res = self._call_procedure(proc, args)
+                        stack.append(res)
+                    elif rec_name in BUILTINS:
+                        func = BUILTINS[rec_name]
+                        import inspect
+                        sig = inspect.signature(func)
+                        num_params = len(sig.parameters)
+                        args = [stack.pop() for _ in range(num_params)]
+                        args.reverse()
+                        stack.append(func(*args))
+                    else:
+                        raise DubSarNameError(f"Undefined recipe: '{rec_name}'", line=step.line, col=step.col)
                 elif isinstance(step, Expression):
                     stack.append(self._eval_expression(step))
                 else:
@@ -484,6 +504,10 @@ class Interpreter:
 
         elif isinstance(expr, TupleExpr):
             return [self._eval_expression(e) for e in expr.elements]
+
+        elif isinstance(expr, ApplyRecipe):
+            call_expr = CallExpr(callee=expr.recipe, arguments=expr.arguments, line=expr.line, col=expr.col)
+            return self._eval_call(call_expr)
 
         raise DubSarSyntaxError(f"Cannot evaluate expression: {expr}", line=expr.line, col=expr.col)
 
@@ -525,42 +549,42 @@ class Interpreter:
         # Check declared procedures
         if call.callee in self.procedures:
             proc = self.procedures[call.callee]
-            if len(call.arguments) != len(proc.parameters):
-                raise DubSarReturnError(
-                    f"Procedure '{proc.name}' takes {len(proc.parameters)} arguments, got {len(call.arguments)}",
-                    line=call.line,
-                    col=call.col,
-                    source_file=self.source_file,
-                )
-
-            # Evaluate argument expressions in current scope
             evaled_args = [self._eval_expression(a) for a in call.arguments]
+            return self._call_procedure(proc, evaled_args)
 
-            # Bind to new procedure environment
-            proc_env = Environment(parent=self.global_env, name=f"proc:{proc.name}")
-            for param_name, arg_val in zip(proc.parameters, evaled_args):
-                proc_env.set(param_name, arg_val)
+    def _call_procedure(self, proc: Procedure, evaled_args: List[Any]) -> Any:
+        if len(evaled_args) != len(proc.parameters):
+            raise DubSarReturnError(
+                f"Procedure '{proc.name}' takes {len(proc.parameters)} arguments, got {len(evaled_args)}",
+                line=proc.line,
+                col=proc.col,
+                source_file=self.source_file,
+            )
 
-            old_env = self.current_env
-            self.current_env = proc_env
+        # Bind to new procedure environment
+        proc_env = Environment(parent=self.global_env, name=f"proc:{proc.name}")
+        for param_name, arg_val in zip(proc.parameters, evaled_args):
+            proc_env.set(param_name, arg_val)
 
-            try:
-                for stmt in proc.body:
-                    self._exec_statement(stmt)
-                # If execution falls through without returning
-                raise DubSarReturnError(
-                    f"Procedure '{proc.name}' reached end without returning a result",
-                    line=proc.line,
-                    col=proc.col,
-                    source_file=self.source_file,
-                )
-            except ReturnSignal as ret:
-                ret_vals = ret.values
-                if len(ret_vals) == 1:
-                    return ret_vals[0]
-                return ret_vals
-            finally:
-                self.current_env = old_env
+        old_env = self.current_env
+        self.current_env = proc_env
+
+        try:
+            for stmt in proc.body:
+                self._exec_statement(stmt)
+            raise DubSarReturnError(
+                f"Procedure '{proc.name}' reached end without returning a result",
+                line=proc.line,
+                col=proc.col,
+                source_file=self.source_file,
+            )
+        except ReturnSignal as ret:
+            ret_vals = ret.values
+            if len(ret_vals) == 1:
+                return ret_vals[0]
+            return ret_vals
+        finally:
+            self.current_env = old_env
 
         raise DubSarNameError(
             f"Call to undefined procedure: '{call.callee}'",

@@ -350,7 +350,9 @@ class VirtualMachine:
                         self.outputs.append(line)
                         self.output_fn(line)
                 else:
-                    if isinstance(val, str):
+                    if isinstance(val, bool):
+                        out_str = "1" if val else "0"
+                    elif isinstance(val, str):
                         out_str = val
                     elif isinstance(val, Quantity):
                         out_str = val.format(format_mode=self.format_mode)

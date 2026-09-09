@@ -60,7 +60,9 @@ Cuneiform and transliterated tokens may be mixed:
 𒂊𒁹
 
     𒈬 : 365;14,31,55 𒌓
-    best-cycle := nearest(100)
+    best-cycle :
+        100
+        nearest
 ```
 
 All three modes MUST normalize to the same token stream and AST when semantically equivalent.
@@ -166,14 +168,13 @@ There is no class/object system in 1.0.
 The normative grammar is:
 
 ```ebnf
-tablet           ::= problem-section procedure-section* result-section ;
+tablet           ::= problem-section recipe-section* result-section ;
 
 problem-section  ::= ("𒂊𒁹" | "problem" | "given") block ;
 result-section   ::= ("𒅗𒁹" | "result") block ;
-procedure-section ::= procedure ;
+recipe-section   ::= recipe ;
 
-procedure        ::= ("𒁾𒊬" | "recipe" | "procedure") identifier "(" parameters? ")" ":" block ;
-parameters       ::= parameter ("," parameter)* ;
+recipe           ::= ("𒁾𒊬" | "recipe" | "procedure") identifier parameter* ":" block ;
 parameter        ::= identifier ;
 
 block            ::= NEWLINE INDENT statement+ DEDENT ;
@@ -181,9 +182,8 @@ block            ::= NEWLINE INDENT statement+ DEDENT ;
 statement        ::= declaration
                    | determination
                    | retain-statement
-                   | assignment
-                   | conditional
                    | repetition
+                   | determine-statement
                    | return-statement
                    | output-statement
                    | expression-statement
@@ -193,37 +193,36 @@ declaration      ::= identifier ":" expression unit?
                    | identifier ":" NEWLINE INDENT postfix-step+ DEDENT
                    | identifier ":" ("𒉡" | "empty") ;
 
-determination    ::= identifier ":" identifier ("," identifier)+ ;
+determination    ::= identifier ":" identifier ("," identifier)+
+                   | identifier ":" NEWLINE INDENT identifier+ DEDENT ;
 
-retain-statement ::= ("𒋼" | "retain") identifier (("𒂊𒀀" | "when") expression)? ;
-
-assignment       ::= identifier ":=" expression
-                   | identifier ("," identifier)+ ":=" expression-list ;
-expression-list  ::= expression ("," expression)+ ;
+retain-statement ::= ("𒋼" | "retain") identifier (NEWLINE INDENT)? (("𒂊𒀀" | "when") expression)? ;
 
 conditional      ::= ("𒂊𒀀" | "when" | "if") expression ":" block alternative? ;
 alternative      ::= ("𒉡𒂊𒀀" | "else") ":" block ;
 
 repetition       ::= ("𒄀" | "consider" | "repeat") identifier range ":" block ;
-range            ::= (("𒋫" | "from")? expression)? ("𒌗" | "through" | "to" | "..") expression
+range            ::= (("𒋫" | "from")? expression)? ("𒂗" | "through" | "to" | "..") expression
                    | expression ;
 
+determine-statement ::= ("𒉆" | "nam" | "determine") expression ;
 return-statement ::= ("𒄑" | "return") expression ("," expression)* ;
 output-statement ::= ("𒁹𒀀" | "output" | "inscribe") expression ;
 input-expression ::= ("𒀀𒁹" | "ask" | "input") ("(" string ")" | string) ;
 
 expression       ::= comparison ;
 comparison       ::= sum (comparison-op sum)*
-                   | sum "is" ("lesser" | "greater" | "equal") "than" sum
+                   | sum "is" ("lesser" | "greater" | "equal") ("than")? sum
                    | sum "is" ("empty" | "not" "empty") ;
 comparison-op    ::= "==" | "!=" | "<" | "<=" | ">" | ">=" | "𒌉" | "𒃲" | "𒊓" ;
 
-sum              ::= product (("+"|"-"|"𒍣"|"𒋫") product)* ;
-product          ::= power (("*"|"/"|"%"|"𒊭"|"𒉌") power)* ;
+sum              ::= product (("+"|"-"|"𒍣"|"𒋫"|"add"|"subtract") product)* ;
+product          ::= power (("*"|"/"|"%"|"𒊭"|"𒉌"|"multiply"|"divide") power)* ;
 power            ::= unary ("**" unary)? ;
 unary            ::= ("-" | "𒉡" | "not")? primary ;
 
-postfix-step     ::= primary | postfix-op ;
+postfix-step     ::= primary | postfix-op | apply-recipe ;
+apply-recipe     ::= ("𒀝" | "apply") identifier ;
 postfix-op       ::= "floor" | "ceil" | "nearest" | "absolute"
                    | "add" | "subtract" | "multiply" | "divide"
                    | "𒄥" | "𒉏" | "𒊑" | "𒋼" | "𒍣" | "𒋫" | "𒊭" | "𒉌" ;
@@ -238,7 +237,7 @@ primary          ::= number quantity-unit?
                    | "(" expression ")" ;
 
 field-access     ::= primary "." identifier
-                   | identifier "of" primary ;
+                   | identifier ("of" | "𒊭") primary ;
 
 quantity-unit    ::= unit ;
 unit             ::= identifier | cuneiform-unit ;
@@ -339,12 +338,15 @@ error of best
 ```
 
 ### 7.5 Derived quantities
-
+ 
 ```text
-fraction := 𒈬 - 365 𒌓
+fraction :
+    solar-year
+    whole-days
+    subtract
 ```
 
-uses `:=` to establish a derived quantity.
+uses `:` to establish a derived quantity via mathematical prescription.
 
 A name established in a procedure is local to that procedure.
 
@@ -531,14 +533,14 @@ Native form:
 
 ```text
 𒂊𒀀 error < best:
-    best := error
+    best : error
 ```
 
 Scholar/ASCII alias:
 
 ```text
-if error < best:
-    best := error
+when error < best:
+    best : error
 ```
 
 Alternative branch:
@@ -630,26 +632,38 @@ A procedure is a reusable mathematical recipe.
 Canonical form:
 
 ```text
-𒁾𒊬 leap-rule(solar, limit):
+𒁾𒊬 leap-rule solar limit:
     ...
-    𒄑 result
+    𒉆 result
 ```
 
-A procedure may return one or more values. Multiple values form a finite **tablet-result tuple**.
-
-Return syntax:
+In Scholar Mode:
 
 ```text
-𒄑 a, b, c
+recipe leap-rule solar limit:
+    ...
+    determine result
 ```
 
-Call syntax:
+A recipe produces a quantity or determination result.
+
+Recipe application uses postfix notation:
 
 ```text
-a, b, c := leap-rule(solar, 1000)
+res :
+    solar
+    1000
+    𒀝 leap-rule
 ```
 
-All returned elements MUST be explicit and ordered.
+or in Scholar Mode:
+
+```text
+res :
+    solar
+    1000
+    apply leap-rule
+```
 
 ---
 
@@ -768,12 +782,6 @@ Prompted input establishes a quantity:
 solar-year : 𒀀𒁹 "solar year in days"
 ```
 
-or parenthesized:
-
-```text
-𒈬 := 𒀀𒁹("solar year in days")
-```
-
 Scholar Mode:
 
 ```text
@@ -855,7 +863,12 @@ DUB.SAR's natural IR is **stack-oriented**, because the source language is desig
 Example source:
 
 ```text
-candidate := whole + leaps / cycle
+candidate-year :
+    whole
+    leaps
+    cycle
+    divide
+    add
 ```
 
 may lower to:
@@ -866,7 +879,7 @@ LOAD leaps
 LOAD cycle
 DIV
 ADD
-STORE candidate
+STORE candidate-year
 ```
 
 A semantic IR node retains both value and unit information.
@@ -1151,19 +1164,38 @@ A cycle `(C,L)` specifies the average year but not which years receive an extra 
 DUB.SAR 1.0 therefore recommends the following exact accumulator procedure:
 
 ```text
-𒁾𒊬 next-leap(accumulator, cycle, leaps):
+𒁾𒊬 leap-for-year year cycle leaps:
 
-    new-accumulator := accumulator + leaps
+    prev-year :
+        year
+        1
+        -
 
-    𒂊𒀀 new-accumulator >= cycle:
+    cur-count :
+        year
+        leaps
+        *
+        cycle
+        /
+        𒄥
 
-        new-accumulator := new-accumulator - cycle
-        𒄑 new-accumulator, 1
+    prev-count :
+        prev-year
+        leaps
+        *
+        cycle
+        /
+        𒄥
 
-    𒄑 new-accumulator, 0
+    is-leap :
+        cur-count
+        prev-count
+        -
+
+    𒉆 is-leap
 ```
 
-A caller can invoke this once per calendar year. This distributes leap days as evenly as possible over the cycle.
+A caller can invoke this for every year in a cycle. This distributes leap days with mathematical uniformity over the cycle without imperative state mutations.
 
 ---
 
@@ -1253,14 +1285,14 @@ Examples:
 
 Examples:
 
-- `:=`;
-- indentation-sensitive blocks;
-- procedures with tuple returns;
-- compiler IR;
-- arbitrary-precision runtime representation;
-- module system and CLI.
+- compiler grammar and mathematical AST;
+- `retain` and atomic selection;
+- high-level Semantic IR;
+- stack bytecode VM and WebAssembly backend;
+- arbitrary-precision rational runtime representation;
+- command-line interface, automated formatter, and SVG renderer.
 
-A DUB.SAR implementation or manual MUST never present category-C syntax as evidence about ancient Sumerian programming.
+A DUB.SAR implementation or manual MUST never present category-C syntax as evidence about ancient Sumerian programming. Never say "ancient Sumerians used `𒍣` as a programming addition operator." Say instead: "DUB.SAR assigns this sign the programming semantic `ADD`, inspired by its lexical and historical associations."
 
 ---
 

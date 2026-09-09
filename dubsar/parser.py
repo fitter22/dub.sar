@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any, List, Optional, Set
 
 from dubsar.ast import (
+    ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
@@ -239,8 +240,12 @@ class Parser:
         if self._check(TokenType.REPEAT):
             return self._parse_repetition()
 
-        # Return: 𒄑 / return
-        if self._check(TokenType.RETURN):
+        # Return / Determine: 𒄑 / return / determine / nam / 𒉆
+        if (
+            self._check(TokenType.RETURN)
+            or self._check(TokenType.DETERMINE)
+            or self.current.raw in ("return", "determine", "nam", "𒉆", "ges", "ĝeš", "𒄑")
+        ):
             return self._parse_return()
 
         # Output / Inscribe: 𒁹𒀀 / inscribe / output
@@ -277,14 +282,14 @@ class Parser:
                     return self._parse_assignment()
 
         # Anonymous stack calculation / expression statement
-        # Check if line contains a postfix sequence (e.g. 1 2 add)
-        line_toks = self._peek_line_tokens()
-        if len(line_toks) > 1 and any(self._is_op_token(t) for t in line_toks):
-            # Consume tokens on line
-            for _ in range(len(line_toks)):
-                self._advance()
-            self._match(TokenType.NEWLINE)
-            steps = self._parse_postfix_steps([line_toks])
+        anon_lines = self._peek_anonymous_postfix_lines()
+        if anon_lines:
+            for line_toks in anon_lines:
+                for _ in range(len(line_toks)):
+                    self._advance()
+                self._match(TokenType.NEWLINE)
+                self._skip_newlines()
+            steps = self._parse_postfix_steps(anon_lines)
             return ExpressionStatement(
                 expr=PostfixExpr(steps=steps, line=tok.line, col=tok.col),
                 line=tok.line,
@@ -298,6 +303,80 @@ class Parser:
 
         self._match(TokenType.NEWLINE)
         return ExpressionStatement(expr=expr, line=expr.line, col=expr.col)
+
+    def _peek_anonymous_postfix_lines(self) -> List[List[Token]]:
+        """Peeks ahead to see if the current line(s) form an anonymous postfix calculation."""
+        t0 = self._peek(0)
+        if t0.type in (
+            TokenType.PROBLEM, TokenType.RECIPE, TokenType.RESULT,
+            TokenType.CONSIDER, TokenType.RETAIN, TokenType.WHEN,
+            TokenType.REPEAT, TokenType.RETURN, TokenType.DETERMINE,
+            TokenType.INSCRIBE, TokenType.ASK, TokenType.DEDENT, TokenType.EOF,
+        ):
+            return []
+        t1 = self._peek(1)
+        if t0.type == TokenType.IDENTIFIER and t1.type in (TokenType.COLON, TokenType.ASSIGN):
+            return []
+
+        lines: List[List[Token]] = []
+        j = 0
+        while True:
+            cur_line: List[Token] = []
+            while True:
+                t = self._peek(j)
+                if t.type in (TokenType.NEWLINE, TokenType.DEDENT, TokenType.EOF):
+                    break
+                cur_line.append(t)
+                j += 1
+            if cur_line:
+                first_t = cur_line[0]
+                if lines and (
+                    first_t.type in (
+                        TokenType.PROBLEM, TokenType.RECIPE, TokenType.RESULT,
+                        TokenType.CONSIDER, TokenType.RETAIN, TokenType.WHEN,
+                        TokenType.REPEAT, TokenType.RETURN, TokenType.DETERMINE,
+                        TokenType.INSCRIBE, TokenType.ASK
+                    )
+                    or (len(cur_line) > 1 and cur_line[1].type in (TokenType.COLON, TokenType.ASSIGN))
+                ):
+                    break
+                lines.append(cur_line)
+
+            while self._peek(j).type == TokenType.NEWLINE:
+                j += 1
+            next_t = self._peek(j)
+            if next_t.type in (TokenType.DEDENT, TokenType.EOF):
+                break
+            if next_t.type in (
+                TokenType.PROBLEM, TokenType.RECIPE, TokenType.RESULT,
+                TokenType.CONSIDER, TokenType.RETAIN, TokenType.WHEN,
+                TokenType.REPEAT, TokenType.RETURN, TokenType.DETERMINE,
+                TokenType.INSCRIBE, TokenType.ASK
+            ) or (next_t.type == TokenType.IDENTIFIER and self._peek(j + 1).type in (TokenType.COLON, TokenType.ASSIGN)):
+                break
+
+            all_toks = [tok for l in lines for tok in l]
+            if any(self._is_op_token(tok) for tok in all_toks):
+                last_tok = all_toks[-1]
+                if self._is_op_token(last_tok) or (len(all_toks) >= 2 and (all_toks[-2].type == TokenType.APPLY or all_toks[-2].raw in ("apply", "ak", "du", "dù", "𒀝", "𒆕"))):
+                    break
+
+        all_toks = [tok for l in lines for tok in l]
+        if not all_toks:
+            return []
+        has_op = any(self._is_op_token(tok) for tok in all_toks) or any(
+            tok.type == TokenType.APPLY or tok.raw in ("apply", "ak", "du", "dù", "𒀝", "𒆕") for tok in all_toks
+        )
+        if not has_op:
+            return []
+
+        last_t = all_toks[-1]
+        ends_with_op = self._is_op_token(last_t)
+        ends_with_apply = len(all_toks) >= 2 and (all_toks[-2].type == TokenType.APPLY or all_toks[-2].raw in ("apply", "ak", "du", "dù", "𒀝", "𒆕"))
+        if ends_with_op or ends_with_apply:
+            return lines
+
+        return []
 
     def _peek_line_tokens(self) -> List[Token]:
         res: List[Token] = []
@@ -356,16 +435,43 @@ class Parser:
         tok = self._expect(TokenType.RETAIN, "Expected 'retain' or '𒋼'")
         candidate_tok = self._expect(TokenType.IDENTIFIER, "Expected candidate identifier")
 
+        # Allow newlines and indents before 'when'
+        indents = 0
+        while self._check(TokenType.NEWLINE):
+            self._advance()
+        while self._check(TokenType.INDENT):
+            self._advance()
+            indents += 1
+
         # Optional condition marker: 'when', 'if', 'e-a', '𒂊𒀀'
-        if self._check(TokenType.WHEN):
+        if self._check(TokenType.WHEN) or self.current.raw in ("when", "if", "e-a", "𒂊𒀀"):
             self._advance()
 
+        while self._check(TokenType.NEWLINE):
+            self._advance()
+        while self._check(TokenType.INDENT):
+            self._advance()
+            indents += 1
+
         cond_expr = self._parse_expression()
-        self._match(TokenType.NEWLINE)
+
+        while self._check(TokenType.NEWLINE):
+            self._advance()
+        while indents > 0 and self._check(TokenType.DEDENT):
+            self._advance()
+            indents -= 1
 
         target = "best"
-        if isinstance(cond_expr, CompareExpr) and isinstance(cond_expr.right, FieldAccess) and isinstance(cond_expr.right.record, Identifier):
-            target = cond_expr.right.record.name
+        if isinstance(cond_expr, CompareExpr):
+            if isinstance(cond_expr.right, FieldAccess) and isinstance(cond_expr.right.record, Identifier):
+                target = cond_expr.right.record.name
+            elif isinstance(cond_expr.right, Identifier):
+                target = cond_expr.right.name
+        elif isinstance(cond_expr, BinaryOp):
+            if isinstance(cond_expr.right, FieldAccess) and isinstance(cond_expr.right.record, Identifier):
+                target = cond_expr.right.record.name
+            elif isinstance(cond_expr.right, Identifier):
+                target = cond_expr.right.name
         elif isinstance(cond_expr, IsExpr) and isinstance(cond_expr.target, Identifier):
             target = cond_expr.target.name
 
@@ -401,7 +507,48 @@ class Parser:
 
             self._expect(TokenType.DEDENT, "Expected dedent at end of block")
 
-            # Check if block contains any mathematical operators
+            # Check for single-line indented expression (e.g. ask "...", 1000, empty)
+            if len(block_tokens) == 1:
+                flat = block_tokens[0]
+                # 1) empty / none / nu / 𒉡
+                if len(flat) == 1 and (flat[0].type == TokenType.EMPTY or flat[0].raw in ("empty", "none", "nu", "𒉡")):
+                    return Declaration(
+                        name=name_tok.value,
+                        value=EmptyLiteral(value="empty", line=flat[0].line, col=flat[0].col),
+                        line=name_tok.line,
+                        col=name_tok.col,
+                    )
+                # 2) ask / input
+                if flat[0].type == TokenType.ASK or flat[0].raw in ("ask", "input", "a-dis", "a-diš", "𒀀𒁹"):
+                    sub_p = Parser(flat, source_file=self.source_file)
+                    return Declaration(
+                        name=name_tok.value,
+                        value=sub_p._parse_input_expr(),
+                        line=name_tok.line,
+                        col=name_tok.col,
+                    )
+                # 3) single postfix line
+                if any(self._is_op_token(t) for t in flat) and self._is_op_token(flat[-1]):
+                    steps = self._parse_postfix_steps(block_tokens)
+                    return Declaration(
+                        name=name_tok.value,
+                        value=PostfixExpr(steps=steps, line=name_tok.line, col=name_tok.col),
+                        line=name_tok.line,
+                        col=name_tok.col,
+                    )
+                # 4) expression on single line
+                sub_p = Parser(flat, source_file=self.source_file)
+                parsed_expr = sub_p._parse_expression()
+                unit = getattr(parsed_expr, "unit", None) if isinstance(parsed_expr, NumberLiteral) else None
+                return Declaration(
+                    name=name_tok.value,
+                    value=parsed_expr,
+                    unit=unit,
+                    line=name_tok.line,
+                    col=name_tok.col,
+                )
+
+            # Check if block contains any mathematical operators or apply recipe
             has_operator = False
             for line_t in block_tokens:
                 for t in line_t:
@@ -523,6 +670,7 @@ class Parser:
             TokenType.CEIL,
             TokenType.NEAREST,
             TokenType.ABSOLUTE,
+            TokenType.APPLY,
         ):
             return True
         r = tok.raw.lower()
@@ -538,6 +686,7 @@ class Parser:
             "lesser", "tur", "𒌉", "<",
             "greater", "gal", "𒃲", ">",
             "equal", "sa", "sá", "𒊓", "==",
+            "apply", "ak", "du", "dù", "𒀝", "𒆕",
         )
 
     def _canonical_op_name(self, tok: Token) -> str:
@@ -566,6 +715,8 @@ class Parser:
             return "equal"
         if r in ("not-equal", "!="):
             return "not-equal"
+        if r in ("apply", "ak", "du", "dù", "𒀝", "𒆕"):
+            return "apply"
         return r
 
     def _parse_postfix_steps(self, token_lines: List[List[Token]]) -> List[Any]:
@@ -575,20 +726,37 @@ class Parser:
         n = len(flat)
         while i < n:
             t = flat[i]
-            if self._is_op_token(t):
+            if t.type == TokenType.APPLY or t.raw.lower() in ("apply", "ak", "du", "dù", "𒀝", "𒆕"):
+                i += 1
+                if i < n and flat[i].type in (TokenType.IDENTIFIER, TokenType.RECIPE):
+                    rec_name = str(flat[i].value)
+                    steps.append(ApplyRecipe(recipe=rec_name, line=t.line, col=t.col))
+                    i += 1
+                else:
+                    steps.append(ApplyRecipe(recipe="", line=t.line, col=t.col))
+            elif self._is_op_token(t):
                 steps.append(self._canonical_op_name(t))
                 i += 1
             elif t.type == TokenType.NUMBER:
                 val = t.value
                 unit = None
-                if i + 1 < n and flat[i + 1].type in (TokenType.IDENTIFIER, TokenType.THROUGH) and not self._is_op_token(flat[i + 1]):
+                if (
+                    i + 1 < n
+                    and flat[i + 1].line == t.line
+                    and flat[i + 1].type in (TokenType.IDENTIFIER, TokenType.THROUGH)
+                    and not self._is_op_token(flat[i + 1])
+                ):
                     unit = flat[i + 1].value
                     i += 1
                 steps.append(NumberLiteral(value=val, unit=unit, line=t.line, col=t.col))
                 i += 1
             elif t.type == TokenType.IDENTIFIER:
+                # Field access: field of record
+                if i + 2 < n and (flat[i + 1].type == TokenType.OF or flat[i + 1].raw in ("of", "ša", "sha", "𒊭")) and flat[i + 2].type == TokenType.IDENTIFIER:
+                    steps.append(FieldAccess(record=Identifier(name=flat[i + 2].value, line=t.line, col=t.col), field=t.value, line=t.line, col=t.col))
+                    i += 3
                 # Field access id.field
-                if i + 2 < n and flat[i + 1].type == TokenType.DOT and flat[i + 2].type == TokenType.IDENTIFIER:
+                elif i + 2 < n and flat[i + 1].type == TokenType.DOT and flat[i + 2].type == TokenType.IDENTIFIER:
                     steps.append(FieldAccess(record=Identifier(name=t.value, line=t.line, col=t.col), field=flat[i + 2].value, line=t.line, col=t.col))
                     i += 3
                 else:
@@ -687,7 +855,10 @@ class Parser:
         )
 
     def _parse_return(self) -> ReturnStatement:
-        tok = self._expect(TokenType.RETURN, "Expected '𒄑' or 'return'")
+        if self._check(TokenType.RETURN) or self._check(TokenType.DETERMINE) or self.current.raw in ("return", "determine", "nam", "𒉆", "ges", "ĝeš", "𒄑"):
+            tok = self._advance()
+        else:
+            tok = self._expect(TokenType.RETURN, "Expected '𒄑', 'return', or 'determine'")
         values: List[Expression] = []
 
         if not self._check(TokenType.NEWLINE) and not self._check(TokenType.DEDENT) and not self._check(TokenType.EOF):
@@ -715,23 +886,40 @@ class Parser:
     def _parse_comparison(self) -> Expression:
         left = self._parse_sum()
 
+        # Check if comparison operator is preceded by newline / indent in multiline conditions
+        # (e.g. retain candidate \n when error of candidate \n is lesser than error of best)
+        peek_offset = 0
+        while self._peek(peek_offset).type in (TokenType.NEWLINE, TokenType.INDENT):
+            peek_offset += 1
+        next_t = self._peek(peek_offset)
+        if next_t.type in (
+            TokenType.IS, TokenType.LESSER, TokenType.GREATER, TokenType.EQUAL,
+            TokenType.EQ, TokenType.NEQ, TokenType.LT, TokenType.LTE, TokenType.GT, TokenType.GTE
+        ) or next_t.raw in ("is", "me", "𒈨", "lesser", "tur", "𒌉", "greater", "gal", "𒃲", "equal", "sa", "𒊓", "<", ">", "==", "!="):
+            for _ in range(peek_offset):
+                self._advance()
+
         # Check for 'is' predicate: 'error is lesser than best.error', 'best is empty'
         if self._check(TokenType.IS) or self.current.raw in ("is", "me", "𒈨"):
             is_tok = self._advance()
+            while self._check(TokenType.NEWLINE) or self._check(TokenType.INDENT):
+                self._advance()
             if self._check(TokenType.LESSER) or self.current.raw in ("lesser", "tur", "𒌉"):
                 self._advance()
                 if self._check(TokenType.THAN) or self.current.raw in ("than", "ta", "𒋫"):
                     self._advance()
-                    right = self._parse_sum()
-                    return CompareExpr(left=left, relation="lesser", right=right, line=is_tok.line, col=is_tok.col)
-                return CompareExpr(left=left, relation="lesser", right=None, line=is_tok.line, col=is_tok.col)
+                while self._check(TokenType.NEWLINE) or self._check(TokenType.INDENT):
+                    self._advance()
+                right = self._parse_sum()
+                return CompareExpr(left=left, relation="lesser", right=right, line=is_tok.line, col=is_tok.col)
             elif self._check(TokenType.GREATER) or self.current.raw in ("greater", "gal", "𒃲"):
                 self._advance()
                 if self._check(TokenType.THAN) or self.current.raw in ("than", "ta", "𒋫"):
                     self._advance()
-                    right = self._parse_sum()
-                    return CompareExpr(left=left, relation="greater", right=right, line=is_tok.line, col=is_tok.col)
-                return CompareExpr(left=left, relation="greater", right=None, line=is_tok.line, col=is_tok.col)
+                while self._check(TokenType.NEWLINE) or self._check(TokenType.INDENT):
+                    self._advance()
+                right = self._parse_sum()
+                return CompareExpr(left=left, relation="greater", right=right, line=is_tok.line, col=is_tok.col)
             elif self._check(TokenType.EMPTY) or self.current.raw in ("empty", "none", "nu", "𒉡"):
                 self._advance()
                 return IsExpr(target=left, predicate="empty", line=is_tok.line, col=is_tok.col)
@@ -750,20 +938,45 @@ class Parser:
         ):
             op_tok = self._advance()
             op_str = op_tok.raw
+            is_relation = False
+            rel_name = "lesser"
             if op_str in ("𒌉", "lesser"):
                 op_str = "<"
+                is_relation = True
+                rel_name = "lesser"
             elif op_str in ("𒃲", "greater"):
                 op_str = ">"
+                is_relation = True
+                rel_name = "greater"
             elif op_str in ("𒊓", "equal"):
                 op_str = "=="
+                is_relation = True
+                rel_name = "equal"
+
+            # Optional 'than' / 'ta' / '𒋫'
+            if self._check(TokenType.THAN) or self.current.raw in ("than", "ta", "𒋫"):
+                self._advance()
+
+            while self._check(TokenType.NEWLINE) or self._check(TokenType.INDENT):
+                self._advance()
+
             right = self._parse_sum()
-            left = BinaryOp(
-                left=left,
-                op=op_str,
-                right=right,
-                line=op_tok.line,
-                col=op_tok.col,
-            )
+            if is_relation:
+                left = CompareExpr(
+                    left=left,
+                    relation=rel_name,
+                    right=right,
+                    line=op_tok.line,
+                    col=op_tok.col,
+                )
+            else:
+                left = BinaryOp(
+                    left=left,
+                    op=op_str,
+                    right=right,
+                    line=op_tok.line,
+                    col=op_tok.col,
+                )
         return left
 
     def _parse_sum(self) -> Expression:

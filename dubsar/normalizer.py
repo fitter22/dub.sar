@@ -25,24 +25,32 @@ from dubsar.tokens import (
 # Mapping table from cuneiform tokens to scholar text
 CUNEIFORM_TO_SCHOLAR_MAP: List[Tuple[str, str]] = [
     ("𒉡𒂊𒀀", "else"),
-    ("𒂊𒁹", "PROBLEM"),
+    ("𒂊𒁹", "problem"),
     ("𒁾𒊬", "recipe"),
-    ("𒅗𒁹", "RESULT"),
+    ("𒅗𒁹", "result"),
     ("𒂊𒀀", "when"),
     ("𒄀", "consider"),
     ("𒄑", "return"),
     ("𒁹𒀀", "output"),
     ("𒀀𒁹", "ask"),
-    ("𒋼", "retain"),
     ("𒌉", "lesser"),
     ("𒃲", "greater"),
     ("𒊓", "equal"),
-    ("𒍣", "+"),
-    ("𒋫", "-"),
-    ("𒊭", "*"),
-    ("𒉌", "/"),
+    ("𒍣", "add"),
+    ("𒊭", "multiply"),
+    ("𒉌", "divide"),
     ("nu", "not"),
     ("𒉡", "empty"),
+    ("𒄥", "floor"),
+    ("𒉏", "ceil"),
+    ("𒊑", "nearest"),
+    ("𒈨", "is"),
+    ("𒉆", "determine"),
+    ("ナム", "determine"),
+    ("𒀝", "apply"),
+    ("𒆕", "apply"),
+    ("𒂗", "through"),
+    ("𒋗", "take"),
     ("𒑰", "#"),
     ("𒌓", "day"),
     ("𒌗", "month"),
@@ -67,14 +75,23 @@ SCHOLAR_TO_CUNEIFORM_WORDS: Dict[str, str] = {
     "gi": "𒄀",
     "retain": "𒋼",
     "from": "𒋫",
-    "through": "𒌗",
-    "to": "𒌗",
-    "..": "𒌗",
+    "through": "𒂗",
+    "to": "𒂗",
+    "en": "𒂗",
     "lesser": "𒌉",
     "greater": "𒃲",
     "equal": "𒊓",
     "empty": "𒉡",
     "none": "𒉡",
+    "floor": "𒄥",
+    "ceil": "𒉏",
+    "nearest": "𒊑",
+    "absolute": "𒋼",
+    "is": "𒈨",
+    "determine": "𒉆",
+    "nam": "𒉆",
+    "apply": "𒀝",
+    "ak": "𒀝",
     "return": "𒄑",
     "ges": "𒄑",
     "ĝeš": "𒄑",
@@ -93,6 +110,15 @@ SCHOLAR_TO_CUNEIFORM_WORDS: Dict[str, str] = {
     "iti": "𒌗",
     "year": "𒈬",
     "mu": "𒈬",
+    "multiply": "𒊭",
+    "mul": "𒊭",
+    "divide": "𒉌",
+    "div": "𒉌",
+    "add": "𒍣",
+    "subtract": "𒋫",
+    "sub": "𒋫",
+    "of": "𒊭",
+    "than": "𒋫",
 }
 
 
@@ -114,9 +140,27 @@ def transliterate(source: str) -> str:
             comment = new_line[idx:]
             new_line = new_line[:idx]
 
-        # Replace cuneiform signs (longest match first)
-        for cun, sch in CUNEIFORM_TO_SCHOLAR_MAP:
-            new_line = new_line.replace(cun, sch)
+        # Preserve string literals during replacement
+        parts = re.split(r'(".*?")', new_line)
+        for i in range(0, len(parts), 2):
+            p = parts[i]
+            # Contextual replacement for domain loops: 𒄀/consider ... 𒋫 ... 𒂗 ...
+            p = re.sub(r'(\b(?:consider|𒄀)\s+[A-Za-z0-9_-]+\s+)𒋫\s+', r'\1from ', p)
+            # Contextual replacement for retain: line starting with 𒋼 <word>
+            p = re.sub(r'^(\s*)𒋼(\s+[A-Za-z0-9_-]+)', r'\1retain\2', p)
+            # Contextual replacement for comparison: 𒌉/lesser 𒋫 -> lesser than
+            p = re.sub(r'(\b(?:lesser|greater|𒌉|𒃲)\s+)𒋫(\s+)', r'\1than\2', p)
+            # Contextual replacement for field access: <word> 𒊭 <word> -> <word> of <word>
+            p = re.sub(r'([A-Za-z0-9_-]+)\s+𒊭\s+([A-Za-z0-9_-]+)', r'\1 of \2', p)
+            # Postfix 𒋼 alone or after whitespace
+            p = re.sub(r'(^|\s+)𒋼($|\s+)', r'\1absolute\2', p)
+            # Postfix 𒋫 alone or after whitespace
+            p = re.sub(r'(^|\s+)𒋫($|\s+)', r'\1subtract\2', p)
+            # Replace cuneiform signs
+            for cun, sch in CUNEIFORM_TO_SCHOLAR_MAP:
+                p = p.replace(cun, sch)
+            parts[i] = p
+        new_line = "".join(parts)
 
         if comment:
             new_line = new_line.rstrip() + "  " + comment if new_line.strip() else comment
@@ -143,17 +187,22 @@ def cuneiformize(source: str) -> str:
             comment = new_line[idx:]
             new_line = new_line[:idx]
 
-        # Word boundary replacement for Scholar keywords
-        def replace_word(match: re.Match) -> str:
-            w = match.group(0).lower()
-            if w in SCHOLAR_TO_CUNEIFORM_WORDS:
-                return SCHOLAR_TO_CUNEIFORM_WORDS[w]
-            return match.group(0)
+        # Preserve string literals during replacement
+        parts = re.split(r'(".*?")', new_line)
+        for i in range(0, len(parts), 2):
+            p = parts[i]
+            def replace_word(match: re.Match) -> str:
+                w = match.group(0).lower()
+                if w in SCHOLAR_TO_CUNEIFORM_WORDS:
+                    return SCHOLAR_TO_CUNEIFORM_WORDS[w]
+                return match.group(0)
 
-        # Pattern for words
-        new_line = re.sub(r"\b[A-Za-z_-]+\b", replace_word, new_line)
-        # Also replace .. with 𒌗
-        new_line = new_line.replace("..", " 𒌗 ")
+            # Pattern for words
+            p = re.sub(r"\b[A-Za-z_-]+\b", replace_word, p)
+            # Also replace .. with 𒂗
+            p = p.replace("..", " 𒂗 ")
+            parts[i] = p
+        new_line = "".join(parts)
 
         if comment:
             new_line = new_line.rstrip() + "  " + comment if new_line.strip() else comment

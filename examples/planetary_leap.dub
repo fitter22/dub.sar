@@ -2,8 +2,11 @@
 
 𒂊𒁹
 
-    solar-year : 𒀀𒁹 "solar year in days"
-    limit : 1000
+    solar-year :
+        𒀀𒁹 "solar year in days"
+
+    limit :
+        1000
 
     whole-days :
         solar-year
@@ -14,9 +17,10 @@
         whole-days
         𒋫
 
-    best : 𒉡
+    best :
+        𒉡
 
-    𒄀 cycle 𒋫 1 𒌗 limit:
+    𒄀 cycle 𒋫 1 𒂗 limit:
 
         leaps :
             cycle
@@ -24,13 +28,16 @@
             𒊭
             𒊑
 
-        error :
+        candidate-year :
             whole-days
             leaps
             cycle
             𒉌
             𒍣
+
+        error :
             solar-year
+            candidate-year
             𒋫
             𒋼
 
@@ -39,7 +46,9 @@
             leaps
             error
 
-        𒋼 candidate 𒂊𒀀 error 𒌉 best.error
+        𒋼 candidate
+            𒂊𒀀 error 𒊭 candidate
+            𒈨 𒌉 𒋫 error 𒊭 best
 
 𒅗𒁹
 

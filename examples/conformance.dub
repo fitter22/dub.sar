@@ -1,9 +1,9 @@
 𒑰 DUB.SAR 1.0 — Conformance Suite
-𒑰 Directly verifies Section 29 test cases:
+𒑰 Directly verifies mathematical tablet conformance:
 𒑰 - Numbers: 1, 60, 1;0, 1;30, 365;14,31,55
 𒑰 - Arithmetic: 1;30 + 0;30 = 2, 2 * 0;30 = 1, 3 / 2 = 1;30
 𒑰 - Unit safety: 1 day + 2 day = 3 day
-𒑰 - Bounded repetition: repeat 1..1, repeat 1..1000
+𒑰 - Finite domain repetition: 1 through 5
 𒑰 - Exactness: Equivalent rational values compare equal
 
 𒂊𒁹
@@ -11,46 +11,73 @@
     # Numbers
     n1 : 1
     n60 : 60
-    n_one : 1;0
-    n_one_half : 1;30
+    n-one : 1;0
+    n-one-half : 1;30
     solar : 365;14,31,55
 
     # Arithmetic
-    sum_res := 1;30 + 0;30
-    mul_res := 2 * 0;30
-    div_res := 3 / 2
+    sum-res :
+        1;30
+        0;30
+        𒍣
+
+    mul-res :
+        2
+        0;30
+        𒊭
+
+    div-res :
+        3
+        2
+        𒉌
 
     # Unit safety
     d1 : 1 𒌓
     d2 : 2 𒌓
-    d_total := d1 + d2
+    d-total :
+        d1
+        d2
+        𒍣
 
     # Exactness check: 1;0 == 1, 1;30 == 3/2
-    exact_check_1 := (1;0 == 1)
-    exact_check_2 := (1;30 == 3 / 2)
+    exact-check-1 :
+        1;0
+        1
+        𒊓
+
+    exact-check-2 :
+        1;30
+        3
+        2
+        𒉌
+        𒊓
 
     # Repetition check
     acc : 0
-    𒄀 i 1 𒌗 5:
-        acc := acc + i
+    𒄀 i 𒋫 1 𒂗 5:
+        next-acc :
+            acc
+            i
+            𒍣
+        acc : next-acc
 
 𒅗𒁹
 
     𒁹𒀀 "sum 1;30 + 0;30 (expected 2):"
-    𒁹𒀀 sum_res
+    𒁹𒀀 sum-res
 
     𒁹𒀀 "mul 2 * 0;30 (expected 1):"
-    𒁹𒀀 mul_res
+    𒁹𒀀 mul-res
 
     𒁹𒀀 "div 3 / 2 (expected 1;30):"
-    𒁹𒀀 div_res
+    𒁹𒀀 div-res
 
     𒁹𒀀 "unit sum 1 day + 2 day (expected 3 day):"
-    𒁹𒀀 d_total
+    𒁹𒀀 d-total
 
     𒁹𒀀 "exactness checks:"
-    𒁹𒀀 exact_check_1
-    𒁹𒀀 exact_check_2
+    𒁹𒀀 exact-check-1
+    𒁹𒀀 exact-check-2
 
     𒁹𒀀 "bounded repetition 1..5 sum (expected 15):"
     𒁹𒀀 acc

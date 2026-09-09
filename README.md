@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
-[![Tests: 79 Passing](https://img.shields.io/badge/Tests-79%2F79%20Passing-brightgreen.svg)](tests/)
+[![Tests: 110 Passing](https://img.shields.io/badge/Tests-110%2F110%20Passing-brightgreen.svg)](tests/)
 [![Architecture: VM + WASM](https://img.shields.io/badge/Architecture-Interpreter%20%7C%20VM%20%7C%20WASM-purple.svg)](dubsar/)
 [![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#-vibe-coded-to-perfection)
 
@@ -60,8 +60,11 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
 
 𒂊𒁹
 
-    solar-year : 𒀀𒁹 "solar year in days"
-    limit : 1000
+    solar-year :
+        𒀀𒁹 "solar year in days"
+
+    limit :
+        1000
 
     whole-days :
         solar-year
@@ -72,9 +75,10 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
         whole-days
         𒋫
 
-    best : 𒉡
+    best :
+        𒉡
 
-    𒄀 cycle 𒋫 1 𒌗 limit:
+    𒄀 cycle 𒋫 1 𒂗 limit:
 
         leaps :
             cycle
@@ -82,13 +86,16 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
             𒊭
             𒊑
 
-        error :
+        candidate-year :
             whole-days
             leaps
             cycle
             𒉌
             𒍣
+
+        error :
             solar-year
+            candidate-year
             𒋫
             𒋼
 
@@ -97,7 +104,9 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
             leaps
             error
 
-        𒋼 candidate 𒂊𒀀 error 𒌉 best.error
+        𒋼 candidate
+            𒂊𒀀 error 𒊭 candidate
+            𒈨 𒌉 𒋫 error 𒊭 best
 
 𒅗𒁹
 
@@ -110,8 +119,11 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
 
 problem
 
-    solar-year : ask "solar year in days"
-    limit : 1000
+    solar-year :
+        ask "solar year in days"
+
+    limit :
+        1000
 
     whole-days :
         solar-year
@@ -122,7 +134,8 @@ problem
         whole-days
         subtract
 
-    best : empty
+    best :
+        empty
 
     consider cycle from 1 through limit:
 
@@ -132,13 +145,16 @@ problem
             multiply
             nearest
 
-        error :
+        candidate-year :
             whole-days
             leaps
             cycle
             divide
             add
+
+        error :
             solar-year
+            candidate-year
             subtract
             absolute
 
@@ -147,7 +163,9 @@ problem
             leaps
             error
 
-        retain candidate when error is lesser than best.error
+        retain candidate
+            when error of candidate
+            is lesser than error of best
 
 result
 
@@ -320,8 +338,11 @@ You can also render directly to your terminal:
 ║                                                                ║
 ║  𒂊𒁹                                                          ║
 ║                                                                ║
-║      solar-year : 𒀀𒁹 "solar year in days"                    ║
-║      limit : 1000                                              ║
+║      solar-year :                                              ║
+║          𒀀𒁹 "solar year in days"                              ║
+║                                                                ║
+║      limit :                                                   ║
+║          1000                                                  ║
 ║                                                                ║
 ║      whole-days :                                              ║
 ║          solar-year                                            ║
@@ -332,9 +353,10 @@ You can also render directly to your terminal:
 ║          whole-days                                            ║
 ║          𒋫                                                    ║
 ║                                                                ║
-║      best : 𒉡                                                 ║
+║      best :                                                    ║
+║          𒉡                                                     ║
 ║                                                                ║
-║      𒄀 cycle 𒋫 1 𒌗 limit:                                   ║
+║      𒄀 cycle 𒋫 1 𒂗 limit:                                   ║
 ║                                                                ║
 ║          leaps :                                               ║
 ║              cycle                                             ║
@@ -342,13 +364,16 @@ You can also render directly to your terminal:
 ║              𒊭                                                ║
 ║              𒊑                                                ║
 ║                                                                ║
-║          error :                                               ║
+║          candidate-year :                                      ║
 ║              whole-days                                        ║
 ║              leaps                                             ║
 ║              cycle                                             ║
 ║              𒉌                                                ║
 ║              𒍣                                                ║
+║                                                                ║
+║          error :                                               ║
 ║              solar-year                                        ║
+║              candidate-year                                    ║
 ║              𒋫                                                ║
 ║              𒋼                                                ║
 ║                                                                ║
@@ -357,7 +382,9 @@ You can also render directly to your terminal:
 ║              leaps                                             ║
 ║              error                                             ║
 ║                                                                ║
-║          𒋼 candidate 𒂊𒀀 error 𒌉 best.error                 ║
+║          𒋼 candidate                                           ║
+║              𒂊𒀀 error 𒊭 candidate                            ║
+║              𒈨 𒌉 𒋫 error 𒊭 best                            ║
 ║                                                                ║
 ║  𒅗𒁹                                                          ║
 ║                                                                ║
@@ -377,13 +404,13 @@ Explore the [`examples/`](examples/) directory for complete, verified tablets av
 - 📐 **Babylonian Square Diagonal ($\sqrt{2} \approx 1;24,51,10$ / Tablet YBC 7289)**:
   - [`babylonian_sqrt2.dub`](examples/babylonian_sqrt2.dub) (Canonical Cuneiform)
   - [`babylonian_sqrt2_scholar.dub`](examples/babylonian_sqrt2_scholar.dub) (Scholar Mode)
-- ⚖️ **Even Distribution of Leap Years (Section 27)**:
+- ⚖️ **Even Distribution of Leap Years**:
   - [`even_distribution.dub`](examples/even_distribution.dub) (Canonical Cuneiform)
   - [`even_distribution_scholar.dub`](examples/even_distribution_scholar.dub) (Scholar Mode)
-- ⏱️ **Unit Conversions & Dimensional Safety (Sections 15 & 16)**:
+- ⏱️ **Unit Conversions & Dimensional Safety**:
   - [`unit_conversion.dub`](examples/unit_conversion.dub) (Canonical Cuneiform)
   - [`unit_conversion_scholar.dub`](examples/unit_conversion_scholar.dub) (Scholar Mode)
-- ✅ **Language Conformance Suite (Section 29)**:
+- ✅ **Language Conformance Suite**:
   - [`conformance.dub`](examples/conformance.dub) (Canonical Cuneiform)
   - [`conformance_scholar.dub`](examples/conformance_scholar.dub) (Scholar Mode)
 
@@ -396,7 +423,7 @@ Run the full automated test suite:
 python3 -m unittest discover -s tests -p "test_*.py"
 ```
 
-**79 unit, integration, and mathematical conformance test cases** cover:
+**110 unit, integration, and mathematical conformance test cases** cover:
 - **Exhaustive Numeric Conformance**: Values `0`, `1`, `2`, `59`, `60`, `1;0`, `1;30`, `1;59,59`, `365;14,31,55`, `-1;30`, round-trip normalization, and exact arithmetic.
 - **Static Unit Type Checking**: Compile-time detection of incompatible units (`1 day + 2 year`), dimensional products, cancellations, and explicit conversions.
 - **Semantic IR & Verbs**: Verification of high-level mathematical verbs (`ESTABLISH`, `TAKE`, `POSTFIX`, `REPEAT`, `RETAIN`, `DETERMINE`).

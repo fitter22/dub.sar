@@ -2,8 +2,11 @@
 
 problem
 
-    solar-year : ask "solar year in days"
-    limit : 1000
+    solar-year :
+        ask "solar year in days"
+
+    limit :
+        1000
 
     whole-days :
         solar-year
@@ -14,7 +17,8 @@ problem
         whole-days
         subtract
 
-    best : empty
+    best :
+        empty
 
     consider cycle from 1 through limit:
 
@@ -24,13 +28,16 @@ problem
             multiply
             nearest
 
-        error :
+        candidate-year :
             whole-days
             leaps
             cycle
             divide
             add
+
+        error :
             solar-year
+            candidate-year
             subtract
             absolute
 
@@ -39,7 +46,9 @@ problem
             leaps
             error
 
-        retain candidate when error is lesser than best.error
+        retain candidate
+            when error of candidate
+            is lesser than error of best
 
 result
 

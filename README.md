@@ -281,17 +281,17 @@ You can also render directly to your terminal:
 ║  # DUB.SAR 1.0 — Planetary Leap-Year Rule (Tablet Mode)                ║
 ║  # As specified in Section 26 of DUB.SAR 1.0 Language Specification    ║
 ║                                                                        ║
-║  𒂊𒁹                                                                    ║
+║  𒂊𒁹                                                                  ║
 ║                                                                        ║
-║      𒈬 := 𒀀𒁹("solar year in days")                                     ║
+║      𒈬 := 𒀀𒁹("solar year in days")                                  ║
 ║      maximum-cycle : 1000                                              ║
-║      cycle, leaps, error := leap-rule(𒈬, maximum-cycle)                ║
+║      cycle, leaps, error := leap-rule(𒈬, maximum-cycle)               ║
 ║                                                                        ║
-║  𒁾𒊬 leap-rule(solar, limit):                                           ║
+║  𒁾𒊬 leap-rule(solar, limit):                                         ║
 ║                                                                        ║
 ║      whole := floor(solar)                                             ║
 ║      fraction := solar - whole                                         ║
-║      fraction-count := fraction / 1 𒌓                                  ║
+║      fraction-count := fraction / 1 𒌓                                 ║
 ║                                                                        ║
 ║      best-cycle := 1                                                   ║
 ║      best-leaps := 0                                                   ║

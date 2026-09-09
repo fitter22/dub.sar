@@ -8,7 +8,35 @@ Implements Section 24 and Section 25:
 from __future__ import annotations
 
 import html
+import unicodedata
 from typing import Optional
+
+
+def get_char_width(ch: str) -> int:
+    """Returns the monospace terminal column width of a character."""
+    cp = ord(ch)
+    if unicodedata.category(ch) in ("Mn", "Me", "Cf"):
+        return 0
+    # Cuneiform blocks (U+12000 to U+1247F) render as double-width (2 columns) in monospace terminals
+    if 0x12000 <= cp <= 0x1247F:
+        return 2
+    # East Asian Wide (W) or Fullwidth (F)
+    eaw = unicodedata.east_asian_width(ch)
+    if eaw in ("W", "F"):
+        return 2
+    return 1
+
+
+def get_display_width(text: str) -> int:
+    """Calculates the total visual terminal column display width of a string."""
+    return sum(get_char_width(c) for c in text)
+
+
+def pad_to_display_width(text: str, target_width: int) -> str:
+    """Pads text with spaces so its visual display width matches target_width."""
+    w = get_display_width(text)
+    padding = max(0, target_width - w)
+    return text + (" " * padding)
 
 
 def render_svg(source: str, title: str = "DUB.SAR TABLET — 𒁾𒊬") -> str:
@@ -97,24 +125,31 @@ def render_svg(source: str, title: str = "DUB.SAR TABLET — 𒁾𒊬") -> str:
 
 
 def render_terminal_tablet(source: str, title: str = "DUB.SAR TABLET — 𒁾𒊬 𒅎𒁍𒁕") -> str:
-    """Renders the source code framed in an authentic terminal box-drawing tablet."""
+    """Renders the source code framed in an authentic terminal box-drawing tablet with straight borders."""
     lines = source.splitlines()
-    max_w = max((len(l) for l in lines), default=20)
-    width = max(64, max_w + 6)
 
-    border_top = "╔" + "═" * width + "╗"
-    title_padded = title.center(width)
-    border_mid = "╠" + "═" * width + "╣"
-    border_bot = "╚" + "═" * width + "╝"
+    content_widths = [get_display_width(f"  {l}") for l in lines]
+    max_content_w = max(content_widths, default=20)
+    title_w = get_display_width(title)
+    inner_width = max(64, max_content_w + 4, title_w + 4)
+
+    border_top = "╔" + ("═" * inner_width) + "╗"
+    border_mid = "╠" + ("═" * inner_width) + "╣"
+    border_bot = "╚" + ("═" * inner_width) + "╝"
+
+    pad_left = (inner_width - title_w) // 2
+    pad_right = inner_width - title_w - pad_left
+    title_line = "║" + (" " * pad_left) + title + (" " * pad_right) + "║"
 
     out_lines = [
         border_top,
-        f"║{title_padded}║",
+        title_line,
         border_mid,
     ]
 
     for line in lines:
-        padded = f"  {line}".ljust(width)
+        content = f"  {line}"
+        padded = pad_to_display_width(content, inner_width)
         out_lines.append(f"║{padded}║")
 
     out_lines.append(border_bot)

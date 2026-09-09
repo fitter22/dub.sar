@@ -52,7 +52,7 @@ def detect_source_mode(source: str) -> str:
 
     Returns: 'tablet', 'scholar', or 'mixed'.
     """
-    has_cuneiform = bool(re.search(r"[\u12000-\u1247F\u12480-\u1254F]", source))
+    has_cuneiform = bool(re.search(r"[\U00012000-\U0001247F\U00012480-\U0001254F]", source))
     scholar_keywords = re.search(r"\b(PROBLEM|RESULT|procedure|repeat|output|input|return)\b", source, re.IGNORECASE)
 
     if has_cuneiform and scholar_keywords:

@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
-[![Tests: 110 Passing](https://img.shields.io/badge/Tests-110%2F110%20Passing-brightgreen.svg)](tests/)
+[![Tests: 131 Passing](https://img.shields.io/badge/Tests-131%2F131%20Passing-brightgreen.svg)](tests/)
 [![Architecture: VM + WASM](https://img.shields.io/badge/Architecture-Interpreter%20%7C%20VM%20%7C%20WASM-purple.svg)](dubsar/)
 [![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#vibe-coded-to-perfection)
 
@@ -16,7 +16,7 @@
   DUB.SAR is not a Python dialect in cuneiform costume. It is an executable Mesopotamian mathematical tablet language engineered from first principles — featuring exact arbitrary-precision rational arithmetic, algebraic dimensional unit safety, bounded mathematical search domains, postfix calculation pipelines, atomic selections, a high-level Semantic IR, a stack bytecode virtual machine, and a WebAssembly compiler.
 </p>
 
-[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
+[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Tablet Archive](#the-tablet-archive) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
 
 ---
 
@@ -237,6 +237,143 @@ bin/dubsar cuneiform examples/planetary_leap_scholar.dub
 bin/dubsar render examples/planetary_leap.dub --style=tablet -o tablet.svg
 bin/dubsar render examples/planetary_leap.dub --style=text
 bin/dubsar render examples/planetary_leap.dub --style=tablet --strip-comments -o tablet_clean.svg
+
+# 9. Tablet Archive Management (é-dub-ba-a)
+bin/dubsar archive list
+bin/dubsar archive show "reciprocals"
+bin/dubsar archive history "reciprocals"
+bin/dubsar archive export -o archive.json
+bin/dubsar archive import archive.json
+bin/dubsar archive render "reciprocals"
+bin/dubsar run examples/tablet_archive.dub --archive=project_archive.db
+```
+
+---
+
+## The Tablet Archive (*é-dub-ba-a*)
+
+DUB.SAR programs execute alongside a persistent, local **Tablet Archive** (*é-dub-ba-a*, the Sumerian "house of tablets") containing inherited scholarly knowledge, tables of constants, metrological standards, and program-inscribed computational results.
+
+### Conceptual Paradigm: House of Tablets, Not a Database
+
+The Tablet Archive is fundamentally **not** SQL, CRUD, or conventional database programming:
+
+```text
+Conventional Programming:              DUB.SAR Architecture:
+┌─────────────────────────┐            ┌─────────────────────────┐
+│       Source Code       │            │  Mathematical Tablet    │
+└────────────┬────────────┘            └────────────┬────────────┘
+             │ SQL queries                          │ consult / inscribe
+             ▼                                      ▼
+┌─────────────────────────┐            ┌─────────────────────────┐
+│     Relational DB       │            │   House of Tablets      │
+│  (Tables, Rows, CRUD)   │            │ (Immutable Clay Tablets)│
+└─────────────────────────┘            └─────────────────────────┘
+```
+
+The language exposes **no** tables, rows, `SELECT`, `FROM`, `WHERE`, `INSERT`, `UPDATE`, or `DELETE` statements. Instead, a DUB.SAR scholar works within an authentic tablet room:
+- **Consulting Knowledge**: Read-only examination of existing reference tablets.
+- **Working Scratchpads**: Temporary in-memory tablets for rapid computation.
+- **Explicit Inscription**: Baking a working tablet into a permanent, immutable clay record.
+- **Lineage and Provenance**: Tracking which earlier tablets were consulted, copied, or derived.
+
+### 1. Consulting Scholarly Knowledge
+
+To retrieve a value from a persistent tablet in the archive, consult the tablet and take the entry:
+
+#### Scholar Mode
+```text
+problem
+
+    consult tablet "reciprocals"
+
+    reciprocal-of-four :
+        4
+        take entry from reciprocals
+
+result
+
+    reciprocal-of-four
+```
+
+#### Canonical Cuneiform Mode
+```text
+𒂊𒁹
+
+    𒅆 𒁾 "reciprocals"
+
+    reciprocal-of-four :
+        4
+        pad 𒋫 reciprocals
+
+𒅗𒁹
+
+    reciprocal-of-four
+```
+
+### 2. Working Tablets & Inscription
+
+Computational scratchpads are declared as working tablets (`kin` / `𒆥`). They are fast, mutable in-memory key-value mappings that disappear upon program termination unless explicitly inscribed:
+
+```text
+problem
+
+    working observations
+
+    put 42 into observations at 10
+
+    inscribe observations as tablet "observations"
+
+result
+
+    observations
+```
+
+Inscription is strictly atomic: the new tablet version is either committed to the archive in its entirety with a cryptographic SHA-256 checksum, or the transaction fails leaving existing records completely intact.
+
+### 3. Immutability, Monotonic Versioning & Lineage
+
+Persistent tablets are strictly **immutable**. Once inscribed, a version cannot be overwritten or altered in place:
+- **Derivation & Copying**: Creating a revision is performed via `copy tablet "T" as working W` or `derive tablet "T" as working W`.
+- **Monotonic Versioning**: Re-inscribing creates version $N+1$ (`v1` -> `v2` -> `v3`), retaining complete historical lineage.
+- **Version Pinning**: Programs can pin an exact historical version (`consult tablet "reciprocals" version 1`) to guarantee mathematical reproducibility across decades.
+
+### 4. Standard Scholarly Archive ("Scribal Archive 1")
+
+Every new DUB.SAR archive automatically initializes with standard scholarly reference tablets:
+- `reciprocals`: Authentic Old Babylonian reciprocal pairs ($2 \to 0;30$, $3 \to 0;20$, $4 \to 0;15$, $5 \to 0;12$, $6 \to 0;10$, $8 \to 0;07,30$, etc.).
+- `common-fractions`: Exact sexagesimal representations of fundamental fractions ($1/2, 1/3, 2/3, 1/4, 3/4, 1/5, 5/6$).
+- `squares`: Exact integer squares for numbers $1$ through $60$.
+- `cubes`: Exact integer cubes for numbers $1$ through $30$.
+- `square-roots`: Verified rational approximations and exact integer roots.
+- `powers`: Powers of fundamental bases ($2$ and $60$).
+- `basic-metrology`: Attested conversion factors for length, area, and capacity.
+- `basic-geometry`: Attested geometric coefficients.
+
+Every scholarly entry retains exact rational representations—no IEEE floating-point approximation or decimal truncation occurs.
+
+### 5. Archive CLI Tooling
+
+Developers and scholars can manage and inspect the local archive using dedicated CLI subcommands:
+
+```bash
+# List all tablets in the archive
+bin/dubsar archive list
+
+# Display tablet contents and metadata
+bin/dubsar archive show "reciprocals"
+
+# Trace version history and provenance
+bin/dubsar archive history "reciprocals"
+
+# Export the archive to canonical JSON
+bin/dubsar archive export -o archive.json
+
+# Import tablets from canonical JSON
+bin/dubsar archive import archive.json
+
+# Render a tablet in ASCII/Unicode clay-style grid
+bin/dubsar archive render "reciprocals"
 ```
 
 ---
@@ -404,6 +541,9 @@ Explore the [`examples/`](examples/) directory for complete, verified tablets av
 - **Babylonian Square Diagonal ($\sqrt{2} \approx 1;24,51,10$ / Tablet YBC 7289)**:
   - [`babylonian_sqrt2.dub`](examples/babylonian_sqrt2.dub) (Canonical Cuneiform)
   - [`babylonian_sqrt2_scholar.dub`](examples/babylonian_sqrt2_scholar.dub) (Scholar Mode)
+- **Tablet Archive & Persistent Knowledge**:
+  - [`tablet_archive.dub`](examples/tablet_archive.dub) (Canonical Cuneiform)
+  - [`tablet_archive_scholar.dub`](examples/tablet_archive_scholar.dub) (Scholar Mode)
 - **Even Distribution of Leap Years**:
   - [`even_distribution.dub`](examples/even_distribution.dub) (Canonical Cuneiform)
   - [`even_distribution_scholar.dub`](examples/even_distribution_scholar.dub) (Scholar Mode)
@@ -423,11 +563,12 @@ Run the full automated test suite:
 python3 -m unittest discover -s tests -p "test_*.py"
 ```
 
-**110 unit, integration, and mathematical conformance test cases** cover:
+**131 unit, integration, and mathematical conformance test cases** cover:
 - **Exhaustive Numeric Conformance**: Values `0`, `1`, `2`, `59`, `60`, `1;0`, `1;30`, `1;59,59`, `365;14,31,55`, `-1;30`, round-trip normalization, and exact arithmetic.
 - **Static Unit Type Checking**: Compile-time detection of incompatible units (`1 day + 2 year`), dimensional products, cancellations, and explicit conversions.
 - **Semantic IR & Verbs**: Verification of high-level mathematical verbs (`ESTABLISH`, `TAKE`, `POSTFIX`, `REPEAT`, `RETAIN`, `DETERMINE`).
 - **Mathematical Redesign Conformance**: Quantities, multiline postfix pipelines, bounded domains, determinations, field lookups, atomic selections, and implicit result inscriptions.
+- **Tablet Archive & Persistent Memory**: SQLite-backed embedded house of tablets, Scribal Archive 1 seeding, version pinning, provenance tracking, working tablet mutations, atomic inscriptions, and exact rational preservation.
 - **Trimodal Source Equivalence**: Tablet, Scholar, and Mixed mode equivalence.
 - **Independent Algorithm Validation**: Continued-fraction best rational approximations verified against bounded mathematical brute force.
 - **Deterministic Leap Distribution**: Bresenham accumulator distribution.

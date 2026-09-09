@@ -1,0 +1,24 @@
+𒑰 DUB.SAR 1.0 — Tablet Archive (Tablet Mode)
+𒑰 Demonstrates persistent tablet consultation, working scratchpads, and inscription.
+
+𒂊𒁹
+
+    𒅆 𒁾 "reciprocals"
+
+    reciprocal-of-four :
+        4
+        pad 𒋫 reciprocals
+
+    𒆥 observations
+
+    𒃻 42 𒀀 observations 𒀀 10
+
+    𒁹𒀀 observations 𒁶 𒁾 "observations"
+
+    recorded-entry :
+        10
+        pad 𒋫 observations
+
+𒅗𒁹
+
+    reciprocal-of-four

@@ -42,6 +42,17 @@ from dubsar.ast import (
     StringLiteral,
     TupleExpr,
     UnaryOp,
+    ConsultTablet,
+    CreateWorkingTablet,
+    CopyTablet,
+    DeriveTablet,
+    InscribeTablet,
+    PutEntry,
+    ReplaceEntry,
+    RemoveEntry,
+    TakeEntry,
+    SeekEntry,
+    TabletHistory,
 )
 from dubsar.errors import DubSarSyntaxError
 from dubsar.tokens import Token, TokenType
@@ -248,6 +259,39 @@ class Parser:
         ):
             return self._parse_return()
 
+        # Tablet Archive Statements (§15-§19)
+        # 1) Consult: consult "reciprocals" [version 2] [as alias] / 𒅆 ...
+        if self._check(TokenType.CONSULT) or self.current.raw in ("consult", "examine", "igi", "𒅆"):
+            return self._parse_consult()
+
+        # 2) Working tablet: working squares / create working squares / 𒆥 squares
+        if (
+            self._check(TokenType.WORKING)
+            or (self._check(TokenType.IDENTIFIER) and self.current.raw == "create" and self._peek(1).type == TokenType.WORKING)
+            or self.current.raw in ("working", "kin", "𒆥")
+        ):
+            return self._parse_working()
+
+        # 3) Copy tablet: copy [source] as working target / 𒃮𒊑 𒁶 𒆥 ...
+        if self._check(TokenType.COPY) or self.current.raw in ("copy", "gaba-ri", "𒃮𒊑"):
+            return self._parse_copy()
+
+        # 4) Derive tablet: derive from source [version v] as working target
+        if self._check(TokenType.DERIVE) or self.current.raw in ("derive",):
+            return self._parse_derive()
+
+        # 5) Put entry: put val into working at key / 𒃻 val 𒀀 working 𒀀 key
+        if self._check(TokenType.PUT) or self.current.raw in ("put", "insert", "set", "gar", "𒃻"):
+            return self._parse_put()
+
+        # 6) Replace entry: replace entry key with val in working
+        if self._check(TokenType.REPLACE) or self.current.raw in ("replace", "update"):
+            return self._parse_replace()
+
+        # 7) Remove entry: remove entry key from working
+        if self._check(TokenType.REMOVE) or self.current.raw in ("remove", "delete"):
+            return self._parse_remove()
+
         # Output / Inscribe: 𒁹𒀀 / inscribe / output
         if self._check(TokenType.INSCRIBE):
             return self._parse_output()
@@ -261,6 +305,21 @@ class Parser:
         # Lookahead for declaration (name : expr) or assignment (name := expr or tuple unpack)
         if self._check(TokenType.IDENTIFIER):
             next1 = self._peek(1)
+            # Working tablet mutation: working replace entry ...
+            if next1.type == TokenType.REPLACE or next1.raw in ("replace", "update"):
+                w_tok = self._advance()
+                return self._parse_replace_for_working(w_tok.value)
+
+            if next1.type == TokenType.NEWLINE and self._peek(2).type == TokenType.INDENT:
+                p3 = self._peek(3)
+                if p3.type == TokenType.REPLACE or p3.raw in ("replace", "update"):
+                    w_tok = self._advance()
+                    self._expect(TokenType.NEWLINE)
+                    self._expect(TokenType.INDENT)
+                    stmt = self._parse_replace_for_working(w_tok.value)
+                    self._expect(TokenType.DEDENT)
+                    return stmt
+
             # Quantity establishment: name : ...
             if next1.type == TokenType.COLON:
                 return self._parse_establishment()
@@ -548,6 +607,41 @@ class Parser:
                     col=name_tok.col,
                 )
 
+            # Check for multi-line take entry:
+            # 7
+            # take entry from reciprocals
+            if len(block_tokens) == 2:
+                line1 = block_tokens[0]
+                line2 = block_tokens[1]
+                is_take_line = False
+                if line2 and (line2[0].type in (TokenType.TAKE, TokenType.ENTRY) or line2[0].raw in ("take", "shu", "šu", "pad")):
+                    is_take_line = True
+                elif len(line2) >= 2 and (line2[-1].type == TokenType.TAKE or line2[-1].raw in ("take", "shu", "šu")):
+                    is_take_line = True
+                if is_take_line:
+                    sub_p1 = Parser(line1, source_file=self.source_file)
+                    key_expr = sub_p1._parse_expression()
+                    if line2 and (line2[-1].type == TokenType.TAKE or line2[-1].raw in ("take", "shu", "šu")) and line2[0].type not in (TokenType.TAKE, TokenType.ENTRY) and line2[0].raw not in ("take", "shu", "šu", "pad"):
+                        sub_p2 = Parser(line2[:-1], source_file=self.source_file)
+                        tablet_expr = sub_p2._parse_expression()
+                    else:
+                        sub_p2 = Parser(line2, source_file=self.source_file)
+                        if sub_p2._check(TokenType.TAKE) or sub_p2.current.raw in ("take", "shu", "šu"):
+                            sub_p2._advance()
+                        if sub_p2._check(TokenType.ENTRY) or sub_p2.current.raw in ("entry", "entries", "pad"):
+                            sub_p2._advance()
+                        if sub_p2._check(TokenType.TAKE) or sub_p2.current.raw in ("take", "shu", "šu"):
+                            sub_p2._advance()
+                        if sub_p2._check(TokenType.FROM) or sub_p2.current.raw in ("from", "ta", "𒋫"):
+                            sub_p2._advance()
+                        tablet_expr = sub_p2._parse_expression()
+                    return Declaration(
+                        name=name_tok.value,
+                        value=TakeEntry(tablet=tablet_expr, key=key_expr, line=name_tok.line, col=name_tok.col),
+                        line=name_tok.line,
+                        col=name_tok.col,
+                    )
+
             # Check if block contains any mathematical operators or apply recipe
             has_operator = False
             for line_t in block_tokens:
@@ -671,6 +765,7 @@ class Parser:
             TokenType.NEAREST,
             TokenType.ABSOLUTE,
             TokenType.APPLY,
+            TokenType.TAKE,
         ):
             return True
         r = tok.raw.lower()
@@ -687,10 +782,13 @@ class Parser:
             "greater", "gal", "𒃲", ">",
             "equal", "sa", "sá", "𒊓", "==",
             "apply", "ak", "du", "dù", "𒀝", "𒆕",
+            "take", "shu", "šu", "𒋗",
         )
 
     def _canonical_op_name(self, tok: Token) -> str:
         r = tok.raw.lower()
+        if tok.type == TokenType.TAKE or r in ("take", "shu", "šu", "𒋗"):
+            return "take"
         if r in ("add", "zi", "𒍣", "+"):
             return "add"
         if r in ("subtract", "sub", "ta", "𒋫", "-"):
@@ -870,11 +968,139 @@ class Parser:
         self._match(TokenType.NEWLINE)
         return ReturnStatement(values=values, line=tok.line, col=tok.col)
 
-    def _parse_output(self) -> OutputStatement:
+    def _parse_output(self) -> Statement:
         tok = self._expect(TokenType.INSCRIBE, "Expected '𒁹𒀀', 'inscribe', or 'output'")
+        # Check if archive inscription: inscribe working_name as [tablet] target_name
+        if self._check(TokenType.IDENTIFIER) and (
+            self._peek(1).type == TokenType.AS
+            or self._peek(1).raw in ("as", "gim", "𒁶")
+        ):
+            working_tok = self._advance()
+            self._advance()  # consume as / gim / 𒁶
+            if self._check(TokenType.TABLET) or self.current.raw in ("tablet", "dub", "𒁾"):
+                self._advance()
+            target_expr = self._parse_expression()
+            self._match(TokenType.NEWLINE)
+            return InscribeTablet(
+                working_name=working_tok.value,
+                target_name=target_expr,
+                line=tok.line,
+                col=tok.col,
+            )
         val_expr = self._parse_expression()
         self._match(TokenType.NEWLINE)
         return OutputStatement(value=val_expr, line=tok.line, col=tok.col)
+
+    def _parse_consult(self) -> ConsultTablet:
+        tok = self._advance()  # consume consult / igi / 𒅆
+        if self._check(TokenType.TABLET) or self.current.raw in ("tablet", "dub", "𒁾"):
+            self._advance()
+        name_expr = self._parse_primary()
+        version_expr = None
+        if self._check(TokenType.VERSION) or self.current.raw in ("version", "mu", "𒈬"):
+            self._advance()
+            version_expr = self._parse_primary()
+        alias_str = None
+        if self._check(TokenType.AS) or self.current.raw in ("as", "gim", "𒁶"):
+            self._advance()
+            alias_tok = self._expect(TokenType.IDENTIFIER, "Expected alias identifier after 'as'")
+            alias_str = alias_tok.value
+        self._match(TokenType.NEWLINE)
+        return ConsultTablet(tablet_name=name_expr, version=version_expr, alias=alias_str, line=tok.line, col=tok.col)
+
+    def _parse_working(self) -> CreateWorkingTablet:
+        if self._check(TokenType.IDENTIFIER) and self.current.raw == "create":
+            self._advance()
+        tok = self._advance()  # consume working / kin / 𒆥
+        if self._check(TokenType.TABLET) or self.current.raw in ("tablet", "dub", "𒁾"):
+            self._advance()
+        name_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier")
+        self._match(TokenType.NEWLINE)
+        return CreateWorkingTablet(name=name_tok.value, shape="table", line=tok.line, col=tok.col)
+
+    def _parse_copy(self) -> CopyTablet:
+        tok = self._advance()  # consume copy / gaba-ri / 𒃮𒊑
+        if self._check(TokenType.AS) or self.current.raw in ("as", "gim", "𒁶"):
+            self._advance()
+            if self._check(TokenType.WORKING) or self.current.raw in ("working", "kin", "𒆥"):
+                self._advance()
+            target_tok = self._expect(TokenType.IDENTIFIER, "Expected target identifier after copy as working")
+            self._match(TokenType.NEWLINE)
+            return CopyTablet(source=None, target=target_tok.value, version=None, line=tok.line, col=tok.col)
+
+        source_expr = self._parse_primary()
+        version_expr = None
+        if self._check(TokenType.VERSION) or self.current.raw in ("version", "mu", "𒈬"):
+            self._advance()
+            version_expr = self._parse_primary()
+        if self._check(TokenType.AS) or self.current.raw in ("as", "gim", "𒁶"):
+            self._advance()
+        if self._check(TokenType.WORKING) or self.current.raw in ("working", "kin", "𒆥"):
+            self._advance()
+        target_tok = self._expect(TokenType.IDENTIFIER, "Expected target working tablet identifier")
+        self._match(TokenType.NEWLINE)
+        return CopyTablet(source=source_expr, target=target_tok.value, version=version_expr, line=tok.line, col=tok.col)
+
+    def _parse_derive(self) -> DeriveTablet:
+        tok = self._advance()  # consume derive
+        self._expect(TokenType.FROM, "Expected 'from' after derive")
+        source_expr = self._parse_primary()
+        version_expr = None
+        if self._check(TokenType.VERSION) or self.current.raw in ("version", "mu", "𒈬"):
+            self._advance()
+            version_expr = self._parse_primary()
+        if self._check(TokenType.AS) or self.current.raw in ("as", "gim", "𒁶"):
+            self._advance()
+        if self._check(TokenType.WORKING) or self.current.raw in ("working", "kin", "𒆥"):
+            self._advance()
+        target_tok = self._expect(TokenType.IDENTIFIER, "Expected target working tablet identifier")
+        self._match(TokenType.NEWLINE)
+        return DeriveTablet(source=source_expr, target=target_tok.value, version=version_expr, line=tok.line, col=tok.col)
+
+    def _parse_put(self) -> PutEntry:
+        tok = self._advance()  # consume put / gar / 𒃻
+        val_expr = self._parse_sum()
+        if self._check(TokenType.INTO) or self.current.raw in ("into", "in", "a", "𒀀"):
+            self._advance()
+        working_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier after into")
+        if self._check(TokenType.AT) or self._check(TokenType.INTO) or self.current.raw in ("at", "a", "𒀀"):
+            self._advance()
+        key_expr = self._parse_expression()
+        self._match(TokenType.NEWLINE)
+        return PutEntry(working_name=working_tok.value, key=key_expr, value=val_expr, line=tok.line, col=tok.col)
+
+    def _parse_replace(self) -> ReplaceEntry:
+        tok = self._advance()  # consume replace / update
+        if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+            self._advance()
+        key_expr = self._parse_sum()
+        self._expect(TokenType.WITH, "Expected 'with' in replace statement")
+        val_expr = self._parse_sum()
+        if self._check(TokenType.INTO) or self.current.raw in ("in", "into", "a", "𒀀"):
+            self._advance()
+        working_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier")
+        self._match(TokenType.NEWLINE)
+        return ReplaceEntry(working_name=working_tok.value, key=key_expr, value=val_expr, line=tok.line, col=tok.col)
+
+    def _parse_replace_for_working(self, working_name: str) -> ReplaceEntry:
+        tok = self._advance()  # consume replace / update
+        if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+            self._advance()
+        key_expr = self._parse_sum()
+        self._expect(TokenType.WITH, "Expected 'with' in replace statement")
+        val_expr = self._parse_sum()
+        self._match(TokenType.NEWLINE)
+        return ReplaceEntry(working_name=working_name, key=key_expr, value=val_expr, line=tok.line, col=tok.col)
+
+    def _parse_remove(self) -> RemoveEntry:
+        tok = self._advance()  # consume remove / delete
+        if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+            self._advance()
+        key_expr = self._parse_sum()
+        self._expect(TokenType.FROM, "Expected 'from' in remove statement")
+        working_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier")
+        self._match(TokenType.NEWLINE)
+        return RemoveEntry(working_name=working_tok.value, key=key_expr, line=tok.line, col=tok.col)
 
     # ==========================================================================
     # Expressions (Section 6 EBNF Grammar)
@@ -1052,12 +1278,22 @@ class Parser:
                 self._advance()
                 unit_str = "𒌗"
 
-            return NumberLiteral(
+            num_lit = NumberLiteral(
                 value=num_tok.value,
                 unit=unit_str,
                 line=num_tok.line,
                 col=num_tok.col,
             )
+            # Check if followed by: take [entry] from <tablet>
+            if self._check(TokenType.TAKE) or self.current.raw in ("take", "shu", "šu"):
+                take_tok = self._advance()
+                if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+                    self._advance()
+                if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫"):
+                    self._advance()
+                tablet_expr = self._parse_primary()
+                return TakeEntry(tablet=tablet_expr, key=num_lit, line=take_tok.line, col=take_tok.col)
+            return num_lit
 
         # String literal
         if self._check(TokenType.STRING):
@@ -1076,6 +1312,40 @@ class Parser:
         # Input expression: 𒀀𒁹("...") or input("...") or ask "..."
         if self._check(TokenType.ASK):
             return self._parse_input_expr()
+
+        # Archive expressions (§21, §22, §38)
+        # 1) take [entry] <key> from <tablet>
+        if self._check(TokenType.TAKE) or tok.raw in ("take", "shu", "šu"):
+            take_tok = self._advance()
+            if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+                self._advance()
+            key_expr = self._parse_sum()
+            if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫"):
+                self._advance()
+            tablet_expr = self._parse_primary()
+            return TakeEntry(tablet=tablet_expr, key=key_expr, line=take_tok.line, col=take_tok.col)
+
+        # 2) seek [entry] [nearest] <target> in <tablet>
+        if self._check(TokenType.SEEK) or tok.raw in ("seek", "find"):
+            seek_tok = self._advance()
+            if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+                self._advance()
+            mode = "nearest"
+            if self._check(TokenType.NEAREST) or self.current.raw in ("nearest", "round", "ri", "𒊑"):
+                self._advance()
+            target_expr = self._parse_sum()
+            if self._check(TokenType.INTO) or self.current.raw in ("in", "into", "from", "ta", "𒋫"):
+                self._advance()
+            tablet_expr = self._parse_primary()
+            return SeekEntry(tablet=tablet_expr, target=target_expr, mode=mode, line=seek_tok.line, col=seek_tok.col)
+
+        # 3) history of <tablet>
+        if self._check(TokenType.HISTORY) or tok.raw in ("history", "igi-kar"):
+            hist_tok = self._advance()
+            if self._check(TokenType.OF) or self.current.raw in ("of", "sha", "ša", "𒊭"):
+                self._advance()
+            tablet_expr = self._parse_primary()
+            return TabletHistory(tablet=tablet_expr, line=hist_tok.line, col=hist_tok.col)
 
         # Parenthesized expression: ( expr )
         if self._match(TokenType.LPAREN):
@@ -1111,6 +1381,21 @@ class Parser:
                     field=str(ident_tok.value),
                     line=ident_tok.line,
                     col=ident_tok.col,
+                )
+
+            # Check if followed by: take [entry] from <tablet>
+            if self._check(TokenType.TAKE) or self.current.raw in ("take", "shu", "šu"):
+                take_tok = self._advance()
+                if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+                    self._advance()
+                if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫"):
+                    self._advance()
+                tablet_expr = self._parse_primary()
+                return TakeEntry(
+                    tablet=tablet_expr,
+                    key=Identifier(name=ident_tok.value, line=ident_tok.line, col=ident_tok.col),
+                    line=take_tok.line,
+                    col=take_tok.col,
                 )
 
             # Procedure call: id(args...)

@@ -42,6 +42,17 @@ from dubsar.ast import (
     StringLiteral,
     TupleExpr,
     UnaryOp,
+    ConsultTablet,
+    CreateWorkingTablet,
+    CopyTablet,
+    DeriveTablet,
+    InscribeTablet,
+    PutEntry,
+    ReplaceEntry,
+    RemoveEntry,
+    TakeEntry,
+    SeekEntry,
+    TabletHistory,
 )
 from dubsar.numbers import Rational
 
@@ -114,6 +125,27 @@ class FieldLookup(VerbExpr):
 class PostfixCalc(VerbExpr):
     """Postfix calculation sequence."""
     steps: List[Any] = field(default_factory=list)
+
+
+@dataclass
+class TakeTabletEntry(VerbExpr):
+    """TAKE entry from persistent or working tablet (§21, §52)."""
+    tablet: VerbExpr = field(default_factory=VerbExpr)
+    key: VerbExpr = field(default_factory=VerbExpr)
+
+
+@dataclass
+class SeekTabletEntry(VerbExpr):
+    """SEEK entry in tablet nearest target (§22, §52)."""
+    tablet: VerbExpr = field(default_factory=VerbExpr)
+    target: VerbExpr = field(default_factory=VerbExpr)
+    mode: str = "nearest"
+
+
+@dataclass
+class InspectTabletHistory(VerbExpr):
+    """Inspect version history of persistent tablet (§38, §52)."""
+    tablet: VerbExpr = field(default_factory=VerbExpr)
 
 
 # ==============================================================================
@@ -190,6 +222,67 @@ class RetainVerb(SemanticVerb):
     candidate: str = ""
     condition: VerbExpr = field(default_factory=VerbExpr)
     target: str = "best"
+
+
+@dataclass
+class ConsultTabletVerb(SemanticVerb):
+    """CONSULT persistent tablet from archive (§19, §52)."""
+    tablet_name: VerbExpr = field(default_factory=VerbExpr)
+    version: Optional[VerbExpr] = None
+    alias: Optional[str] = None
+
+
+@dataclass
+class CreateWorkingTabletVerb(SemanticVerb):
+    """CREATE working mutable tablet in memory (§15, §52)."""
+    name: str = ""
+    shape: str = "table"
+
+
+@dataclass
+class CopyTabletVerb(SemanticVerb):
+    """COPY persistent tablet to working tablet (§17, §52)."""
+    target: str = ""
+    source: Optional[VerbExpr] = None
+    version: Optional[VerbExpr] = None
+
+
+@dataclass
+class DeriveTabletVerb(SemanticVerb):
+    """DERIVE working tablet retaining provenance (§18, §52)."""
+    target: str = ""
+    source: Optional[VerbExpr] = None
+    version: Optional[VerbExpr] = None
+
+
+@dataclass
+class InscribeTabletVerb(SemanticVerb):
+    """INSCRIBE working tablet into persistent archive (§16, §42, §52)."""
+    working_name: str = ""
+    target_name: VerbExpr = field(default_factory=VerbExpr)
+
+
+@dataclass
+class PutTabletEntryVerb(SemanticVerb):
+    """PUT entry into working tablet (§15, §52)."""
+    working_name: str = ""
+    key: VerbExpr = field(default_factory=VerbExpr)
+    value: VerbExpr = field(default_factory=VerbExpr)
+
+
+@dataclass
+class ReplaceTabletEntryVerb(SemanticVerb):
+    """REPLACE entry in working tablet (§15, §52)."""
+    working_name: str = ""
+    key: VerbExpr = field(default_factory=VerbExpr)
+    value: VerbExpr = field(default_factory=VerbExpr)
+
+
+@dataclass
+class RemoveTabletEntryVerb(SemanticVerb):
+    """REMOVE entry from working tablet (§15, §52)."""
+    working_name: str = ""
+    key: VerbExpr = field(default_factory=VerbExpr)
 
 
 # ==============================================================================
@@ -282,6 +375,27 @@ def lower_expression_to_sem_ir(expr: Expression) -> VerbExpr:
         return ApplyMathVerb(verb="COMPARE", operands=ops, relation=expr.relation, line=expr.line, col=expr.col)
     elif isinstance(expr, IsExpr):
         return ApplyMathVerb(verb="IS", operands=[lower_expression_to_sem_ir(expr.target)], relation=expr.predicate, line=expr.line, col=expr.col)
+    elif isinstance(expr, TakeEntry):
+        return TakeTabletEntry(
+            tablet=lower_expression_to_sem_ir(expr.tablet),
+            key=lower_expression_to_sem_ir(expr.key),
+            line=expr.line,
+            col=expr.col,
+        )
+    elif isinstance(expr, SeekEntry):
+        return SeekTabletEntry(
+            tablet=lower_expression_to_sem_ir(expr.tablet),
+            target=lower_expression_to_sem_ir(expr.target),
+            mode=expr.mode,
+            line=expr.line,
+            col=expr.col,
+        )
+    elif isinstance(expr, TabletHistory):
+        return InspectTabletHistory(
+            tablet=lower_expression_to_sem_ir(expr.tablet),
+            line=expr.line,
+            col=expr.col,
+        )
     return VerbExpr(line=expr.line, col=expr.col)
 
 
@@ -357,6 +471,62 @@ def lower_statement_to_sem_ir(stmt: Statement) -> SemanticVerb:
             start=lower_expression_to_sem_ir(stmt.start),
             end=lower_expression_to_sem_ir(stmt.end),
             body=[lower_statement_to_sem_ir(s) for s in stmt.body],
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, ConsultTablet):
+        return ConsultTabletVerb(
+            tablet_name=lower_expression_to_sem_ir(stmt.tablet_name),
+            version=lower_expression_to_sem_ir(stmt.version) if stmt.version else None,
+            alias=stmt.alias,
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, CreateWorkingTablet):
+        return CreateWorkingTabletVerb(name=stmt.name, shape=stmt.shape, line=stmt.line, col=stmt.col)
+    elif isinstance(stmt, CopyTablet):
+        return CopyTabletVerb(
+            source=lower_expression_to_sem_ir(stmt.source) if stmt.source else None,
+            target=stmt.target,
+            version=lower_expression_to_sem_ir(stmt.version) if stmt.version else None,
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, DeriveTablet):
+        return DeriveTabletVerb(
+            source=lower_expression_to_sem_ir(stmt.source) if stmt.source else None,
+            target=stmt.target,
+            version=lower_expression_to_sem_ir(stmt.version) if stmt.version else None,
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, InscribeTablet):
+        return InscribeTabletVerb(
+            working_name=stmt.working_name,
+            target_name=lower_expression_to_sem_ir(stmt.target_name),
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, PutEntry):
+        return PutTabletEntryVerb(
+            working_name=stmt.working_name,
+            key=lower_expression_to_sem_ir(stmt.key),
+            value=lower_expression_to_sem_ir(stmt.value),
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, ReplaceEntry):
+        return ReplaceTabletEntryVerb(
+            working_name=stmt.working_name,
+            key=lower_expression_to_sem_ir(stmt.key),
+            value=lower_expression_to_sem_ir(stmt.value),
+            line=stmt.line,
+            col=stmt.col,
+        )
+    elif isinstance(stmt, RemoveEntry):
+        return RemoveTabletEntryVerb(
+            working_name=stmt.working_name,
+            key=lower_expression_to_sem_ir(stmt.key),
             line=stmt.line,
             col=stmt.col,
         )

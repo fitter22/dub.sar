@@ -97,7 +97,61 @@ class DubSarDeterminationError(DubSarError):
     pass
 
 
-# Export standard names matching Section 19 & Section 59
+# ==============================================================================
+# Tablet Archive Errors (§44)
+# ==============================================================================
+
+class DubSarArchiveError(DubSarError):
+    """Base error for all tablet archive operations."""
+    pass
+
+
+class DubSarTabletNotFoundError(DubSarArchiveError):
+    """Requested tablet was not found in the archive."""
+    pass
+
+
+class DubSarTabletVersionNotFoundError(DubSarArchiveError):
+    """Requested version of tablet was not found in the archive."""
+    pass
+
+
+class DubSarTabletExistsError(DubSarArchiveError):
+    """Tablet already exists in the archive."""
+    pass
+
+
+class DubSarArchiveConflictError(DubSarArchiveError):
+    """Concurrent modification or version revision conflict."""
+    pass
+
+
+class DubSarArchiveCorruptError(DubSarArchiveError):
+    """Archive database or tablet payload is corrupted."""
+    pass
+
+
+class DubSarInvalidTabletError(DubSarArchiveError):
+    """Invalid tablet structure, shape, or format."""
+    pass
+
+
+class DubSarInvalidEntryError(DubSarArchiveError):
+    """Invalid key or entry access in tablet."""
+    pass
+
+
+class DubSarConsultationError(DubSarArchiveError):
+    """Error consulting persistent tablet."""
+    pass
+
+
+class DubSarInscriptionError(DubSarArchiveError):
+    """Error inscribing working tablet into persistent archive."""
+    pass
+
+
+# Export standard names matching Section 19, Section 44, Section 59
 SyntaxError = DubSarSyntaxError
 NameError = DubSarNameError
 UnitError = DubSarUnitError
@@ -109,6 +163,17 @@ InputError = DubSarInputError
 ReturnError = DubSarReturnError
 RecipeError = DubSarRecipeError
 DeterminationError = DubSarDeterminationError
+
+ArchiveError = DubSarArchiveError
+TabletNotFoundError = DubSarTabletNotFoundError
+TabletVersionNotFoundError = DubSarTabletVersionNotFoundError
+TabletExistsError = DubSarTabletExistsError
+ArchiveConflictError = DubSarArchiveConflictError
+ArchiveCorruptError = DubSarArchiveCorruptError
+InvalidTabletError = DubSarInvalidTabletError
+InvalidEntryError = DubSarInvalidEntryError
+ConsultationError = DubSarConsultationError
+InscriptionError = DubSarInscriptionError
 
 __all__ = [
     "DubSarError",
@@ -123,6 +188,16 @@ __all__ = [
     "DubSarReturnError",
     "DubSarRecipeError",
     "DubSarDeterminationError",
+    "DubSarArchiveError",
+    "DubSarTabletNotFoundError",
+    "DubSarTabletVersionNotFoundError",
+    "DubSarTabletExistsError",
+    "DubSarArchiveConflictError",
+    "DubSarArchiveCorruptError",
+    "DubSarInvalidTabletError",
+    "DubSarInvalidEntryError",
+    "DubSarConsultationError",
+    "DubSarInscriptionError",
     "SyntaxError",
     "NameError",
     "UnitError",
@@ -134,4 +209,14 @@ __all__ = [
     "ReturnError",
     "RecipeError",
     "DeterminationError",
+    "ArchiveError",
+    "TabletNotFoundError",
+    "TabletVersionNotFoundError",
+    "TabletExistsError",
+    "ArchiveConflictError",
+    "ArchiveCorruptError",
+    "InvalidTabletError",
+    "InvalidEntryError",
+    "ConsultationError",
+    "InscriptionError",
 ]

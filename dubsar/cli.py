@@ -18,6 +18,8 @@ import sys
 from pathlib import Path
 from typing import Any, List, Optional
 
+from dubsar.archive.archive import SQLiteTabletArchive
+from dubsar.archive.models import TabletVersionInfo
 from dubsar.diagnostics import format_diagnostic
 from dubsar.errors import DubSarError
 from dubsar.formatter import detect_source_mode, format_source
@@ -60,6 +62,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="auto",
         help="Source language mode filter / detection",
     )
+    run_p.add_argument("--archive", type=str, default=None, help="Path to tablet archive database (.db)")
 
     # check
     check_p = subparsers.add_parser("check", help="Parse and semantically validate a tablet")
@@ -126,12 +129,135 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rend_p.add_argument("-o", "--output", type=str, default=None, help="Output destination file")
 
+    # archive
+    arc_p = subparsers.add_parser("archive", help="Manage and inspect persistent tablet archive")
+    arc_sub = arc_p.add_subparsers(dest="archive_cmd", required=True, help="Archive action")
+
+    # archive list
+    arc_list = arc_sub.add_parser("list", help="List tablets in the archive")
+    arc_list.add_argument("--namespace", type=str, default=None, help="Filter by namespace")
+    arc_list.add_argument("--archive", type=str, default=None, help="Path to archive database (.db)")
+
+    # archive show
+    arc_show = arc_sub.add_parser("show", help="Show entries of a persistent tablet")
+    arc_show.add_argument("name", type=str, help="Tablet name")
+    arc_show.add_argument("--version", type=int, default=None, help="Explicit tablet version")
+    arc_show.add_argument("--archive", type=str, default=None, help="Path to archive database (.db)")
+
+    # archive history
+    arc_hist = arc_sub.add_parser("history", help="Show version history of a tablet")
+    arc_hist.add_argument("name", type=str, help="Tablet name")
+    arc_hist.add_argument("--archive", type=str, default=None, help="Path to archive database (.db)")
+
+    # archive export
+    arc_exp = arc_sub.add_parser("export", help="Export archive to JSON")
+    arc_exp.add_argument("-o", "--output", type=str, default=None, help="Output destination file")
+    arc_exp.add_argument("--archive", type=str, default=None, help="Path to archive database (.db)")
+
+    # archive import
+    arc_imp = arc_sub.add_parser("import", help="Import tablets into archive from JSON")
+    arc_imp.add_argument("file", type=str, help="Path to JSON file to import")
+    arc_imp.add_argument("--archive", type=str, default=None, help="Path to archive database (.db)")
+
+    # archive render
+    arc_rend = arc_sub.add_parser("render", help="Render tablet entries")
+    arc_rend.add_argument("name", type=str, help="Tablet name")
+    arc_rend.add_argument("--version", type=int, default=None, help="Explicit tablet version")
+    arc_rend.add_argument("-o", "--output", type=str, default=None, help="Output destination file")
+    arc_rend.add_argument("--archive", type=str, default=None, help="Path to archive database (.db)")
+
     return parser
+
+
+def handle_archive_command(args: argparse.Namespace) -> int:
+    db_path = args.archive if getattr(args, "archive", None) else "archive.db"
+    archive = SQLiteTabletArchive(db_path)
+    try:
+        subcmd = args.archive_cmd
+        if subcmd == "list":
+            tablets = archive.list_tablets(namespace=getattr(args, "namespace", None))
+            if not tablets:
+                print("No tablets found in archive.")
+                return 0
+            print(f"{'NAME':<20} {'NAMESPACE':<12} {'VER':<5} {'KIND':<14} {'SHAPE':<10}")
+            print("-" * 65)
+            for t in tablets:
+                print(f"{t['name']:<20} {t['namespace']:<12} {t['current_version']:<5} {t['kind']:<14} {t['shape']:<10}")
+            return 0
+
+        elif subcmd == "show":
+            version = getattr(args, "version", None)
+            info = archive.consult(args.name, version=version)
+            print(f"Tablet: {info.name} (v{info.version})")
+            print(f"  Kind: {info.kind.value} | Shape: {info.shape.value} | Checksum: {info.checksum[:16]}")
+            if info.metadata.title:
+                print(f"  Title: {info.metadata.title}")
+            if info.metadata.source:
+                print(f"  Source: {info.metadata.source}")
+            if info.metadata.provenance:
+                print(f"  Provenance: {info.metadata.provenance}")
+            if info.metadata.historical_tag:
+                print(f"  Status: {info.metadata.historical_tag.value}")
+            print("\nEntries:")
+            for k, v in info.entries:
+                v_str = v.format() if hasattr(v, "format") else str(v)
+                print(f"  {k} -> {v_str}")
+            return 0
+
+        elif subcmd == "history":
+            hist = archive.history(args.name)
+            if not hist:
+                print(f"No history found for tablet '{args.name}'")
+                return 0
+            print(f"History of '{args.name}':")
+            for v in hist:
+                parent_str = f"parent v{v.parent_version}" if v.parent_version else "root"
+                print(f"  v{v.version} | {parent_str} | {v.checksum[:12]} | {v.created_at} | {v.created_by}")
+            return 0
+
+        elif subcmd == "export":
+            data = archive.export_archive(filepath=args.output)
+            if not args.output:
+                print(json.dumps(data, indent=2, ensure_ascii=False))
+            else:
+                print(f"Archive exported to: {args.output}")
+            return 0
+
+        elif subcmd == "import":
+            count = archive.import_archive(args.file)
+            print(f"Successfully imported {count} tablet version(s) into archive.")
+            return 0
+
+        elif subcmd == "render":
+            version = getattr(args, "version", None)
+            info = archive.consult(args.name, version=version)
+            lines = [f"TABLET: {info.name.upper()} (v{info.version})", "=" * 40]
+            for k, v in info.entries:
+                v_str = v.format() if hasattr(v, "format") else str(v)
+                k_str = str(k)
+                lines.append(f"{k_str:>8}  |  {v_str}")
+            rendered = "\n".join(lines)
+            if getattr(args, "output", None):
+                Path(args.output).write_text(rendered, encoding="utf-8")
+                print(f"Rendered tablet written to: {args.output}")
+            else:
+                print(rendered)
+            return 0
+
+    except DubSarError as err:
+        print(f"Archive Error: {err}", file=sys.stderr)
+        return 1
+    finally:
+        archive.close()
+    return 0
 
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "archive":
+        return handle_archive_command(args)
 
     file_path = Path(args.file)
     if not file_path.exists():
@@ -158,15 +284,18 @@ def main(argv: Optional[List[str]] = None) -> int:
             else:
                 in_fn = input
 
+            archive_db = args.archive if args.archive else str(file_path.parent / f"{file_path.stem}.tablets.db")
+            archive_inst = SQLiteTabletArchive(archive_db)
+
             if args.backend == "vm":
                 from dubsar.vm import VirtualMachine
                 SemanticAnalyzer(source_file=str(file_path)).analyze(program)
                 compiler = Compiler()
                 compiled = compiler.compile(program)
-                vm = VirtualMachine(input_fn=in_fn, output_fn=print, format_mode=args.format)
+                vm = VirtualMachine(input_fn=in_fn, output_fn=print, format_mode=args.format, archive=archive_inst)
                 vm.execute(compiled)
             else:
-                interp = Interpreter(input_fn=in_fn, output_fn=print, source_file=str(file_path), format_mode=args.format)
+                interp = Interpreter(input_fn=in_fn, output_fn=print, source_file=str(file_path), format_mode=args.format, archive=archive_inst)
                 interp.run(program)
             return 0
 

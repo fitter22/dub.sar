@@ -49,6 +49,24 @@ class TokenType(Enum):
     DETERMINE = auto()    # 𒉆 / determine / nam
     APPLY = auto()        # apply
 
+    # Tablet Archive (House of Tablets / É.DUB.BA.A) (§3, §51)
+    CONSULT = auto()      # 𒅆 / consult / examine / igi
+    TABLET = auto()       # 𒁾 / tablet / dub
+    WORKING = auto()      # 𒆥 / working / kin
+    ENTRY = auto()        # entry / entries / pad
+    PUT = auto()          # 𒃻 / put / insert / set / gar
+    INTO = auto()         # into / in
+    AT = auto()           # at
+    REPLACE = auto()      # replace / update
+    WITH = auto()         # 𒁕 / with / da
+    REMOVE = auto()       # remove / delete
+    COPY = auto()         # 𒃮𒊑 / copy / gaba-ri
+    DERIVE = auto()       # derive
+    VERSION = auto()      # version
+    HISTORY = auto()      # history / igi-kar
+    AS = auto()           # 𒁶 / as / gim
+    SEEK = auto()         # seek / find
+
     # Assignment & Punctuation
     ASSIGN = auto()       # :=
     COLON = auto()        # :
@@ -150,6 +168,15 @@ CUNEIFORM_KEYWORDS: Dict[str, TokenType] = {
     "𒀝": TokenType.APPLY,
     "𒆕": TokenType.APPLY,
     "𒂗": TokenType.THROUGH,
+    "𒅆": TokenType.CONSULT,
+    "𒁾": TokenType.TABLET,
+    "𒆥": TokenType.WORKING,
+    "𒃻": TokenType.PUT,
+    "𒁕": TokenType.WITH,
+    "𒃮𒊑": TokenType.COPY,
+    "𒁶": TokenType.AS,
+    "𒊬": TokenType.INSCRIBE,
+    "𒀀": TokenType.INTO,
 }
 
 # Scholar / Transliteration keyword mappings (§2.2, §4, §6, §60)
@@ -239,6 +266,38 @@ SCHOLAR_KEYWORDS: Dict[str, TokenType] = {
     "te": TokenType.ABSOLUTE,
     "not": TokenType.NOT,
     "nu": TokenType.NOT,
+    "consult": TokenType.CONSULT,
+    "examine": TokenType.CONSULT,
+    "igi": TokenType.CONSULT,
+    "tablet": TokenType.TABLET,
+    "dub": TokenType.TABLET,
+    "working": TokenType.WORKING,
+    "kin": TokenType.WORKING,
+    "entry": TokenType.ENTRY,
+    "entries": TokenType.ENTRY,
+    "pad": TokenType.ENTRY,
+    "put": TokenType.PUT,
+    "insert": TokenType.PUT,
+    "set": TokenType.PUT,
+    "gar": TokenType.PUT,
+    "into": TokenType.INTO,
+    "at": TokenType.AT,
+    "replace": TokenType.REPLACE,
+    "update": TokenType.REPLACE,
+    "with": TokenType.WITH,
+    "da": TokenType.WITH,
+    "remove": TokenType.REMOVE,
+    "delete": TokenType.REMOVE,
+    "copy": TokenType.COPY,
+    "gaba-ri": TokenType.COPY,
+    "derive": TokenType.DERIVE,
+    "version": TokenType.VERSION,
+    "history": TokenType.HISTORY,
+    "igi-kar": TokenType.HISTORY,
+    "as": TokenType.AS,
+    "gim": TokenType.AS,
+    "seek": TokenType.SEEK,
+    "find": TokenType.SEEK,
 }
 
 # Reverse mapping for canonical transliteration / cuneiformization
@@ -273,6 +332,13 @@ TOKEN_TO_CUNEIFORM: Dict[TokenType, str] = {
     TokenType.APPLY: "𒀝",
     TokenType.OF: "𒊭",
     TokenType.FROM: "𒋫",
+    TokenType.CONSULT: "𒅆",
+    TokenType.TABLET: "𒁾",
+    TokenType.WORKING: "𒆥",
+    TokenType.PUT: "𒃻",
+    TokenType.WITH: "𒁕",
+    TokenType.COPY: "𒃮𒊑",
+    TokenType.AS: "𒁶",
 }
 
 TOKEN_TO_SCHOLAR: Dict[TokenType, str] = {
@@ -310,4 +376,20 @@ TOKEN_TO_SCHOLAR: Dict[TokenType, str] = {
     TokenType.TAKE: "take",
     TokenType.DETERMINE: "determine",
     TokenType.APPLY: "apply",
+    TokenType.CONSULT: "consult",
+    TokenType.TABLET: "tablet",
+    TokenType.WORKING: "working",
+    TokenType.ENTRY: "entry",
+    TokenType.PUT: "put",
+    TokenType.INTO: "into",
+    TokenType.AT: "at",
+    TokenType.REPLACE: "replace",
+    TokenType.WITH: "with",
+    TokenType.REMOVE: "remove",
+    TokenType.COPY: "copy",
+    TokenType.DERIVE: "derive",
+    TokenType.VERSION: "version",
+    TokenType.HISTORY: "history",
+    TokenType.AS: "as",
+    TokenType.SEEK: "seek",
 }

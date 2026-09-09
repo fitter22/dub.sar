@@ -126,6 +126,31 @@ class ApplyRecipe(Expression):
 
 
 # ==============================================================================
+# Tablet Archive Expressions (§21, §22, §51)
+# ==============================================================================
+
+@dataclass
+class TakeEntry(Expression):
+    """Take an entry from a tablet: take entry key from tablet / key take entry from tablet."""
+    tablet: Expression = field(default_factory=Expression)
+    key: Expression = field(default_factory=Expression)
+
+
+@dataclass
+class SeekEntry(Expression):
+    """Seek an entry from a tablet: seek nearest target in tablet."""
+    tablet: Expression = field(default_factory=Expression)
+    target: Expression = field(default_factory=Expression)
+    mode: str = "nearest"
+
+
+@dataclass
+class TabletHistory(Expression):
+    """Inspect tablet version history: history of tablet."""
+    tablet: Expression = field(default_factory=Expression)
+
+
+# ==============================================================================
 # Statements / Prescriptions
 # ==============================================================================
 
@@ -217,6 +242,71 @@ class Recipe(Statement):
 
 
 # ==============================================================================
+# Tablet Archive Statements (§15-§19, §51)
+# ==============================================================================
+
+@dataclass
+class ConsultTablet(Statement):
+    """Consult persistent tablet: consult tablet_name [version v] [as alias]."""
+    tablet_name: Expression = field(default_factory=Expression)
+    version: Optional[Expression] = None
+    alias: Optional[str] = None
+
+
+@dataclass
+class CreateWorkingTablet(Statement):
+    """Create a temporary mutable working tablet: working name."""
+    name: str = ""
+    shape: str = "table"
+
+
+@dataclass
+class CopyTablet(Statement):
+    """Copy persistent tablet into working tablet: copy [source] as working target."""
+    target: str = ""
+    source: Optional[Expression] = None
+    version: Optional[Expression] = None
+
+
+@dataclass
+class DeriveTablet(Statement):
+    """Derive working tablet from persistent tablet: derive from source [version v] as working target."""
+    target: str = ""
+    source: Optional[Expression] = None
+    version: Optional[Expression] = None
+
+
+@dataclass
+class InscribeTablet(Statement):
+    """Inscribe working tablet into persistent archive: inscribe working as target_name."""
+    working_name: str = ""
+    target_name: Expression = field(default_factory=Expression)
+
+
+@dataclass
+class PutEntry(Statement):
+    """Put entry into working tablet: put value into working at key."""
+    working_name: str = ""
+    key: Expression = field(default_factory=Expression)
+    value: Expression = field(default_factory=Expression)
+
+
+@dataclass
+class ReplaceEntry(Statement):
+    """Replace entry in working tablet: [working] replace entry key with value."""
+    working_name: str = ""
+    key: Expression = field(default_factory=Expression)
+    value: Expression = field(default_factory=Expression)
+
+
+@dataclass
+class RemoveEntry(Statement):
+    """Remove entry from working tablet: remove entry key from working."""
+    working_name: str = ""
+    key: Expression = field(default_factory=Expression)
+
+
+# ==============================================================================
 # Tablet Structure
 # ==============================================================================
 
@@ -269,3 +359,8 @@ Retain = RetainStatement
 Inscription = OutputStatement
 Input = InputExpr
 Determine = ReturnStatement
+Consult = ConsultTablet
+Working = CreateWorkingTablet
+Copy = CopyTablet
+Derive = DeriveTablet
+InscribeArchive = InscribeTablet

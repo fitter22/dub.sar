@@ -1,0 +1,24 @@
+# DUB.SAR 1.0 — Tablet Archive (Scholar Mode)
+# Demonstrates persistent tablet consultation, working scratchpads, and inscription.
+
+problem
+
+    consult tablet "reciprocals"
+
+    reciprocal-of-four :
+        4
+        take entry from reciprocals
+
+    working observations
+
+    put 42 into observations at 10
+
+    inscribe observations as tablet "observations"
+
+    recorded-entry :
+        10
+        take entry from observations
+
+result
+
+    reciprocal-of-four

@@ -69,6 +69,17 @@ class OpCode(Enum):
     DETERMINE = auto()      # Create determination record: arg = (name, fields)
     FIELD_GET = auto()      # Pop record; push field value: arg = field_name
     RETAIN = auto()         # Pop condition; retain candidate into target if condition is True: arg = (candidate, target)
+    CONSULT = auto()        # Consult persistent tablet: arg=(has_version, alias)
+    WORKING_CREATE = auto() # Create working tablet: arg=(name, shape)
+    TABLET_COPY = auto()    # Copy tablet: arg=(target, has_source, has_version)
+    TABLET_DERIVE = auto()  # Derive tablet: arg=(target, has_source, has_version)
+    TABLET_INSCRIBE = auto()# Inscribe working tablet: arg=working_name
+    WORKING_PUT = auto()    # Put into working tablet: arg=working_name
+    WORKING_REPLACE = auto()# Replace in working tablet: arg=working_name
+    WORKING_REMOVE = auto() # Remove from working tablet: arg=working_name
+    ENTRY_TAKE = auto()     # Pop key, tablet; push entry value
+    ENTRY_SEEK = auto()     # Pop target, tablet; push nearest entry value
+    TABLET_HISTORY = auto() # Pop tablet; push tablet history
     HALT = auto()           # End execution
 
 
@@ -142,6 +153,17 @@ from dubsar.semantic_ir import (
     TakeText,
     TuplePack,
     VerbExpr,
+    ConsultTabletVerb,
+    CreateWorkingTabletVerb,
+    CopyTabletVerb,
+    DeriveTabletVerb,
+    InscribeTabletVerb,
+    PutTabletEntryVerb,
+    ReplaceTabletEntryVerb,
+    RemoveTabletEntryVerb,
+    TakeTabletEntry,
+    SeekTabletEntry,
+    InspectTabletHistory,
     ast_to_semantic_ir,
 )
 
@@ -270,6 +292,57 @@ class Compiler:
         elif isinstance(verb, RetainVerb):
             self._compile_verb_expr(verb.condition)
             chunk.emit(OpCode.RETAIN, (verb.candidate, verb.target), verb.line)
+
+        elif isinstance(verb, ConsultTabletVerb):
+            self._compile_verb_expr(verb.tablet_name)
+            if verb.version:
+                self._compile_verb_expr(verb.version)
+                chunk.emit(OpCode.CONSULT, (True, verb.alias), verb.line)
+            else:
+                chunk.emit(OpCode.CONSULT, (False, verb.alias), verb.line)
+
+        elif isinstance(verb, CreateWorkingTabletVerb):
+            chunk.emit(OpCode.WORKING_CREATE, (verb.name, verb.shape), verb.line)
+
+        elif isinstance(verb, CopyTabletVerb):
+            has_source = False
+            if verb.source:
+                self._compile_verb_expr(verb.source)
+                has_source = True
+            has_version = False
+            if verb.version:
+                self._compile_verb_expr(verb.version)
+                has_version = True
+            chunk.emit(OpCode.TABLET_COPY, (verb.target, has_source, has_version), verb.line)
+
+        elif isinstance(verb, DeriveTabletVerb):
+            has_source = False
+            if verb.source:
+                self._compile_verb_expr(verb.source)
+                has_source = True
+            has_version = False
+            if verb.version:
+                self._compile_verb_expr(verb.version)
+                has_version = True
+            chunk.emit(OpCode.TABLET_DERIVE, (verb.target, has_source, has_version), verb.line)
+
+        elif isinstance(verb, InscribeTabletVerb):
+            self._compile_verb_expr(verb.target_name)
+            chunk.emit(OpCode.TABLET_INSCRIBE, verb.working_name, verb.line)
+
+        elif isinstance(verb, PutTabletEntryVerb):
+            self._compile_verb_expr(verb.key)
+            self._compile_verb_expr(verb.value)
+            chunk.emit(OpCode.WORKING_PUT, verb.working_name, verb.line)
+
+        elif isinstance(verb, ReplaceTabletEntryVerb):
+            self._compile_verb_expr(verb.key)
+            self._compile_verb_expr(verb.value)
+            chunk.emit(OpCode.WORKING_REPLACE, verb.working_name, verb.line)
+
+        elif isinstance(verb, RemoveTabletEntryVerb):
+            self._compile_verb_expr(verb.key)
+            chunk.emit(OpCode.WORKING_REMOVE, verb.working_name, verb.line)
 
     def _compile_verb_expr(self, expr: VerbExpr) -> None:
         assert self.current_chunk is not None
@@ -413,6 +486,22 @@ class Compiler:
                         chunk.emit(OpCode.CMP, "==", expr.line)
                     elif step == "not-equal":
                         chunk.emit(OpCode.CMP, "!=", expr.line)
+                    elif step in ("take", "shu", "šu", "𒋗"):
+                        chunk.emit(OpCode.ENTRY_TAKE, None, expr.line)
+
+        elif isinstance(expr, TakeTabletEntry):
+            self._compile_verb_expr(expr.tablet)
+            self._compile_verb_expr(expr.key)
+            chunk.emit(OpCode.ENTRY_TAKE, None, expr.line)
+
+        elif isinstance(expr, SeekTabletEntry):
+            self._compile_verb_expr(expr.tablet)
+            self._compile_verb_expr(expr.target)
+            chunk.emit(OpCode.ENTRY_SEEK, expr.mode, expr.line)
+
+        elif isinstance(expr, InspectTabletHistory):
+            self._compile_verb_expr(expr.tablet)
+            chunk.emit(OpCode.TABLET_HISTORY, None, expr.line)
 
     def _compile_statement(self, stmt: Statement) -> None:
         assert self.current_chunk is not None
@@ -504,6 +593,57 @@ class Compiler:
             self._compile_expression(stmt.expr)
             chunk.emit(OpCode.POP, None, stmt.line)
 
+        elif isinstance(stmt, ConsultTablet):
+            self._compile_expression(stmt.tablet_name)
+            if stmt.version:
+                self._compile_expression(stmt.version)
+                chunk.emit(OpCode.CONSULT, (True, stmt.alias), stmt.line)
+            else:
+                chunk.emit(OpCode.CONSULT, (False, stmt.alias), stmt.line)
+
+        elif isinstance(stmt, CreateWorkingTablet):
+            chunk.emit(OpCode.WORKING_CREATE, (stmt.name, stmt.shape), stmt.line)
+
+        elif isinstance(stmt, CopyTablet):
+            has_source = False
+            if stmt.source:
+                self._compile_expression(stmt.source)
+                has_source = True
+            has_version = False
+            if stmt.version:
+                self._compile_expression(stmt.version)
+                has_version = True
+            chunk.emit(OpCode.TABLET_COPY, (stmt.target, has_source, has_version), stmt.line)
+
+        elif isinstance(stmt, DeriveTablet):
+            has_source = False
+            if stmt.source:
+                self._compile_expression(stmt.source)
+                has_source = True
+            has_version = False
+            if stmt.version:
+                self._compile_expression(stmt.version)
+                has_version = True
+            chunk.emit(OpCode.TABLET_DERIVE, (stmt.target, has_source, has_version), stmt.line)
+
+        elif isinstance(stmt, InscribeTablet):
+            self._compile_expression(stmt.target_name)
+            chunk.emit(OpCode.TABLET_INSCRIBE, stmt.working_name, stmt.line)
+
+        elif isinstance(stmt, PutEntry):
+            self._compile_expression(stmt.key)
+            self._compile_expression(stmt.value)
+            chunk.emit(OpCode.WORKING_PUT, stmt.working_name, stmt.line)
+
+        elif isinstance(stmt, ReplaceEntry):
+            self._compile_expression(stmt.key)
+            self._compile_expression(stmt.value)
+            chunk.emit(OpCode.WORKING_REPLACE, stmt.working_name, stmt.line)
+
+        elif isinstance(stmt, RemoveEntry):
+            self._compile_expression(stmt.key)
+            chunk.emit(OpCode.WORKING_REMOVE, stmt.working_name, stmt.line)
+
     def _compile_expression(self, expr: Expression) -> None:
         assert self.current_chunk is not None
         chunk = self.current_chunk
@@ -569,3 +709,17 @@ class Compiler:
         elif isinstance(expr, TupleExpr):
             for e in expr.elements:
                 self._compile_expression(e)
+
+        elif isinstance(expr, TakeEntry):
+            self._compile_expression(expr.tablet)
+            self._compile_expression(expr.key)
+            chunk.emit(OpCode.ENTRY_TAKE, None, expr.line)
+
+        elif isinstance(expr, SeekEntry):
+            self._compile_expression(expr.tablet)
+            self._compile_expression(expr.target)
+            chunk.emit(OpCode.ENTRY_SEEK, expr.mode, expr.line)
+
+        elif isinstance(expr, TabletHistory):
+            self._compile_expression(expr.tablet)
+            chunk.emit(OpCode.TABLET_HISTORY, None, expr.line)

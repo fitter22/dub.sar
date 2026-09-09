@@ -138,6 +138,14 @@ The following tokens are part of DUB.SAR 1.0. Their programming meanings are **D
 | `𒄑` | ĝeš | return |
 | `𒁹𒀀` | diš-a | output / inscribe |
 | `𒀀𒁹` | a-diš | input / ask |
+| `𒅆` | igi | consult persistent tablet |
+| `𒁾` | dub | tablet keyword |
+| `𒆥` | kin | working mutable tablet |
+| `𒃻` | gar | put entry into tablet |
+| `𒁕` | da | with |
+| `𒃮𒊑` | gaba-ri | copy tablet |
+| `𒁶` | gim | as |
+| `pad` | pad | entry |
 | `𒑰` | — | comment marker |
 
 The vocabulary is intentionally small. Where a modern programming concept has no defensible historical Sumerian equivalent, DUB.SAR assigns a transparent technical convention instead of pretending the term is ancient.
@@ -186,6 +194,14 @@ statement        ::= declaration
                    | determine-statement
                    | return-statement
                    | output-statement
+                   | consult-statement
+                   | working-statement
+                   | copy-statement
+                   | derive-statement
+                   | inscribe-statement
+                   | put-statement
+                   | replace-statement
+                   | remove-statement
                    | expression-statement
                    | expression ;
 
@@ -210,6 +226,15 @@ return-statement ::= ("𒄑" | "return") expression ("," expression)* ;
 output-statement ::= ("𒁹𒀀" | "output" | "inscribe") expression ;
 input-expression ::= ("𒀀𒁹" | "ask" | "input") ("(" string ")" | string) ;
 
+consult-statement   ::= ("𒅆" | "consult" | "examine") expression (("version" | "mu" | "𒈬") expression)? (("𒁶" | "as") identifier)? ;
+working-statement   ::= ("create")? ("𒆥" | "working") ("𒁾" | "tablet")? identifier ;
+copy-statement      ::= ("𒃮𒊑" | "copy") (expression)? (("version" | "mu" | "𒈬") expression)? ("𒁶" | "as") ("𒆥" | "working")? identifier ;
+derive-statement    ::= "derive" ("𒋫" | "from") expression (("version" | "mu" | "𒈬") expression)? ("𒁶" | "as") ("𒆥" | "working")? identifier ;
+inscribe-statement  ::= ("𒁹𒀀" | "output" | "inscribe" | "𒊬") identifier ("𒁶" | "as") expression ;
+put-statement       ::= ("𒃻" | "put" | "insert" | "set") expression ("into" | "in" | "𒀀") identifier ("at" | "𒀀") expression ;
+replace-statement   ::= (identifier)? ("replace" | "update") ("entry" | "pad")? expression ("𒁕" | "with") expression ("into" identifier)? ;
+remove-statement    ::= ("remove" | "delete") ("entry" | "pad")? expression ("𒋫" | "from") identifier ;
+
 expression       ::= comparison ;
 comparison       ::= sum (comparison-op sum)*
                    | sum "is" ("lesser" | "greater" | "equal") ("than")? sum
@@ -224,8 +249,8 @@ unary            ::= ("-" | "𒉡" | "not")? primary ;
 postfix-step     ::= primary | postfix-op | apply-recipe ;
 apply-recipe     ::= ("𒀝" | "apply") identifier ;
 postfix-op       ::= "floor" | "ceil" | "nearest" | "absolute"
-                   | "add" | "subtract" | "multiply" | "divide"
-                   | "𒄥" | "𒉏" | "𒊑" | "𒋼" | "𒍣" | "𒋫" | "𒊭" | "𒉌" ;
+                   | "add" | "subtract" | "multiply" | "divide" | "take"
+                   | "𒄥" | "𒉏" | "𒊑" | "𒋼" | "𒍣" | "𒋫" | "𒊭" | "𒉌" | "𒋗" ;
 
 primary          ::= number quantity-unit?
                    | field-access
@@ -234,7 +259,15 @@ primary          ::= number quantity-unit?
                    | ("𒉡" | "empty")
                    | call
                    | input-expression
+                   | take-entry
+                   | seek-entry
+                   | history-expression
                    | "(" expression ")" ;
+
+take-entry       ::= ("𒋗" | "take") ("entry" | "pad")? expression ("𒋫" | "from") primary
+                   | expression ("𒋗" | "take") ("entry" | "pad")? ("𒋫" | "from") primary ;
+seek-entry       ::= ("seek" | "find") ("entry" | "pad")? ("nearest" | "round" | "ri" | "𒊑")? expression ("in" | "into" | "𒋫" | "from") primary ;
+history-expression ::= ("history" | "igi-kar") ("of" | "𒊭") primary ;
 
 field-access     ::= primary "." identifier
                    | identifier ("of" | "𒊭") primary ;
@@ -1402,3 +1435,149 @@ That is the boundary DUB.SAR 1.0 is designed to occupy.
    https://cdli.earth/
 
 Historical claims in this specification should be read as references to the cited sources; DUB.SAR's programming semantics remain an original design.
+
+---
+
+## 36. The Tablet Archive (*é-dub-ba-a*)
+
+### 36.1 Conceptual Model
+
+DUB.SAR programs operate within a computational environment coupled with a local, persistent **Tablet Archive** (the scribal house of tablets, *é-dub-ba-a*). 
+
+The archive is **not** a relational SQL database or generic CRUD key-value store exposed to the source language. Rather, it models persistent, versioned mathematical clay tablets carrying recorded scholarly knowledge, tables of constants, metrological lists, and program-inscribed experimental results.
+
+The distinction is foundational:
+- **Procedures and Recipes** contain executable algorithms.
+- **Tablets** contain recorded mathematical knowledge and persistent data.
+
+### 36.2 Persistent Tablets and Immutability
+
+Persistent tablets stored in the archive are strictly **immutable**. Once inscribed, a tablet version can never be modified in place.
+
+Every persistent tablet possesses:
+- **Tablet Identity**: A unique identifier or name (e.g. `"reciprocals"`, `"solar-observations"`).
+- **Monotonic Versioning**: An integer version (`v1`, `v2`, `...`) incremented automatically upon each new inscription.
+- **Content Checksum**: A deterministic SHA-256 digest computed from canonical key-value serialization.
+- **Colophon and Provenance Metadata**: Recording the tablet title, kind, historical tags, lineage (`copied-from`, `derived-from`), timestamp, and inscribing agent.
+
+When a program consults a tablet without an explicit version:
+```text
+consult tablet "reciprocals"
+```
+the runtime resolves the highest available version. Pinning an exact historical version guarantees bit-for-bit computational reproducibility:
+```text
+consult tablet "reciprocals" version 1
+```
+
+### 36.3 Provenance and Lineage
+
+Modifications to existing knowledge occur through derivation or copying, never in-place mutation. When a tablet is copied or derived:
+- `copy tablet "T" as working W`: Creates a mutable working tablet pre-populated with all entries of `T`, recording `T` as its parent.
+- `derive tablet "T" as working W`: Establishes a formal mathematical derivation lineage, recording source tablet identity and version.
+
+When `W` is subsequently inscribed:
+```text
+inscribe W as tablet "T"
+```
+the archive creates version $N+1$ whose provenance points directly to version $N$.
+
+### 36.4 Working Tablets (*kin* / 𒆥)
+
+Working tablets (`kin` / `𒆥`) are mutable, temporary in-memory scratchpads. They allow high-performance computational modifications without disk I/O or database transaction overhead:
+- `working W`: Declares an empty working tablet named `W`.
+- `put V into W at K`: Inserts or sets key $K$ to value $V$.
+- `replace entry K in W with V`: Replaces the value at key $K$.
+- `remove entry K from W`: Deletes key $K$ from the working tablet.
+- `K take entry from W`: Retrieves entry for key $K$.
+- `seek entry in W nearest K`: Finds entry whose key is closest to $K$.
+
+Working tablets that are not explicitly inscribed before execution ends evaporate upon program termination.
+
+### 36.5 Inscription (*sar* / 𒁾𒊬)
+
+Explicit inscription is the sole mechanism by which working tablets become persistent:
+```text
+inscribe W as tablet "target-name"
+```
+Inscription is strictly atomic: either the new tablet version and its entries are committed in full to the archive, or the operation fails completely, leaving existing versions unmodified.
+
+### 36.6 Exact Value Preservation
+
+All tablet entries preserve DUB.SAR's exact arithmetic guarantees. Entries are serialized using canonical exact representations:
+- **Rationals**: Stored as exact numerator and denominator integers without decimal or floating-point rounding.
+- **Quantities**: Preserved as exact rational value and dimension vector / canonical unit.
+- **Strings and Determinations**: Serialized preserving field order, typing, and precision.
+
+### 36.7 Standard Scholarly Archive ("Scribal Archive 1")
+
+Every new DUB.SAR archive automatically initializes with standard scholarly reference tablets:
+1. `reciprocals`: Standard Old Babylonian reciprocal pairs ($2 \to 0;30$, $3 \to 0;20$, $4 \to 0;15$, $5 \to 0;12$, $6 \to 0;10$, $8 \to 0;07,30$, etc.).
+2. `common-fractions`: Exact sexagesimal representations of fundamental fractions ($1/2, 1/3, 2/3, 1/4, 3/4, 1/5, 5/6$).
+3. `squares`: Exact integer squares for integers $1$ through $60$.
+4. `cubes`: Exact integer cubes for integers $1$ through $30$.
+5. `square-roots`: Documented rational approximations and exact integer roots.
+6. `powers`: Powers of fundamental bases (powers of $2$ and $60$).
+7. `basic-metrology`: Attested conversion factors for length, area, and capacity.
+8. `basic-geometry`: Geometric coefficients (e.g. circle constant approximations).
+
+Each tablet carries explicit historical provenance tags: `attested` (historically attested in cuneiform corpus), `reconstructed`, or `modern`.
+
+### 36.8 Dual-Mode Syntax Examples
+
+#### Canonical Cuneiform Mode
+
+```text
+𒂊𒁹
+
+    𒅆 𒁾 "reciprocals"
+
+    reciprocal-of-7 :
+        7
+        pad 𒋫 reciprocals
+
+    𒆥 observations
+
+    observations
+        10
+        42
+        𒃻
+
+    𒁾 observations 𒁶 "observations"
+
+𒅗𒁹
+
+    reciprocal-of-7
+```
+
+#### Scholar Mode
+
+```text
+problem
+
+    consult tablet "reciprocals"
+
+    reciprocal-of-7 :
+        7
+        take entry from reciprocals
+
+    working observations
+
+    put 42 into observations at 10
+
+    inscribe observations as tablet "observations"
+
+result
+
+    reciprocal-of-7
+```
+
+### 36.9 Developer Tooling and Inspection
+
+Outside source execution, the `dubsar archive` CLI suite allows scholars and developers to inspect and manage the archive:
+- `dubsar archive list`: Enumerate all tablets with current version, entry count, and metadata.
+- `dubsar archive show <name> [--version V]`: Display tablet contents and colophon.
+- `dubsar archive history <name>`: Trace complete version lineage and parent links.
+- `dubsar archive export [--out file.json]`: Export archive to a deterministic canonical JSON bundle.
+- `dubsar archive import <file.json>`: Safely import tablets into an archive.
+- `dubsar archive render <name>`: Render tablet layout as an ASCII/Unicode clay-style grid.
+

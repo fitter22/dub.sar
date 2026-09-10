@@ -51,11 +51,14 @@ from dubsar.ast import (
     DeriveTablet,
     InscribeTablet,
     PutEntry,
+    AppendEntry,
     ReplaceEntry,
     RemoveEntry,
     TakeEntry,
     SeekEntry,
     TabletHistory,
+    SequenceLength,
+    IterateEntries,
 )
 from dubsar.archive.archive import SQLiteTabletArchive, TabletArchive
 from dubsar.archive.models import (
@@ -71,6 +74,8 @@ from dubsar.errors import (
     DubSarArchiveError,
     DubSarConsultationError,
     DubSarDivisionByZero,
+    DubSarEntryNotFoundError,
+    DubSarImmutableTabletError,
     DubSarInputError,
     DubSarInscriptionError,
     DubSarInvalidEntryError,
@@ -249,33 +254,70 @@ class Interpreter:
                 return self._resolve_tablet(val)
             raise DubSarInvalidTabletError(f"Invalid tablet expression: {val}", line=getattr(expr, "line", 0), col=getattr(expr, "col", 0))
 
+    def _resolve_working_tablet(self, name: Any, line: int = 0, col: int = 0) -> WorkingTablet:
+        if isinstance(name, WorkingTablet):
+            return name
+        if isinstance(name, (TabletVersionInfo, TabletReference)):
+            raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{getattr(name, 'name', name)}' (§57)", line=line, col=col)
+        if isinstance(name, str):
+            if name in self.working_tablets:
+                return self.working_tablets[name]
+            if name in self.consulted_tablets:
+                raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{name}' (§57)", line=line, col=col)
+            if self.current_env.has(name):
+                val = self.current_env.get(name)
+                if isinstance(val, (TabletVersionInfo, TabletReference)):
+                    raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{name}' (§57)", line=line, col=col)
+                if isinstance(val, WorkingTablet):
+                    return val
+            try:
+                _ = self.archive.consult(name)
+                raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{name}' (§57)", line=line, col=col)
+            except DubSarImmutableTabletError:
+                raise
+            except Exception:
+                pass
+            raise DubSarInvalidTabletError(f"Working tablet '{name}' not found", line=line, col=col)
+        raise DubSarInvalidTabletError(f"Object {name!r} is not a working tablet", line=line, col=col)
+
     def _eval_take_entry(self, tablet_expr: Any, key_val: Any, line: int = 0, col: int = 0) -> Any:
         tab = self._resolve_tablet(tablet_expr)
         if isinstance(tab, (WorkingTablet, TabletVersionInfo)):
             res = tab.get(key_val)
             if res is None:
-                raise DubSarInvalidEntryError(f"Entry {key_val!r} not found in tablet '{tab.name}'", line=line, col=col)
+                raise DubSarEntryNotFoundError(f"Entry {key_val!r} not found in tablet '{tab.name}'", line=line, col=col)
             return res
         elif isinstance(tab, TabletReference):
             info = self.archive.consult(tab.name, version=tab.version)
             res = info.get(key_val)
             if res is None:
-                raise DubSarInvalidEntryError(f"Entry {key_val!r} not found in tablet '{tab.name}'", line=line, col=col)
+                raise DubSarEntryNotFoundError(f"Entry {key_val!r} not found in tablet '{tab.name}'", line=line, col=col)
             return res
         raise DubSarInvalidTabletError(f"Object {tab!r} is not a valid tablet", line=line, col=col)
 
     def _eval_seek_entry(self, tablet_expr: Any, target_val: Any, mode: str = "nearest", line: int = 0, col: int = 0) -> Any:
         tab = self._resolve_tablet(tablet_expr)
+        entry = None
         if isinstance(tab, (WorkingTablet, TabletVersionInfo)):
-            entry = tab.seek_nearest(target_val)
+            if mode == "first":
+                entry = tab.first()
+            elif mode == "last":
+                entry = tab.last()
+            else:
+                entry = tab.seek_nearest(target_val)
             if entry is None:
-                raise DubSarInvalidEntryError(f"No entry found in tablet '{tab.name}' nearest {target_val!r}", line=line, col=col)
+                raise DubSarEntryNotFoundError(f"No entry found in tablet '{tab.name}' for {mode}", line=line, col=col)
             return entry[1]
         elif isinstance(tab, TabletReference):
             info = self.archive.consult(tab.name, version=tab.version)
-            entry = info.seek_nearest(target_val)
+            if mode == "first":
+                entry = info.first()
+            elif mode == "last":
+                entry = info.last()
+            else:
+                entry = info.seek_nearest(target_val)
             if entry is None:
-                raise DubSarInvalidEntryError(f"No entry found in tablet '{tab.name}' nearest {target_val!r}", line=line, col=col)
+                raise DubSarEntryNotFoundError(f"No entry found in tablet '{tab.name}' for {mode}", line=line, col=col)
             return entry[1]
         raise DubSarInvalidTabletError(f"Object {tab!r} is not a valid tablet", line=line, col=col)
 
@@ -428,8 +470,11 @@ class Interpreter:
             self._eval_expression(stmt.expr)
 
         elif isinstance(stmt, ConsultTablet):
-            name_val = self._eval_expression(stmt.tablet_name)
-            name_str = str(name_val)
+            if isinstance(stmt.tablet_name, Identifier):
+                name_str = stmt.tablet_name.name
+            else:
+                name_val = self._eval_expression(stmt.tablet_name)
+                name_str = name_val.name if isinstance(name_val, (TabletVersionInfo, WorkingTablet)) else str(name_val)
             v_num = None
             if stmt.version:
                 v_val = self._eval_expression(stmt.version)
@@ -442,8 +487,60 @@ class Interpreter:
         elif isinstance(stmt, CreateWorkingTablet):
             shape = TabletShape(stmt.shape) if stmt.shape in ("table", "scalar", "sequence", "structured", "text") else TabletShape.TABLE
             wt = self.archive.create_working(stmt.name, shape=shape)
+            if stmt.length is not None:
+                wt.shape = TabletShape.SEQUENCE
+                length_val = self._eval_expression(stmt.length)
+                count = to_quantity(length_val).value.numerator if isinstance(length_val, Quantity) else int(length_val)
+                for i in range(int(count)):
+                    wt[Rational(i)] = Rational(0)
             self.working_tablets[stmt.name] = wt
             self.current_env.update(stmt.name, wt)
+            if stmt.fields:
+                wt.shape = TabletShape.STRUCTURED
+                for f in stmt.fields:
+                    if isinstance(f, Declaration):
+                        f_val = self._eval_expression(f.value)
+                        wt.put(f.name, f_val)
+                    elif isinstance(f, Assignment):
+                        f_val = self._eval_expression(f.value)
+                        wt.put(f.targets[0], f_val)
+                    else:
+                        self._exec_statement(f)
+
+        elif isinstance(stmt, AppendEntry):
+            wt = self._resolve_working_tablet(stmt.working_name, line=stmt.line, col=stmt.col)
+            val = self._eval_expression(stmt.value)
+            wt.append(val)
+
+        elif isinstance(stmt, IterateEntries):
+            tab = self._resolve_tablet(stmt.tablet)
+            entries_list: List[Tuple[Any, Any]] = []
+            if isinstance(tab, (WorkingTablet, TabletVersionInfo)):
+                entries_list = tab.items()
+            elif isinstance(tab, TabletReference):
+                info = self.archive.consult(tab.name, version=tab.version)
+                entries_list = info.items()
+            elif hasattr(tab, "entries"):
+                if isinstance(tab.entries, dict):
+                    entries_list = list(tab.entries.items())
+                elif isinstance(tab.entries, list):
+                    entries_list = list(tab.entries)
+
+            loop_env = Environment(parent=self.current_env, name="iterate_entries")
+            old_env = self.current_env
+            self.current_env = loop_env
+            try:
+                for k, v in entries_list:
+                    if stmt.key_target:
+                        k_val = Quantity(k, DIMENSIONLESS) if isinstance(k, (int, Rational)) else k
+                        self.current_env.update(stmt.key_target, k_val)
+                    self.current_env.update(stmt.value_target, v)
+                    if stmt.value_target == "entry":
+                        self.current_env.update("v", v)
+                    for s in stmt.body:
+                        self._exec_statement(s)
+            finally:
+                self.current_env = old_env
 
         elif isinstance(stmt, CopyTablet):
             if stmt.source:
@@ -478,11 +575,7 @@ class Interpreter:
             self.current_env.update(stmt.target, wt)
 
         elif isinstance(stmt, PutEntry):
-            wt = self.working_tablets.get(stmt.working_name)
-            if wt is None and self.current_env.has(stmt.working_name):
-                wt = self.current_env.get(stmt.working_name)
-            if not isinstance(wt, WorkingTablet):
-                raise DubSarInvalidTabletError(f"'{stmt.working_name}' is not a working tablet", line=stmt.line, col=stmt.col)
+            wt = self._resolve_working_tablet(stmt.working_name, line=stmt.line, col=stmt.col)
             v = self._eval_expression(stmt.value)
             if stmt.key is not None:
                 k = self._eval_expression(stmt.key)
@@ -498,32 +591,23 @@ class Interpreter:
                     wt.put(getattr(stmt.value, "name", "value"), v)
 
         elif isinstance(stmt, ReplaceEntry):
-            wt = self.working_tablets.get(stmt.working_name)
-            if wt is None and self.current_env.has(stmt.working_name):
-                wt = self.current_env.get(stmt.working_name)
-            if not isinstance(wt, WorkingTablet):
-                raise DubSarInvalidTabletError(f"'{stmt.working_name}' is not a working tablet", line=stmt.line, col=stmt.col)
+            wt = self._resolve_working_tablet(stmt.working_name, line=stmt.line, col=stmt.col)
             k = self._eval_expression(stmt.key)
             v = self._eval_expression(stmt.value)
             wt.replace(k, v)
 
         elif isinstance(stmt, RemoveEntry):
-            wt = self.working_tablets.get(stmt.working_name)
-            if wt is None and self.current_env.has(stmt.working_name):
-                wt = self.current_env.get(stmt.working_name)
-            if not isinstance(wt, WorkingTablet):
-                raise DubSarInvalidTabletError(f"'{stmt.working_name}' is not a working tablet", line=stmt.line, col=stmt.col)
+            wt = self._resolve_working_tablet(stmt.working_name, line=stmt.line, col=stmt.col)
             k = self._eval_expression(stmt.key)
             wt.remove(k)
 
         elif isinstance(stmt, InscribeTablet):
-            wt = self.working_tablets.get(stmt.working_name)
-            if wt is None and self.current_env.has(stmt.working_name):
-                wt = self.current_env.get(stmt.working_name)
-            if not isinstance(wt, WorkingTablet):
-                raise DubSarInvalidTabletError(f"'{stmt.working_name}' is not a working tablet", line=stmt.line, col=stmt.col)
-            target_val = self._eval_expression(stmt.target_name)
-            target_name = str(target_val)
+            wt = self._resolve_working_tablet(stmt.working_name, line=stmt.line, col=stmt.col)
+            if isinstance(stmt.target_name, Identifier):
+                target_name = stmt.target_name.name
+            else:
+                target_val = self._eval_expression(stmt.target_name)
+                target_name = target_val.name if isinstance(target_val, (WorkingTablet, TabletVersionInfo)) else str(target_val)
             new_info = self.archive.inscribe(wt, target_name=target_name)
             self.consulted_tablets[target_name] = new_info
             self.current_env.update(target_name, new_info)
@@ -686,6 +770,51 @@ class Interpreter:
                         b = stack.pop()  # key
                         a = stack.pop()  # tablet
                         stack.append(self._eval_take_entry(a, b, expr.line, expr.col))
+                    elif op in ("put", "gar", "𒃻"):
+                        val = stack.pop()
+                        k = stack.pop()
+                        tab = stack.pop()
+                        wt = self._resolve_tablet(tab)
+                        if isinstance(wt, (TabletVersionInfo, TabletReference)):
+                            raise DubSarImmutableTabletError(f"Cannot put into persistent tablet '{getattr(wt, 'name', wt)}' (§57)", line=expr.line, col=expr.col)
+                        if not isinstance(wt, WorkingTablet):
+                            raise DubSarInvalidTabletError(f"'{tab}' is not a working tablet", line=expr.line, col=expr.col)
+                        wt.put(k, val)
+                    elif op in ("append", "dah", "tah", "𒈭"):
+                        val = stack.pop()
+                        tab = stack.pop()
+                        wt = self._resolve_tablet(tab)
+                        if isinstance(wt, (TabletVersionInfo, TabletReference)):
+                            raise DubSarImmutableTabletError(f"Cannot append to persistent tablet '{getattr(wt, 'name', wt)}' (§57)", line=expr.line, col=expr.col)
+                        if not isinstance(wt, WorkingTablet):
+                            raise DubSarInvalidTabletError(f"'{tab}' is not a working tablet", line=expr.line, col=expr.col)
+                        next_k = wt.append(val)
+                        stack.append(Quantity(next_k, DIMENSIONLESS))
+                    elif op in ("length", "gid", "gíd", "us", "uš", "𒁍", "𒍑"):
+                        tab = stack.pop()
+                        tab_obj = self._resolve_tablet(tab)
+                        if hasattr(tab_obj, "length"):
+                            ln = tab_obj.length()
+                        elif hasattr(tab_obj, "entries"):
+                            ln = len(tab_obj.entries)
+                        else:
+                            ln = len(tab_obj)
+                        stack.append(Quantity(Rational(ln), DIMENSIONLESS))
+                    elif op in ("remove", "delete"):
+                        k = stack.pop()
+                        tab = stack.pop()
+                        wt = self._resolve_tablet(tab)
+                        if isinstance(wt, (TabletVersionInfo, TabletReference)):
+                            raise DubSarImmutableTabletError(f"Cannot remove entry from persistent tablet '{getattr(wt, 'name', wt)}' (§57)", line=expr.line, col=expr.col)
+                        if not isinstance(wt, WorkingTablet):
+                            raise DubSarInvalidTabletError(f"'{tab}' is not a working tablet", line=expr.line, col=expr.col)
+                        wt.remove(k)
+                    elif op == "first":
+                        tab = stack.pop()
+                        stack.append(self._eval_seek_entry(tab, None, mode="first", line=expr.line, col=expr.col))
+                    elif op == "last":
+                        tab = stack.pop()
+                        stack.append(self._eval_seek_entry(tab, None, mode="last", line=expr.line, col=expr.col))
                     else:
                         raise DubSarSyntaxError(f"Unknown postfix operation: {op}")
                 elif isinstance(step, ApplyRecipe):
@@ -756,13 +885,23 @@ class Interpreter:
             return self._eval_take_entry(expr.tablet, key_val, expr.line, expr.col)
 
         elif isinstance(expr, SeekEntry):
-            target_val = self._eval_expression(expr.target)
+            target_val = self._eval_expression(expr.target) if expr.target is not None else None
             return self._eval_seek_entry(expr.tablet, target_val, expr.mode, expr.line, expr.col)
 
         elif isinstance(expr, TabletHistory):
             tab = self._resolve_tablet(expr.tablet)
             name = getattr(tab, "name", str(tab))
             return self.archive.history(name)
+
+        elif isinstance(expr, SequenceLength):
+            tab = self._resolve_tablet(expr.tablet)
+            if hasattr(tab, "length"):
+                ln = tab.length()
+            elif hasattr(tab, "entries"):
+                ln = len(tab.entries)
+            else:
+                ln = len(tab)
+            return Quantity(Rational(ln), DIMENSIONLESS)
 
         raise DubSarSyntaxError(f"Cannot evaluate expression: {expr}", line=expr.line, col=expr.col)
 

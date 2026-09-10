@@ -47,6 +47,7 @@ from dubsar.ast import (
     UnaryOp,
     ConsultTablet,
     CreateWorkingTablet,
+    AppendEntry,
     CopyTablet,
     DeriveTablet,
     InscribeTablet,
@@ -56,8 +57,20 @@ from dubsar.ast import (
     TakeEntry,
     SeekEntry,
     TabletHistory,
+    SequenceLength,
+    IterateEntries,
 )
 from dubsar.builtins import BUILTINS
+
+STANDARD_TABLETS: Set[str] = {
+    "reciprocals",
+    "common-fractions",
+    "squares",
+    "square-roots",
+    "cubes",
+    "metrology",
+    "coefficients",
+}
 from dubsar.errors import (
     DubSarNameError,
     DubSarRangeError,
@@ -352,7 +365,12 @@ class SemanticAnalyzer:
                 self.current_scope.define(stmt.tablet_name.name, None)
 
         elif isinstance(stmt, CreateWorkingTablet):
+            if stmt.length is not None:
+                self._analyze_expression(stmt.length)
             self.current_scope.define(stmt.name, None)
+            if stmt.fields:
+                for f in stmt.fields:
+                    self._analyze_statement(f)
 
         elif isinstance(stmt, CopyTablet):
             if stmt.source:
@@ -390,6 +408,16 @@ class SemanticAnalyzer:
             if stmt.key is not None:
                 self._analyze_expression(stmt.key)
 
+        elif isinstance(stmt, AppendEntry):
+            if not self.current_scope.is_defined(stmt.working_name):
+                raise DubSarNameError(
+                    f"Working tablet '{stmt.working_name}' is not established",
+                    line=stmt.line,
+                    col=stmt.col,
+                    source_file=self.source_file,
+                )
+            self._analyze_expression(stmt.value)
+
         elif isinstance(stmt, ReplaceEntry):
             if not self.current_scope.is_defined(stmt.working_name):
                 raise DubSarNameError(
@@ -411,6 +439,22 @@ class SemanticAnalyzer:
                 )
             self._analyze_expression(stmt.key)
 
+        elif isinstance(stmt, IterateEntries):
+            self._analyze_expression(stmt.tablet)
+            loop_scope = Scope(parent=self.current_scope, name="iterate_entries")
+            if stmt.key_target:
+                loop_scope.define(stmt.key_target, None)
+            loop_scope.define(stmt.value_target, None)
+            if stmt.value_target == "entry":
+                loop_scope.define("v", None)
+            old_scope = self.current_scope
+            self.current_scope = loop_scope
+            try:
+                for s in stmt.body:
+                    self._analyze_statement(s)
+            finally:
+                self.current_scope = old_scope
+
     def _analyze_expression(self, expr: Expression) -> Optional[Unit]:
         """Analyzes an expression and returns its statically inferred unit if known."""
         if isinstance(expr, NumberLiteral):
@@ -430,6 +474,9 @@ class SemanticAnalyzer:
 
             if expr.name in UNIT_TABLE:
                 return lookup_unit(expr.name)
+
+            if expr.name in STANDARD_TABLETS:
+                return None
 
             if expr.name not in BUILTINS:
                 raise DubSarNameError(
@@ -628,8 +675,27 @@ class SemanticAnalyzer:
                             unit_stack.append(None)
                     elif step in ("floor", "ceil", "nearest", "absolute", "abs", "gur", "nim", "ri", "te", "𒄥", "𒉏", "𒊑", "𒋼"):
                         pass
-                    elif step == "take":
+                    elif step in ("take", "shu", "šu", "𒋗"):
                         unit_stack.pop() if unit_stack else None
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(None)
+                    elif step in ("put", "gar", "𒃻"):
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(None)
+                    elif step in ("append", "dah", "tah", "𒈭"):
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(DIMENSIONLESS)
+                    elif step in ("length", "gid", "gíd", "us", "uš", "𒁍", "𒍑"):
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(DIMENSIONLESS)
+                    elif step in ("remove", "delete"):
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(None)
+                    elif step in ("first", "last"):
                         unit_stack.pop() if unit_stack else None
                         unit_stack.append(None)
                     elif step in ("<", "<=", ">", ">=", "==", "!=", "lesser", "greater", "equal", "not-equal"):
@@ -662,12 +728,17 @@ class SemanticAnalyzer:
 
         elif isinstance(expr, SeekEntry):
             self._analyze_expression(expr.tablet)
-            self._analyze_expression(expr.target)
+            if expr.target is not None:
+                self._analyze_expression(expr.target)
             return None
 
         elif isinstance(expr, TabletHistory):
             self._analyze_expression(expr.tablet)
             return None
+
+        elif isinstance(expr, SequenceLength):
+            self._analyze_expression(expr.tablet)
+            return DIMENSIONLESS
 
         return None
 

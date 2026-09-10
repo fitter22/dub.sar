@@ -136,8 +136,18 @@ class DubSarInvalidTabletError(DubSarArchiveError):
     pass
 
 
+class DubSarImmutableTabletError(DubSarInvalidTabletError):
+    """Attempted mutation of an immutable persistent tablet (§57)."""
+    pass
+
+
 class DubSarInvalidEntryError(DubSarArchiveError):
     """Invalid key or entry access in tablet."""
+    pass
+
+
+class DubSarEntryNotFoundError(DubSarInvalidEntryError):
+    """Requested entry was not found in tablet (§56)."""
     pass
 
 
@@ -171,7 +181,9 @@ TabletExistsError = DubSarTabletExistsError
 ArchiveConflictError = DubSarArchiveConflictError
 ArchiveCorruptError = DubSarArchiveCorruptError
 InvalidTabletError = DubSarInvalidTabletError
+ImmutableTablet = DubSarImmutableTabletError
 InvalidEntryError = DubSarInvalidEntryError
+EntryNotFound = DubSarEntryNotFoundError
 ConsultationError = DubSarConsultationError
 InscriptionError = DubSarInscriptionError
 
@@ -195,7 +207,9 @@ __all__ = [
     "DubSarArchiveConflictError",
     "DubSarArchiveCorruptError",
     "DubSarInvalidTabletError",
+    "DubSarImmutableTabletError",
     "DubSarInvalidEntryError",
+    "DubSarEntryNotFoundError",
     "DubSarConsultationError",
     "DubSarInscriptionError",
     "SyntaxError",
@@ -216,7 +230,9 @@ __all__ = [
     "ArchiveConflictError",
     "ArchiveCorruptError",
     "InvalidTabletError",
+    "ImmutableTablet",
     "InvalidEntryError",
+    "EntryNotFound",
     "ConsultationError",
     "InscriptionError",
 ]

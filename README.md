@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
-[![Tests: 137 Passing](https://img.shields.io/badge/Tests-137%2F137%20Passing-brightgreen.svg)](tests/)
+[![Tests: 154 Passing](https://img.shields.io/badge/Tests-154%2F154%20Passing-brightgreen.svg)](tests/)
 [![Architecture: VM + WASM](https://img.shields.io/badge/Architecture-Interpreter%20%7C%20VM%20%7C%20WASM-purple.svg)](dubsar/)
 [![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#vibe-coded-to-perfection)
 
@@ -16,7 +16,7 @@
   DUB.SAR is not a Python dialect in cuneiform costume. It is an executable Mesopotamian mathematical tablet language engineered from first principles — featuring exact arbitrary-precision rational arithmetic, algebraic dimensional unit safety, bounded mathematical search domains, postfix calculation pipelines, atomic selections, a high-level Semantic IR, a stack bytecode virtual machine, and a WebAssembly compiler.
 </p>
 
-[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Tablet Archive](#the-tablet-archive) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
+[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Tablet Archive](#the-tablet-archive) • [Tablet Data Model](#the-tablet-oriented-data-model-sequences-tables-and-structured-records) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
 
 ---
 
@@ -605,6 +605,73 @@ bin/dubsar archive render "ea-nasir-assessment" --style svg -o examples/ea_nasir
 Pre-rendered clay tablet artwork artifacts for both tablets are available in the repository:
 - [`examples/ea_nasir_shipment.svg`](examples/ea_nasir_shipment.svg) (Original shipment tablet)
 - [`examples/ea_nasir_assessment.svg`](examples/ea_nasir_assessment.svg) (Inscribed assessment tablet)
+
+---
+
+## The Tablet-Oriented Data Model (Sequences, Tables, and Structured Records)
+
+DUB.SAR provides a unified, first-class mathematical data model:
+
+> **A tablet is an inscribed mathematical data object containing identifiable entries.**
+
+Instead of borrowing modern concepts like generic arrays, vectors, Python lists, or SQL tables, DUB.SAR grounds all data collections in the physical and mathematical reality of the clay tablet.
+
+### 1. The Three Tablet Shapes
+
+1. **Sequence (`shape: sequence`)**:
+   - Sequential, ordered entries keyed by contiguous non-negative integers ($0, 1, 2, \dots, N-1$).
+   - Models numerical series, coefficients, polynomials, coordinate vectors, and observation streams.
+   - Declared with an optional pre-allocated length: `working signal of length 1024`.
+   - Supports auto-indexing append: `append 42 to signal` (or `signal 42 𒈭`).
+
+2. **Mathematical Table (`shape: table`)**:
+   - Associative mappings with arbitrary exact mathematical keys (integers, sexagesimal rationals, strings, or dimensioned quantities).
+   - Models reciprocal tables, tables of squares and square roots, astronomical ephemerides, and metrological standards.
+   - Entries set at specific exact keys: `put 0;30 into recips at 2` (or `recips 2 0;30 𒃻`).
+
+3. **Structured Tablet (`shape: structured`)**:
+   - Named fields representing compound physical or administrative entities.
+   - Models celestial observations, shipment bills of lading, and multi-parameter problem states.
+   - Initialized with inline field declarations:
+     ```text
+     working planet:
+         mass : 100
+         radius : 20
+     ```
+
+### 2. First-Class Tablet Operations
+
+All operations are natively available in both **Scholar Mode** (prefix phrasing) and **Canonical Cuneiform Mode** (postfix operand-verb order):
+
+| Operation | Scholar Mode (Prefix) | Canonical Cuneiform (Postfix) | Semantics |
+| :--- | :--- | :--- | :--- |
+| **Creation** | `working W [of length N] [:]` | `working W [of length N] [:]` | Allocates a mutable working tablet |
+| **Retrieval** | `take entry K from T` | `T K 𒋗` | Looks up entry $K$. Raises `DubSarEntryNotFoundError` if absent |
+| **Insertion** | `put V into W at K` | `W K V 𒃻` | Inserts or overwrites entry $K$ in working tablet $W$ |
+| **Append** | `append V to W` | `W V 𒈭` | Appends value $V$ at the next sequential integer index |
+| **Length** | `length of T` | `T 𒁍` | Evaluates to the exact dimensionless integer count of entries |
+| **Removal** | `remove entry K from W` | `W K remove` | Deletes entry $K$ from working tablet $W$ |
+| **First Entry** | `first from T` | `T first` | Retrieves the value of the earliest entry by key sort |
+| **Last Entry** | `last from T` | `T last` | Retrieves the value of the latest entry by key sort |
+| **Nearest Entry** | `seek entry nearest X in T` | `T X 𒊑` | Retrieves the entry whose key is closest to $X$ |
+| **Iteration** | `consider entries of T:` | `consider entries of T:` | Iterates each entry value (bound to `entry` or `v`) |
+| **Keyed Iteration** | `consider K, V of T:` | `consider K, V of T:` | Iterates each key and value pair |
+| **Inscription** | `inscribe tablet W [as T]` | `𒁹𒀀 W [as T]` | Persists working tablet $W$ into the archive |
+
+### 3. Safety Guarantees: Immutability and Exactness
+
+- **Strict Immutability**: Modifying, appending to, or removing entries from a persistent archive tablet raises `DubSarImmutableTabletError` (alias `ImmutableTablet`). Persistent records can only be revised by deriving a working tablet and inscribing a new version.
+- **Missing Entry Protection**: Attempting to take a non-existent entry raises `DubSarEntryNotFoundError` (alias `EntryNotFound`).
+- **Exact Rational Guarantee**: Sequence indices, table keys, and values are preserved as exact rationals and quantities. No decimal or floating-point distortion can occur.
+
+### 4. Canonical Tablet Model Examples
+
+The repository includes four end-to-end runnable examples demonstrating the tablet-oriented data model:
+
+- **Reciprocal Table Lookup** ([`examples/reciprocal_lookup_scholar.dub`](examples/reciprocal_lookup_scholar.dub) / [`examples/reciprocal_lookup.dub`](examples/reciprocal_lookup.dub)): Consults standard mathematical tablet `reciprocals` and performs exact division by multiplying by the reciprocal.
+- **Sequence Generation** ([`examples/sequence_generation_scholar.dub`](examples/sequence_generation_scholar.dub) / [`examples/sequence_generation.dub`](examples/sequence_generation.dub)): Builds a Fibonacci-style sequence, inspects `length`, and queries `first` and `last`.
+- **Sequence Transformation** ([`examples/sequence_transformation_scholar.dub`](examples/sequence_transformation_scholar.dub) / [`examples/sequence_transformation.dub`](examples/sequence_transformation.dub)): Iterates entries of an observation sequence with `consider entries of ...:` and creates a scaled working sequence.
+- **Persistent Tablet Sequences** ([`examples/persistent_sequence_scholar.dub`](examples/persistent_sequence_scholar.dub) / [`examples/persistent_sequence.dub`](examples/persistent_sequence.dub)): Inscribes a working sequence tablet and queries persistent versioned entries.
 
 ---
 

@@ -75,11 +75,19 @@ class OpCode(Enum):
     TABLET_DERIVE = auto()  # Derive tablet: arg=(target, has_source, has_version)
     TABLET_INSCRIBE = auto()# Inscribe working tablet: arg=working_name
     WORKING_PUT = auto()    # Put into working tablet: arg=working_name
+    WORKING_PUT_STACK = auto() # Pop value, key, tablet; put value at key into working tablet
+    WORKING_APPEND = auto() # Append to working tablet: arg=working_name
+    WORKING_APPEND_STACK = auto() # Pop value, tablet; append value to working tablet
     WORKING_REPLACE = auto()# Replace in working tablet: arg=working_name
     WORKING_REMOVE = auto() # Remove from working tablet: arg=working_name
+    WORKING_REMOVE_STACK = auto() # Pop key, tablet; remove key from working tablet
     ENTRY_TAKE = auto()     # Pop key, tablet; push entry value
     ENTRY_SEEK = auto()     # Pop target, tablet; push nearest entry value
     TABLET_HISTORY = auto() # Pop tablet; push tablet history
+    SEQUENCE_LENGTH = auto()# Pop tablet; push exact integer length
+    ITER_START = auto()     # Pop tablet; begin iteration
+    ITER_NEXT = auto()      # Advance iteration: arg=(key_var, val_var, exit_addr)
+    ITER_END = auto()       # End iteration
     HALT = auto()           # End execution
 
 
@@ -155,6 +163,8 @@ from dubsar.semantic_ir import (
     VerbExpr,
     ConsultTabletVerb,
     CreateWorkingTabletVerb,
+    AppendTabletEntryVerb,
+    IterateTabletEntriesVerb,
     CopyTabletVerb,
     DeriveTabletVerb,
     InscribeTabletVerb,
@@ -164,6 +174,7 @@ from dubsar.semantic_ir import (
     TakeTabletEntry,
     SeekTabletEntry,
     InspectTabletHistory,
+    TakeSequenceLength,
     ast_to_semantic_ir,
 )
 
@@ -302,7 +313,43 @@ class Compiler:
                 chunk.emit(OpCode.CONSULT, (False, verb.alias), verb.line)
 
         elif isinstance(verb, CreateWorkingTabletVerb):
-            chunk.emit(OpCode.WORKING_CREATE, (verb.name, verb.shape), verb.line)
+            has_len = False
+            if verb.length is not None:
+                self._compile_verb_expr(verb.length)
+                has_len = True
+            chunk.emit(OpCode.WORKING_CREATE, (verb.name, verb.shape, has_len), verb.line)
+            if verb.fields:
+                for f in verb.fields:
+                    if isinstance(f, EstablishVerb):
+                        chunk.emit(OpCode.CONST, f.name, f.line)
+                        self._compile_verb_expr(f.value)
+                        if f.unit is not None:
+                            u = lookup_unit(f.unit)
+                            chunk.emit(OpCode.CONST, Quantity(1, u), f.line)
+                            chunk.emit(OpCode.MUL, None, f.line)
+                        chunk.emit(OpCode.WORKING_PUT, verb.name, f.line)
+                    elif isinstance(f, AssignVerb):
+                        chunk.emit(OpCode.CONST, f.targets[0], f.line)
+                        self._compile_verb_expr(f.value)
+                        chunk.emit(OpCode.WORKING_PUT, verb.name, f.line)
+                    else:
+                        self._compile_verb(f)
+
+        elif isinstance(verb, AppendTabletEntryVerb):
+            self._compile_verb_expr(verb.value)
+            chunk.emit(OpCode.WORKING_APPEND, verb.working_name, verb.line)
+
+        elif isinstance(verb, IterateTabletEntriesVerb):
+            self._compile_verb_expr(verb.tablet)
+            chunk.emit(OpCode.ITER_START, None, verb.line)
+            loop_head = len(chunk.instructions)
+            next_instr_idx = chunk.emit(OpCode.ITER_NEXT, (verb.key_target, verb.value_target, None), verb.line)
+            for v in verb.body:
+                self._compile_verb(v)
+            chunk.emit(OpCode.JUMP, loop_head, verb.line)
+            exit_label = len(chunk.instructions)
+            chunk.instructions[next_instr_idx].arg = (verb.key_target, verb.value_target, exit_label)
+            chunk.emit(OpCode.ITER_END, None, verb.line)
 
         elif isinstance(verb, CopyTabletVerb):
             has_source = False
@@ -491,6 +538,16 @@ class Compiler:
                         chunk.emit(OpCode.CMP, "!=", expr.line)
                     elif step in ("take", "shu", "šu", "𒋗"):
                         chunk.emit(OpCode.ENTRY_TAKE, None, expr.line)
+                    elif step in ("put", "gar", "𒃻"):
+                        chunk.emit(OpCode.WORKING_PUT_STACK, None, expr.line)
+                    elif step in ("append", "dah", "tah", "𒈭"):
+                        chunk.emit(OpCode.WORKING_APPEND_STACK, None, expr.line)
+                    elif step in ("length", "gid", "gíd", "us", "uš", "𒁍", "𒍑"):
+                        chunk.emit(OpCode.SEQUENCE_LENGTH, None, expr.line)
+                    elif step in ("remove", "delete"):
+                        chunk.emit(OpCode.WORKING_REMOVE_STACK, None, expr.line)
+                    elif step in ("first", "last"):
+                        chunk.emit(OpCode.ENTRY_SEEK, step, expr.line)
 
         elif isinstance(expr, TakeTabletEntry):
             self._compile_verb_expr(expr.tablet)
@@ -499,12 +556,17 @@ class Compiler:
 
         elif isinstance(expr, SeekTabletEntry):
             self._compile_verb_expr(expr.tablet)
-            self._compile_verb_expr(expr.target)
+            if expr.target is not None:
+                self._compile_verb_expr(expr.target)
             chunk.emit(OpCode.ENTRY_SEEK, expr.mode, expr.line)
 
         elif isinstance(expr, InspectTabletHistory):
             self._compile_verb_expr(expr.tablet)
             chunk.emit(OpCode.TABLET_HISTORY, None, expr.line)
+
+        elif isinstance(expr, TakeSequenceLength):
+            self._compile_verb_expr(expr.tablet)
+            chunk.emit(OpCode.SEQUENCE_LENGTH, None, expr.line)
 
     def _compile_statement(self, stmt: Statement) -> None:
         assert self.current_chunk is not None

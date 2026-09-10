@@ -13,6 +13,8 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from dubsar.builtins import BUILTINS
 from dubsar.errors import (
     DubSarDivisionByZero,
+    DubSarEntryNotFoundError,
+    DubSarImmutableTabletError,
     DubSarInputError,
     DubSarNameError,
     DubSarRangeError,
@@ -72,62 +74,105 @@ class VirtualMachine:
         self.format_mode = format_mode
         self.operand_stack: List[Any] = []
         self.call_stack: List[CallFrame] = []
+        self.iter_stack: List[List[Any]] = []
         self.global_env = Environment(name="tablet")
         self.outputs: List[str] = []
         self.archive = archive or SQLiteTabletArchive(":memory:")
         self.working_tablets: Dict[str, WorkingTablet] = {}
         self.consulted_tablets: Dict[str, TabletVersionInfo] = {}
 
-    def _eval_take(self, tab: Any, key_val: Any, line: int) -> Any:
+    def _resolve_tablet(self, tab: Any, line: int) -> Any:
         if isinstance(tab, str):
             if tab in self.working_tablets:
-                tab = self.working_tablets[tab]
-            elif tab in self.consulted_tablets:
-                tab = self.consulted_tablets[tab]
-            else:
-                tab = self.archive.consult(tab)
-                self.consulted_tablets[tab.name] = tab
+                return self.working_tablets[tab]
+            if tab in self.consulted_tablets:
+                return self.consulted_tablets[tab]
+            if self.call_stack and self.call_stack[-1].env.has(tab):
+                val = self.call_stack[-1].env.get(tab)
+                if isinstance(val, (WorkingTablet, TabletVersionInfo, TabletReference)):
+                    return val
+            try:
+                info = self.archive.consult(tab)
+                self.consulted_tablets[tab] = info
+                return info
+            except Exception:
+                raise DubSarTabletNotFoundError(f"Tablet '{tab}' not found in archive", line=line)
+        if isinstance(tab, (WorkingTablet, TabletVersionInfo, TabletReference)):
+            return tab
+        raise DubSarInvalidTabletError(f"Object {tab!r} is not a valid tablet", line=line)
 
-        if isinstance(tab, (WorkingTablet, TabletVersionInfo)):
-            res = tab.get(key_val)
+    def _resolve_working_tablet(self, tab: Any, line: int) -> WorkingTablet:
+        if isinstance(tab, str):
+            if tab in self.working_tablets:
+                return self.working_tablets[tab]
+            if tab in self.consulted_tablets:
+                raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{tab}' (§57)", line=line)
+            if self.call_stack and self.call_stack[-1].env.has(tab):
+                val = self.call_stack[-1].env.get(tab)
+                if isinstance(val, (TabletVersionInfo, TabletReference)):
+                    raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{tab}' (§57)", line=line)
+                if isinstance(val, WorkingTablet):
+                    return val
+            try:
+                _ = self.archive.consult(tab)
+                raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{tab}' (§57)", line=line)
+            except DubSarImmutableTabletError:
+                raise
+            except Exception:
+                pass
+            raise DubSarInvalidTabletError(f"Working tablet '{tab}' not found", line=line)
+        if isinstance(tab, (TabletVersionInfo, TabletReference)):
+            raise DubSarImmutableTabletError(f"Cannot mutate persistent tablet '{getattr(tab, 'name', tab)}' (§57)", line=line)
+        if isinstance(tab, WorkingTablet):
+            return tab
+        raise DubSarInvalidTabletError(f"Object {tab!r} is not a working tablet", line=line)
+
+    def _eval_take(self, tab: Any, key_val: Any, line: int) -> Any:
+        tab_obj = self._resolve_tablet(tab, line)
+        if isinstance(tab_obj, (WorkingTablet, TabletVersionInfo)):
+            res = tab_obj.get(key_val)
             if res is None:
-                raise DubSarInvalidEntryError(f"Entry {key_val!r} not found in tablet '{tab.name}'", line=line)
+                raise DubSarEntryNotFoundError(f"Entry {key_val!r} not found in tablet '{tab_obj.name}'", line=line)
             return res
-        elif isinstance(tab, TabletReference):
-            info = self.archive.consult(tab.name, version=tab.version)
+        elif isinstance(tab_obj, TabletReference):
+            info = self.archive.consult(tab_obj.name, version=tab_obj.version)
             res = info.get(key_val)
             if res is None:
-                raise DubSarInvalidEntryError(f"Entry {key_val!r} not found in tablet '{tab.name}'", line=line)
+                raise DubSarEntryNotFoundError(f"Entry {key_val!r} not found in tablet '{tab_obj.name}'", line=line)
             return res
-        raise DubSarInvalidTabletError(f"Object {tab!r} is not a valid tablet", line=line)
+        raise DubSarInvalidTabletError(f"Object {tab_obj!r} is not a valid tablet", line=line)
 
-    def _eval_seek(self, tab: Any, target_val: Any, line: int) -> Any:
-        if isinstance(tab, str):
-            if tab in self.working_tablets:
-                tab = self.working_tablets[tab]
-            elif tab in self.consulted_tablets:
-                tab = self.consulted_tablets[tab]
+    def _eval_seek(self, tab: Any, target_val: Any, mode: str = "nearest", line: int = 0) -> Any:
+        tab_obj = self._resolve_tablet(tab, line)
+        entry = None
+        if isinstance(tab_obj, (WorkingTablet, TabletVersionInfo)):
+            if mode == "first":
+                entry = tab_obj.first()
+            elif mode == "last":
+                entry = tab_obj.last()
             else:
-                tab = self.archive.consult(tab)
-                self.consulted_tablets[tab.name] = tab
-
-        if isinstance(tab, (WorkingTablet, TabletVersionInfo)):
-            entry = tab.seek_nearest(target_val)
+                entry = tab_obj.seek_nearest(target_val)
             if entry is None:
-                raise DubSarInvalidEntryError(f"No entry found in tablet '{tab.name}' nearest {target_val!r}", line=line)
+                raise DubSarEntryNotFoundError(f"No entry found in tablet '{tab_obj.name}' for {mode}", line=line)
             return entry[1]
-        elif isinstance(tab, TabletReference):
-            info = self.archive.consult(tab.name, version=tab.version)
-            entry = info.seek_nearest(target_val)
+        elif isinstance(tab_obj, TabletReference):
+            info = self.archive.consult(tab_obj.name, version=tab_obj.version)
+            if mode == "first":
+                entry = info.first()
+            elif mode == "last":
+                entry = info.last()
+            else:
+                entry = info.seek_nearest(target_val)
             if entry is None:
-                raise DubSarInvalidEntryError(f"No entry found in tablet '{tab.name}' nearest {target_val!r}", line=line)
+                raise DubSarEntryNotFoundError(f"No entry found in tablet '{tab_obj.name}' for {mode}", line=line)
             return entry[1]
-        raise DubSarInvalidTabletError(f"Object {tab!r} is not a valid tablet", line=line)
+        raise DubSarInvalidTabletError(f"Object {tab_obj!r} is not a valid tablet", line=line)
 
     def execute(self, tablet: CompiledTablet) -> List[str]:
         """Executes a compiled tablet and returns emitted output lines."""
         self.operand_stack.clear()
         self.call_stack.clear()
+        self.iter_stack.clear()
         self.outputs.clear()
         self.global_env = Environment(name="tablet")
 
@@ -445,16 +490,27 @@ class VirtualMachine:
             elif op == OpCode.CONSULT:
                 has_version, alias = arg
                 v_num = int(to_quantity(self.operand_stack.pop()).value.numerator) if has_version else None
-                name_val = str(self.operand_stack.pop())
+                name_pop = self.operand_stack.pop()
+                if isinstance(name_pop, (TabletVersionInfo, WorkingTablet)):
+                    name_val = name_pop.name
+                else:
+                    name_val = str(name_pop)
                 info = self.archive.consult(name_val, version=v_num)
                 target_alias = alias or name_val
                 self.consulted_tablets[target_alias] = info
                 frame.env.update(target_alias, info)
 
             elif op == OpCode.WORKING_CREATE:
-                name, shape_str = arg
+                if len(arg) == 3:
+                    name, shape_str, has_len = arg
+                    length_val = int(to_quantity(self.operand_stack.pop()).value.numerator) if has_len else None
+                else:
+                    name, shape_str = arg
+                    length_val = None
                 shape = TabletShape(shape_str) if shape_str in ("table", "scalar", "sequence", "structured", "text") else TabletShape.TABLE
                 wt = self.archive.create_working(name, shape=shape)
+                if length_val is not None:
+                    wt.shape = TabletShape.SEQUENCE
                 self.working_tablets[name] = wt
                 frame.env.update(name, wt)
 
@@ -486,7 +542,11 @@ class VirtualMachine:
 
             elif op == OpCode.TABLET_INSCRIBE:
                 working_name = arg
-                target_name = str(self.operand_stack.pop())
+                target_pop = self.operand_stack.pop()
+                if isinstance(target_pop, (TabletVersionInfo, WorkingTablet)):
+                    target_name = target_pop.name
+                else:
+                    target_name = str(target_pop)
                 wt = self.working_tablets.get(working_name)
                 if wt is None and frame.env.has(working_name):
                     wt = frame.env.get(working_name)
@@ -500,11 +560,7 @@ class VirtualMachine:
                 working_name = arg
                 val = self.operand_stack.pop()
                 k = self.operand_stack.pop()
-                wt = self.working_tablets.get(working_name)
-                if wt is None and frame.env.has(working_name):
-                    wt = frame.env.get(working_name)
-                if not isinstance(wt, WorkingTablet):
-                    raise DubSarInvalidTabletError(f"'{working_name}' is not a working tablet", line=instr.line)
+                wt = self._resolve_working_tablet(working_name, instr.line)
                 if k is None or isinstance(k, EmptySentinel) or (isinstance(k, DeterminationValue) and k.is_empty) or k == "":
                     if isinstance(val, DeterminationValue):
                         for f_k, f_v in val.fields.items():
@@ -517,25 +573,43 @@ class VirtualMachine:
                 else:
                     wt.put(k, val)
 
+            elif op == OpCode.WORKING_PUT_STACK:
+                val = self.operand_stack.pop()
+                k = self.operand_stack.pop()
+                tab = self.operand_stack.pop()
+                wt = self._resolve_working_tablet(tab, instr.line)
+                wt.put(k, val)
+
+            elif op == OpCode.WORKING_APPEND:
+                working_name = arg
+                val = self.operand_stack.pop()
+                wt = self._resolve_working_tablet(working_name, instr.line)
+                wt.append(val)
+
+            elif op == OpCode.WORKING_APPEND_STACK:
+                val = self.operand_stack.pop()
+                tab = self.operand_stack.pop()
+                wt = self._resolve_working_tablet(tab, instr.line)
+                next_k = wt.append(val)
+                self.operand_stack.append(Quantity(next_k, DIMENSIONLESS))
+
             elif op == OpCode.WORKING_REPLACE:
                 working_name = arg
                 val = self.operand_stack.pop()
                 k = self.operand_stack.pop()
-                wt = self.working_tablets.get(working_name)
-                if wt is None and frame.env.has(working_name):
-                    wt = frame.env.get(working_name)
-                if not isinstance(wt, WorkingTablet):
-                    raise DubSarInvalidTabletError(f"'{working_name}' is not a working tablet", line=instr.line)
+                wt = self._resolve_working_tablet(working_name, instr.line)
                 wt.replace(k, val)
 
             elif op == OpCode.WORKING_REMOVE:
                 working_name = arg
                 k = self.operand_stack.pop()
-                wt = self.working_tablets.get(working_name)
-                if wt is None and frame.env.has(working_name):
-                    wt = frame.env.get(working_name)
-                if not isinstance(wt, WorkingTablet):
-                    raise DubSarInvalidTabletError(f"'{working_name}' is not a working tablet", line=instr.line)
+                wt = self._resolve_working_tablet(working_name, instr.line)
+                wt.remove(k)
+
+            elif op == OpCode.WORKING_REMOVE_STACK:
+                k = self.operand_stack.pop()
+                tab = self.operand_stack.pop()
+                wt = self._resolve_working_tablet(tab, instr.line)
                 wt.remove(k)
 
             elif op == OpCode.ENTRY_TAKE:
@@ -545,14 +619,68 @@ class VirtualMachine:
 
             elif op == OpCode.ENTRY_SEEK:
                 mode = arg or "nearest"
-                target_val = self.operand_stack.pop()
-                tab = self.operand_stack.pop()
-                self.operand_stack.append(self._eval_seek(tab, target_val, instr.line))
+                if mode in ("first", "last"):
+                    tab = self.operand_stack.pop()
+                    self.operand_stack.append(self._eval_seek(tab, None, mode=mode, line=instr.line))
+                else:
+                    target_val = self.operand_stack.pop()
+                    tab = self.operand_stack.pop()
+                    self.operand_stack.append(self._eval_seek(tab, target_val, mode=mode, line=instr.line))
 
             elif op == OpCode.TABLET_HISTORY:
                 tab = self.operand_stack.pop()
                 name = getattr(tab, "name", str(tab))
                 self.operand_stack.append(self.archive.history(name))
+
+            elif op == OpCode.SEQUENCE_LENGTH:
+                tab = self.operand_stack.pop()
+                tab_obj = self._resolve_tablet(tab, instr.line)
+                if hasattr(tab_obj, "length"):
+                    ln = tab_obj.length()
+                elif hasattr(tab_obj, "entries"):
+                    ln = len(tab_obj.entries)
+                else:
+                    ln = len(tab_obj)
+                self.operand_stack.append(Quantity(Rational(ln), DIMENSIONLESS))
+
+            elif op == OpCode.ITER_START:
+                tab = self.operand_stack.pop()
+                tab_obj = self._resolve_tablet(tab, instr.line)
+                if isinstance(tab_obj, (WorkingTablet, TabletVersionInfo)):
+                    entries = tab_obj.items()
+                elif isinstance(tab_obj, TabletReference):
+                    info = self.archive.consult(tab_obj.name, version=tab_obj.version)
+                    entries = info.items()
+                elif hasattr(tab_obj, "entries"):
+                    if isinstance(tab_obj.entries, dict):
+                        entries = list(tab_obj.entries.items())
+                    elif isinstance(tab_obj.entries, list):
+                        entries = list(tab_obj.entries)
+                    else:
+                        entries = []
+                else:
+                    entries = []
+                self.iter_stack.append([entries, 0])
+
+            elif op == OpCode.ITER_NEXT:
+                key_var, val_var, exit_addr = arg
+                iter_info = self.iter_stack[-1]
+                entries, idx = iter_info
+                if idx >= len(entries):
+                    frame.ip = exit_addr
+                else:
+                    k, v = entries[idx]
+                    iter_info[1] = idx + 1
+                    if key_var:
+                        k_val = Quantity(k, DIMENSIONLESS) if isinstance(k, (int, Rational)) else k
+                        frame.env.update(key_var, k_val)
+                    frame.env.update(val_var, v)
+                    if val_var == "entry":
+                        frame.env.update("v", v)
+
+            elif op == OpCode.ITER_END:
+                if self.iter_stack:
+                    self.iter_stack.pop()
 
             elif op == OpCode.HALT:
                 break

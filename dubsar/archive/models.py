@@ -14,6 +14,7 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from dubsar.errors import DubSarImmutableTabletError
 from dubsar.numbers import Rational
 from dubsar.units import Quantity, Unit, lookup_unit
 from dubsar.values import DeterminationValue, EmptySentinel
@@ -100,6 +101,15 @@ class TabletReference:
     kind: TabletKind = TabletKind.MATHEMATICAL
     shape: TabletShape = TabletShape.TABLE
 
+    def put(self, key: Any, value: Any) -> None:
+        raise DubSarImmutableTabletError(f"Cannot put into immutable persistent tablet '{self.name}' (§57)")
+
+    def append(self, value: Any) -> None:
+        raise DubSarImmutableTabletError(f"Cannot append to immutable persistent tablet '{self.name}' (§57)")
+
+    def remove(self, key: Any) -> Any:
+        raise DubSarImmutableTabletError(f"Cannot remove entry from immutable persistent tablet '{self.name}' (§57)")
+
     def __repr__(self) -> str:
         return f"TabletRef({self.name!r} v{self.version})"
 
@@ -131,6 +141,8 @@ class TabletVersionInfo:
             search_key = Rational(key)
         elif hasattr(key, "unit") and hasattr(key, "value") and getattr(key.unit, "is_dimensionless", False):
             search_key = key.value
+        elif hasattr(key, "name") and not isinstance(key, (Rational, Quantity)):
+            search_key = key.name
 
         for k, v in self.entries:
             comp_k = Rational(k) if isinstance(k, int) else k
@@ -143,6 +155,45 @@ class TabletVersionInfo:
     def get(self, key: Any, default: Any = None) -> Any:
         res = self.get_entry(key)
         return res if res is not None else default
+
+    def first(self) -> Optional[Tuple[Any, Any]]:
+        """Returns the first key/value entry in the persistent tablet (§22)."""
+        return self.entries[0] if self.entries else None
+
+    def last(self) -> Optional[Tuple[Any, Any]]:
+        """Returns the last key/value entry in the persistent tablet (§22)."""
+        return self.entries[-1] if self.entries else None
+
+    def length(self) -> int:
+        """Returns the number of entries in the persistent tablet (§14)."""
+        return len(self.entries)
+
+    def __len__(self) -> int:
+        return len(self.entries)
+
+    def items(self) -> List[Tuple[Any, Any]]:
+        return list(self.entries)
+
+    def keys(self) -> List[Any]:
+        return [k for k, _ in self.entries]
+
+    def values(self) -> List[Any]:
+        return [v for _, v in self.entries]
+
+    def __getitem__(self, key: Any) -> Any:
+        val = self.get(key)
+        if val is None and not self.has(key):
+            raise DubSarEntryNotFoundError(f"Entry with key {key!r} not found in persistent tablet '{self.name}'")
+        return val
+
+    def put(self, key: Any, value: Any) -> None:
+        raise DubSarImmutableTabletError(f"Cannot put into immutable persistent tablet '{self.name}' (§57)")
+
+    def append(self, value: Any) -> None:
+        raise DubSarImmutableTabletError(f"Cannot append to immutable persistent tablet '{self.name}' (§57)")
+
+    def remove(self, key: Any) -> Any:
+        raise DubSarImmutableTabletError(f"Cannot remove entry from immutable persistent tablet '{self.name}' (§57)")
 
     def seek_nearest(self, target: Any) -> Optional[Tuple[Any, Any]]:
         """Finds the entry whose numeric key is nearest to target."""

@@ -19,7 +19,7 @@ from dubsar.archive.models import (
     deserialize_value,
     serialize_value,
 )
-from dubsar.errors import DubSarInvalidEntryError
+from dubsar.errors import DubSarEntryNotFoundError, DubSarInvalidEntryError
 from dubsar.numbers import Rational
 from dubsar.units import Quantity
 
@@ -34,6 +34,7 @@ class WorkingTablet:
         kind: TabletKind = TabletKind.DATA,
         metadata: Optional[TabletMetadata] = None,
         provenance: Optional[Dict[str, Any]] = None,
+        length: Optional[int] = None,
     ) -> None:
         self.name = name
         self.shape = shape
@@ -46,12 +47,18 @@ class WorkingTablet:
         )
         self.provenance = provenance or {}
         self.entries: OrderedDict[Any, Any] = OrderedDict()
+        if length is not None:
+            self.shape = TabletShape.SEQUENCE
+            for i in range(int(length)):
+                self.entries[Rational(i)] = Rational(0)
 
     def _normalize_key(self, key: Any) -> Any:
         if isinstance(key, int):
             return Rational(key)
         if isinstance(key, Quantity) and key.unit.is_dimensionless:
             return key.value
+        if hasattr(key, "name") and not isinstance(key, (Rational, Quantity)):
+            return key.name
         return key
 
     def put(self, key: Any, value: Any) -> None:
@@ -59,18 +66,51 @@ class WorkingTablet:
         norm_key = self._normalize_key(key)
         self.entries[norm_key] = value
 
+    def append(self, value: Any) -> Any:
+        """Appends a value to the working tablet with the next sequential integer key (§16)."""
+        int_keys = [
+            int(k) if isinstance(k, int) else int(k.numerator)
+            for k in self.entries.keys()
+            if (isinstance(k, int) or (isinstance(k, Rational) and k.is_integer)) and (k >= 0)
+        ]
+        next_k = Rational(max(int_keys) + 1) if int_keys else Rational(0)
+        self.put(next_k, value)
+        if all(
+            isinstance(k, (int, Rational)) and (isinstance(k, int) or k.is_integer) for k in self.entries.keys()
+        ):
+            self.shape = TabletShape.SEQUENCE
+        return next_k
+
+    def first(self) -> Optional[Tuple[Any, Any]]:
+        """Returns the first key/value entry in the working tablet."""
+        if not self.entries:
+            return None
+        k = next(iter(self.entries))
+        return (k, self.entries[k])
+
+    def last(self) -> Optional[Tuple[Any, Any]]:
+        """Returns the last key/value entry in the working tablet."""
+        if not self.entries:
+            return None
+        k = next(reversed(self.entries))
+        return (k, self.entries[k])
+
+    def length(self) -> int:
+        """Returns the number of entries in the working tablet (§14)."""
+        return len(self.entries)
+
     def replace(self, key: Any, value: Any) -> None:
         """Replaces an existing entry, erroring if key does not exist (§15)."""
         norm_key = self._normalize_key(key)
         if norm_key not in self.entries:
-            raise DubSarInvalidEntryError(f"Cannot replace missing entry with key {key!r} in working tablet {self.name!r}")
+            raise DubSarEntryNotFoundError(f"Cannot replace missing entry with key {key!r} in working tablet {self.name!r}")
         self.entries[norm_key] = value
 
     def remove(self, key: Any) -> Any:
         """Removes an entry from the working tablet (§15)."""
         norm_key = self._normalize_key(key)
         if norm_key not in self.entries:
-            raise DubSarInvalidEntryError(f"Cannot remove missing entry with key {key!r} in working tablet {self.name!r}")
+            raise DubSarEntryNotFoundError(f"Cannot remove missing entry with key {key!r} in working tablet {self.name!r}")
         return self.entries.pop(norm_key)
 
     def get(self, key: Any, default: Any = None) -> Any:
@@ -107,7 +147,7 @@ class WorkingTablet:
     def __getitem__(self, key: Any) -> Any:
         norm_key = self._normalize_key(key)
         if norm_key not in self.entries:
-            raise DubSarInvalidEntryError(f"Entry {key!r} not found in working tablet {self.name!r}")
+            raise DubSarEntryNotFoundError(f"Entry {key!r} not found in working tablet {self.name!r}")
         return self.entries[norm_key]
 
     def __setitem__(self, key: Any, value: Any) -> None:

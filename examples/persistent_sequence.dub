@@ -1,0 +1,24 @@
+𒑰 DUB.SAR 1.0 — Persistent Tablet Sequences (Canonical Cuneiform)
+𒑰 Demonstrates inscribing a working sequence and consulting persistent entries.
+
+𒂊𒁹
+
+    working powers of length 0
+    powers 1 𒈭
+    powers 2 𒈭
+    powers 4 𒈭
+    powers 8 𒈭
+    powers 16 𒈭
+
+    inscribe tablet powers
+
+    𒅆 𒁾 "powers"
+    n : powers 𒁍
+    first_power : powers first
+    last_power : powers last
+
+𒅗𒁹
+
+    n
+    first_power
+    last_power

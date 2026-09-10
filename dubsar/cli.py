@@ -321,7 +321,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             tokens = Lexer(source, source_file=str(file_path)).tokenize()
             program = Parser(tokens, source_file=str(file_path)).parse()
             SemanticAnalyzer(source_file=str(file_path)).analyze(program)
-            print(f"✓ Tablet '{file_path.name}' parsed and verified successfully (Mode: {detected_mode}).")
+            print(f"[OK] Tablet '{file_path.name}' parsed and verified successfully (Mode: {detected_mode}).")
             return 0
 
         elif args.command == "compile":

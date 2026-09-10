@@ -1,0 +1,17 @@
+𒑰 DUB.SAR 1.0 — Reciprocal Table Lookup (Canonical Cuneiform)
+𒑰 Demonstrates consulting the standard reciprocal tablet and exact division.
+
+𒂊𒁹
+
+    𒅆 𒁾 "reciprocals"
+
+    recip_8 :
+        reciprocals 8 𒋗
+
+    dividend : 30
+    quotient := dividend * recip_8
+
+𒅗𒁹
+
+    recip_8
+    quotient

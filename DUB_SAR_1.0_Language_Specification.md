@@ -1581,3 +1581,77 @@ Outside source execution, the `dubsar archive` CLI suite allows scholars and dev
 - `dubsar archive export [--out file.json]`: Export archive to a deterministic canonical JSON bundle.
 - `dubsar archive import <file.json>`: Safely import tablets into an archive.
 - `dubsar archive render <name> [--style text|tablet|svg] [-o output]`: Render tablet layout as an ASCII/Unicode clay-style grid or vector SVG artwork.
+
+---
+
+## 37. Tablet-Oriented Data Model (Sequences, Tables, and Structured Data)
+
+### 37.1 The Fundamental Abstraction
+
+In DUB.SAR, structured mathematical data is represented through a unified **tablet-oriented data model**:
+
+> **A tablet is an inscribed mathematical data object containing identifiable entries.**
+
+The language does not introduce generic arrays, vectors, hashes, or relational tables under borrowed names. Instead, whether persistent in the archive or mutable in active working memory, data objects are conceptualized as clay tablets carrying inscribed mathematical entries.
+
+### 37.2 The Three Shapes of Tablets
+
+Every tablet belongs to one of three mathematical shapes:
+
+1. **Sequence (`shape: sequence`)**:
+   - Ordered, contiguous mathematical entries keyed by non-negative integers ($0, 1, 2, \dots, N-1$).
+   - Models numerical sequences, polynomials, coefficients, time-series observations, and vector coordinate tuples.
+   - Initialized with an optional allocated length: `working signal of length 1024`.
+   - Supports auto-indexing append operations: `append val to signal` / `signal val 𒈭`.
+
+2. **Mathematical Table (`shape: table`)**:
+   - Sparse or discrete associative mappings keyed by arbitrary exact mathematical keys (integers, sexagesimal rationals, strings, or dimensioned quantities).
+   - Models reciprocal tables, multiplication tables, squares, square roots, astronomical ephemerides, and metrological lookup tables.
+   - Entries are placed at exact keys: `put 0;30 into recips at 2` / `recips 2 0;30 𒃻`.
+
+3. **Structured Tablet (`shape: structured`)**:
+   - Named fields or record-like structured entries.
+   - Models physical entity records, administrative shipments, astronomical bodies, and compound problem parameters.
+   - Initialized with inline field definitions:
+     ```text
+     working planet:
+         mass : 100
+         radius : 20
+     ```
+
+### 37.3 First-Class Tablet Operations
+
+DUB.SAR provides first-class tablet operations in both prefix (Scholar Mode) and postfix (Canonical Cuneiform Mode) styles:
+
+| Operation | Scholar Mode (Prefix) | Canonical Cuneiform (Postfix) | Description |
+| :--- | :--- | :--- | :--- |
+| **Creation** | `working W [of length N] [:]` | `working W [of length N] [:]` | Declares a mutable working tablet. |
+| **Retrieval** | `take entry K from T` | `T K 𒋗` | Retrieves entry with key $K$. Raises `DubSarEntryNotFoundError` if absent. |
+| **Insertion** | `put V into W at K` | `W K V 𒃻` | Inserts or overwrites entry $K$ in working tablet $W$. |
+| **Append** | `append V to W` | `W V 𒈭` | Appends $V$ at the next sequential non-negative integer key. |
+| **Length** | `length of T` | `T 𒁍` | Evaluates to the exact integer count of entries in tablet $T$. |
+| **Removal** | `remove entry K from W` | `W K remove` | Deletes entry $K$ from working tablet $W$. |
+| **Seek First** | `first from T` | `T first` | Retrieves the value of the earliest entry by sorted key order. |
+| **Seek Last** | `last from T` | `T last` | Retrieves the value of the latest entry by sorted key order. |
+| **Seek Nearest**| `seek entry nearest X in T` | `T X 𒊑` | Finds the entry whose numeric key is closest to target $X$. |
+| **Iteration** | `consider entries of T:` | `consider entries of T:` | Iterates each entry, binding the entry value to `entry` (or `v`). |
+| **Keyed Iter** | `consider K, V of T:` | `consider K, V of T:` | Iterates each key-value pair in tablet $T$. |
+| **Inscription**| `inscribe tablet W [as T]` | `𒁹𒀀 W [as T]` | Persists working tablet $W$ as an immutable archive tablet version. |
+
+### 37.4 Immutability Guarantee
+
+Persistent archive tablets are strictly immutable. Any attempt to modify, append to, or remove entries from a persistent tablet raises `DubSarImmutableTabletError` (error alias `ImmutableTablet`):
+```text
+consult tablet "reciprocals"
+append 5 to reciprocals   # ERROR: DubSarImmutableTabletError: persistent tablets are immutable
+```
+To modify existing data, a program must create a mutable working copy using `derive tablet "reciprocals" as working my_recips` or `copy tablet "reciprocals" as working my_recips`.
+
+### 37.5 Entry Lookup Semantics
+
+Looking up an entry with `take entry K from T` (or `T K 𒋗`) requires the entry to exist. If the key is not present in the tablet, evaluation halts with `DubSarEntryNotFoundError` (error alias `EntryNotFound`):
+```text
+consult tablet "reciprocals"
+v : take entry 99 from reciprocals   # ERROR: DubSarEntryNotFoundError: Entry 99 not found
+```
+For approximate mathematical tables, programs use `seek entry nearest target in T` to locate the closest entry without raising an error.

@@ -48,11 +48,14 @@ from dubsar.ast import (
     DeriveTablet,
     InscribeTablet,
     PutEntry,
+    AppendEntry,
     ReplaceEntry,
     RemoveEntry,
     TakeEntry,
     SeekEntry,
     TabletHistory,
+    SequenceLength,
+    IterateEntries,
 )
 from dubsar.errors import DubSarSyntaxError
 from dubsar.tokens import Token, TokenType
@@ -284,6 +287,10 @@ class Parser:
         if self._check(TokenType.PUT) or self.current.raw in ("put", "insert", "set", "gar", "𒃻"):
             return self._parse_put()
 
+        # 6) Append entry: append val to/into working / 𒈭 val 𒀀 working
+        if self._check(TokenType.APPEND) or self.current.raw in ("append", "dah", "tah", "𒈭"):
+            return self._parse_append()
+
         # 6) Replace entry: replace entry key with val in working
         if self._check(TokenType.REPLACE) or self.current.raw in ("replace", "update"):
             return self._parse_replace()
@@ -303,6 +310,9 @@ class Parser:
             return ExpressionStatement(expr=input_expr, line=input_expr.line, col=input_expr.col)
 
         # Lookahead for declaration (name : expr) or assignment (name := expr or tuple unpack)
+        if self._peek(1).type == TokenType.COLON:
+            return self._parse_establishment()
+
         if self._check(TokenType.IDENTIFIER):
             next1 = self._peek(1)
             # Working tablet mutation: working replace entry ...
@@ -421,7 +431,7 @@ class Parser:
                     break
 
         all_toks = [tok for l in lines for tok in l]
-        if not all_toks:
+        if len(all_toks) < 2:
             return []
         has_op = any(self._is_op_token(tok) for tok in all_toks) or any(
             tok.type == TokenType.APPLY or tok.raw in ("apply", "ak", "du", "dù", "𒀝", "𒆕") for tok in all_toks
@@ -448,9 +458,44 @@ class Parser:
             j += 1
         return res
 
-    def _parse_domain_repetition(self) -> Repetition:
+    def _parse_domain_repetition(self) -> Statement:
         tok = self._expect(TokenType.CONSIDER, "Expected 'consider' or '𒄀'")
+
+        # 1) consider entries of <tablet>:
+        if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad", "𒉻"):
+            self._advance()
+            if self._check(TokenType.OF) or self._check(TokenType.FROM) or self.current.raw in ("of", "from", "sha", "ša", "𒊭", "ta", "𒋫", "in", "into", "a", "𒀀"):
+                self._advance()
+            tablet_expr = self._parse_primary()
+            self._expect(TokenType.COLON, "Expected ':' after consider entries of tablet")
+            body = self._parse_block()
+            return IterateEntries(key_target=None, value_target="entry", tablet=tablet_expr, body=body, line=tok.line, col=tok.col)
+
+        # 2) consider key, value of <tablet>:
+        if self._check(TokenType.IDENTIFIER) and self._peek(1).type == TokenType.COMMA:
+            k_tok = self._advance()
+            self._advance()  # consume comma
+            v_tok = self._expect(TokenType.IDENTIFIER, "Expected value identifier in consider key, value")
+            if self._check(TokenType.OF) or self._check(TokenType.FROM) or self.current.raw in ("of", "from", "in", "into", "sha", "ša", "𒊭", "ta", "𒋫", "a", "𒀀"):
+                self._advance()
+            if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad", "𒉻"):
+                self._advance()
+            if self._check(TokenType.OF) or self._check(TokenType.FROM) or self.current.raw in ("of", "from", "in", "into", "sha", "ša", "𒊭", "ta", "𒋫", "a", "𒀀"):
+                self._advance()
+            tablet_expr = self._parse_primary()
+            self._expect(TokenType.COLON, "Expected ':' after consider key, value of tablet")
+            body = self._parse_block()
+            return IterateEntries(key_target=k_tok.value, value_target=v_tok.value, tablet=tablet_expr, body=body, line=tok.line, col=tok.col)
+
         target_tok = self._expect(TokenType.IDENTIFIER, "Expected domain variable identifier")
+
+        # 3) consider item in/of <tablet>: (single variable entry iteration)
+        if self.current.raw in ("in", "of", "sha", "ša", "𒊭"):
+            self._advance()
+            tablet_expr = self._parse_primary()
+            self._expect(TokenType.COLON, "Expected ':' after consider item of tablet")
+            body = self._parse_block()
+            return IterateEntries(key_target=None, value_target=target_tok.value, tablet=tablet_expr, body=body, line=tok.line, col=tok.col)
 
         # Optional 'from' / 'ta' / '𒋫'
         if self._check(TokenType.FROM) or (self._check(TokenType.MINUS) and self.current.raw in ("ta", "𒋫")):
@@ -543,7 +588,7 @@ class Parser:
         )
 
     def _parse_establishment(self) -> Statement:
-        name_tok = self._expect(TokenType.IDENTIFIER, "Expected identifier in quantity establishment")
+        name_tok = self._advance()
         self._expect(TokenType.COLON, "Expected ':' after identifier")
 
         # Case 1: Indented block follows
@@ -587,7 +632,7 @@ class Parser:
                         col=name_tok.col,
                     )
                 # 3) single postfix line
-                if any(self._is_op_token(t) for t in flat) and self._is_op_token(flat[-1]):
+                if len(flat) >= 2 and any(self._is_op_token(t) for t in flat) and self._is_op_token(flat[-1]):
                     steps = self._parse_postfix_steps(block_tokens)
                     return Declaration(
                         name=name_tok.value,
@@ -766,6 +811,10 @@ class Parser:
             TokenType.ABSOLUTE,
             TokenType.APPLY,
             TokenType.TAKE,
+            TokenType.PUT,
+            TokenType.APPEND,
+            TokenType.LENGTH,
+            TokenType.REMOVE,
         ):
             return True
         r = tok.raw.lower()
@@ -783,12 +832,29 @@ class Parser:
             "equal", "sa", "sá", "𒊓", "==",
             "apply", "ak", "du", "dù", "𒀝", "𒆕",
             "take", "shu", "šu", "𒋗",
+            "put", "gar", "𒃻",
+            "append", "dah", "tah", "𒈭",
+            "length", "gid", "gíd", "us", "uš", "𒁍", "𒍑",
+            "remove", "delete",
+            "first", "last",
         )
 
     def _canonical_op_name(self, tok: Token) -> str:
         r = tok.raw.lower()
         if tok.type == TokenType.TAKE or r in ("take", "shu", "šu", "𒋗"):
             return "take"
+        if tok.type == TokenType.PUT or r in ("put", "gar", "𒃻"):
+            return "put"
+        if tok.type == TokenType.APPEND or r in ("append", "dah", "tah", "𒈭"):
+            return "append"
+        if tok.type == TokenType.LENGTH or r in ("length", "gid", "gíd", "us", "uš", "𒁍", "𒍑"):
+            return "length"
+        if tok.type == TokenType.REMOVE or r in ("remove", "delete"):
+            return "remove"
+        if r == "first":
+            return "first"
+        if r == "last":
+            return "last"
         if r in ("add", "zi", "𒍣", "+"):
             return "add"
         if r in ("subtract", "sub", "ta", "𒋫", "-"):
@@ -970,8 +1036,25 @@ class Parser:
 
     def _parse_output(self) -> Statement:
         tok = self._expect(TokenType.INSCRIBE, "Expected '𒁹𒀀', 'inscribe', or 'output'")
-        # Check if archive inscription: inscribe working_name as [tablet] target_name
-        if self._check(TokenType.IDENTIFIER) and (
+        # Check if archive inscription: inscribe [tablet] working_name [as [tablet] target_name]
+        is_tablet_kw = self._check(TokenType.TABLET) or self.current.raw in ("tablet", "dub", "𒁾")
+        if is_tablet_kw and self._peek(1).type == TokenType.IDENTIFIER:
+            self._advance()  # consume tablet / dub / 𒁾
+            working_tok = self._advance()
+            target_expr = Identifier(name=working_tok.value, line=working_tok.line, col=working_tok.col)
+            if self._check(TokenType.AS) or self.current.raw in ("as", "gim", "𒁶"):
+                self._advance()
+                if self._check(TokenType.TABLET) or self.current.raw in ("tablet", "dub", "𒁾"):
+                    self._advance()
+                target_expr = self._parse_expression()
+            self._match(TokenType.NEWLINE)
+            return InscribeTablet(
+                working_name=working_tok.value,
+                target_name=target_expr,
+                line=tok.line,
+                col=tok.col,
+            )
+        elif self._check(TokenType.IDENTIFIER) and (
             self._peek(1).type == TokenType.AS
             or self._peek(1).raw in ("as", "gim", "𒁶")
         ):
@@ -1015,8 +1098,37 @@ class Parser:
         if self._check(TokenType.TABLET) or self.current.raw in ("tablet", "dub", "𒁾"):
             self._advance()
         name_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier")
-        self._match(TokenType.NEWLINE)
-        return CreateWorkingTablet(name=name_tok.value, shape="table", line=tok.line, col=tok.col)
+        length_expr = None
+        if self._check(TokenType.OF) or self.current.raw in ("of", "sha", "ša", "𒊭"):
+            self._advance()
+            if self._check(TokenType.LENGTH) or self.current.raw in ("length", "gid", "gíd", "us", "uš", "𒁍", "𒍑"):
+                self._advance()
+            length_expr = self._parse_sum()
+
+        fields = []
+        if self._match(TokenType.COLON):
+            self._expect(TokenType.NEWLINE, "Expected newline after ':' in working tablet")
+            self._expect(TokenType.INDENT, "Expected indent after ':' in working tablet")
+            while not self._check(TokenType.DEDENT) and not self._check(TokenType.EOF):
+                if self._check(TokenType.NEWLINE):
+                    self._advance()
+                    continue
+                field_stmt = self._parse_statement()
+                fields.append(field_stmt)
+                self._skip_newlines()
+            self._expect(TokenType.DEDENT, "Expected dedent at end of working tablet block")
+        else:
+            self._match(TokenType.NEWLINE)
+
+        shape = "sequence" if length_expr is not None else "table"
+        return CreateWorkingTablet(
+            name=name_tok.value,
+            shape=shape,
+            length=length_expr,
+            fields=fields if fields else None,
+            line=tok.line,
+            col=tok.col,
+        )
 
     def _parse_copy(self) -> CopyTablet:
         tok = self._advance()  # consume copy / gaba-ri / 𒃮𒊑
@@ -1075,6 +1187,15 @@ class Parser:
         self._match(TokenType.NEWLINE)
         return PutEntry(working_name=working_tok.value, key=key_expr, value=val_expr, line=tok.line, col=tok.col)
 
+    def _parse_append(self) -> AppendEntry:
+        tok = self._advance()  # consume append / dah / 𒈭
+        val_expr = self._parse_sum()
+        if self._check(TokenType.INTO) or self._check(TokenType.THROUGH) or self.current.raw.lower() in ("to", "into", "in", "a", "𒀀"):
+            self._advance()
+        working_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier after append")
+        self._match(TokenType.NEWLINE)
+        return AppendEntry(working_name=working_tok.value, value=val_expr, line=tok.line, col=tok.col)
+
     def _parse_replace(self) -> ReplaceEntry:
         tok = self._advance()  # consume replace / update
         if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
@@ -1100,10 +1221,13 @@ class Parser:
 
     def _parse_remove(self) -> RemoveEntry:
         tok = self._advance()  # consume remove / delete
-        if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+        if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad", "𒉻"):
             self._advance()
         key_expr = self._parse_sum()
-        self._expect(TokenType.FROM, "Expected 'from' in remove statement")
+        if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫", "of", "sha", "ša", "𒊭"):
+            self._advance()
+        else:
+            self._expect(TokenType.FROM, "Expected 'from' in remove statement")
         working_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier")
         self._match(TokenType.NEWLINE)
         return RemoveEntry(working_name=working_tok.value, key=key_expr, line=tok.line, col=tok.col)
@@ -1329,33 +1453,90 @@ class Parser:
         if self._check(TokenType.ASK):
             return self._parse_input_expr()
 
-        # Archive expressions (§21, §22, §38)
-        # 1) take [entry] <key> from <tablet>
-        if self._check(TokenType.TAKE) or tok.raw in ("take", "shu", "šu"):
-            take_tok = self._advance()
-            if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+        # Archive & Tablet expressions (§14, §16, §21, §22, §38)
+        # 1) length of <tablet> / 𒁍 𒊭 <tablet>
+        if self._check(TokenType.LENGTH) or tok.raw in ("length", "gid", "gíd", "us", "uš", "𒁍", "𒍑"):
+            next_t = self._peek(1)
+            if next_t.type in (TokenType.OF, TokenType.FROM) or next_t.raw in ("of", "sha", "ša", "𒊭", "from", "ta", "𒋫"):
+                len_tok = self._advance()
                 self._advance()
-            key_expr = self._parse_sum()
-            if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫"):
+                tablet_expr = self._parse_primary()
+                return SequenceLength(tablet=tablet_expr, line=len_tok.line, col=len_tok.col)
+            elif not self._check(TokenType.IDENTIFIER):
+                len_tok = self._advance()
+                return Identifier(name=str(len_tok.value), line=len_tok.line, col=len_tok.col)
+
+        # 2) first / last [entry] [from/of] <tablet>
+        if self._check(TokenType.IDENTIFIER) and tok.raw.lower() in ("first", "last"):
+            next_t = self._peek(1)
+            if next_t.type in (TokenType.ENTRY, TokenType.OF, TokenType.FROM) or next_t.raw in ("entry", "entries", "pad", "𒉻", "of", "from", "sha", "ša", "𒊭", "ta", "𒋫", "in", "into"):
+                first_tok = self._advance()
+                mode = first_tok.raw.lower()
+                if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad", "𒉻"):
+                    self._advance()
+                if self._check(TokenType.OF) or self._check(TokenType.FROM) or self.current.raw in ("of", "from", "sha", "ša", "𒊭", "ta", "𒋫", "in", "into"):
+                    self._advance()
+                tablet_expr = self._parse_primary()
+                return SeekEntry(tablet=tablet_expr, target=None, mode=mode, line=first_tok.line, col=first_tok.col)
+
+        # 4) entry <key> from/of <tablet>
+        if self._check(TokenType.ENTRY) or tok.raw in ("entry", "entries", "pad", "𒉻"):
+            ent_tok = self._advance()
+            if self._check(TokenType.IDENTIFIER) and (
+                self._peek(1).type in (TokenType.OF, TokenType.FROM)
+                or self._peek(1).raw in ("of", "from", "sha", "ša", "𒊭", "ta", "𒋫", "in", "into")
+            ):
+                ident_k = self._advance()
+                key_expr = StringLiteral(value=ident_k.value, line=ident_k.line, col=ident_k.col)
+            else:
+                key_expr = self._parse_sum()
+            if self._check(TokenType.OF) or self._check(TokenType.FROM) or self.current.raw in ("of", "from", "sha", "ša", "𒊭", "ta", "𒋫", "in", "into"):
+                self._advance()
+            tablet_expr = self._parse_primary()
+            return TakeEntry(tablet=tablet_expr, key=key_expr, line=ent_tok.line, col=ent_tok.col)
+
+        # 5) take [entry] <key> from <tablet>
+        if self._check(TokenType.TAKE) or tok.raw in ("take", "shu", "šu", "𒋗"):
+            take_tok = self._advance()
+            if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad", "𒉻"):
+                self._advance()
+            if self._check(TokenType.IDENTIFIER) and (
+                self._peek(1).type in (TokenType.OF, TokenType.FROM)
+                or self._peek(1).raw in ("from", "ta", "𒋫", "of", "sha", "ša", "𒊭", "in", "into")
+            ):
+                ident_k = self._advance()
+                key_expr = StringLiteral(value=ident_k.value, line=ident_k.line, col=ident_k.col)
+            else:
+                key_expr = self._parse_sum()
+            if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫", "of", "sha", "ša", "𒊭", "in", "into"):
                 self._advance()
             tablet_expr = self._parse_primary()
             return TakeEntry(tablet=tablet_expr, key=key_expr, line=take_tok.line, col=take_tok.col)
 
-        # 2) seek [entry] [nearest] <target> in <tablet>
+        # 6) seek [entry] [nearest / first / last] [<target>] in <tablet>
         if self._check(TokenType.SEEK) or tok.raw in ("seek", "find"):
             seek_tok = self._advance()
-            if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+            if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad", "𒉻"):
                 self._advance()
             mode = "nearest"
-            if self._check(TokenType.NEAREST) or self.current.raw in ("nearest", "round", "ri", "𒊑"):
+            if self._check(TokenType.FIRST) or self.current.raw == "first":
                 self._advance()
-            target_expr = self._parse_sum()
-            if self._check(TokenType.INTO) or self.current.raw in ("in", "into", "from", "ta", "𒋫"):
+                mode = "first"
+            elif self._check(TokenType.LAST) or self.current.raw == "last":
+                self._advance()
+                mode = "last"
+            elif self._check(TokenType.NEAREST) or self.current.raw in ("nearest", "round", "ri", "𒊑"):
+                self._advance()
+                mode = "nearest"
+            target_expr = None
+            if mode == "nearest":
+                target_expr = self._parse_sum()
+            if self._check(TokenType.INTO) or self.current.raw in ("in", "into", "from", "ta", "𒋫", "of", "sha", "ša", "𒊭"):
                 self._advance()
             tablet_expr = self._parse_primary()
             return SeekEntry(tablet=tablet_expr, target=target_expr, mode=mode, line=seek_tok.line, col=seek_tok.col)
 
-        # 3) history of <tablet>
+        # 7) history of <tablet>
         if self._check(TokenType.HISTORY) or tok.raw in ("history", "igi-kar"):
             hist_tok = self._advance()
             if self._check(TokenType.OF) or self.current.raw in ("of", "sha", "ša", "𒊭"):

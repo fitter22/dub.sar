@@ -1,0 +1,23 @@
+# DUB.SAR 1.0 — Sequence Generation (Scholar Mode)
+# Demonstrates working sequence tablets, appending, and length queries.
+
+problem:
+
+    working fib of length 0
+
+    append 1 to fib
+    append 1 to fib
+    append 2 to fib
+    append 3 to fib
+    append 5 to fib
+    append 8 to fib
+
+    n : length of fib
+    first_val : first from fib
+    last_val : last from fib
+
+result:
+
+    n
+    first_val
+    last_val

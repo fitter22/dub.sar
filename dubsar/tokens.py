@@ -60,6 +60,8 @@ class TokenType(Enum):
     REPLACE = auto()      # replace / update
     WITH = auto()         # 𒁕 / with / da
     REMOVE = auto()       # remove / delete
+    APPEND = auto()       # 𒈭 / append / dah
+    LENGTH = auto()       # 𒁍 / 𒍑 / length / gid / us
     COPY = auto()         # 𒃮𒊑 / copy / gaba-ri
     DERIVE = auto()       # derive
     VERSION = auto()      # version
@@ -178,6 +180,10 @@ CUNEIFORM_KEYWORDS: Dict[str, TokenType] = {
     "𒊬": TokenType.INSCRIBE,
     "𒀀": TokenType.INTO,
     "𒁴": TokenType.DERIVE,
+    "𒁍": TokenType.LENGTH,
+    "𒍑": TokenType.LENGTH,
+    "𒈭": TokenType.APPEND,
+    "𒉻": TokenType.ENTRY,
 }
 
 # Scholar / Transliteration keyword mappings (§2.2, §4, §6, §60)
@@ -299,6 +305,14 @@ SCHOLAR_KEYWORDS: Dict[str, TokenType] = {
     "gim": TokenType.AS,
     "seek": TokenType.SEEK,
     "find": TokenType.SEEK,
+    "length": TokenType.LENGTH,
+    "gid": TokenType.LENGTH,
+    "gíd": TokenType.LENGTH,
+    "us": TokenType.LENGTH,
+    "uš": TokenType.LENGTH,
+    "append": TokenType.APPEND,
+    "dah": TokenType.APPEND,
+    "tah": TokenType.APPEND,
 }
 
 # Reverse mapping for canonical transliteration / cuneiformization
@@ -340,6 +354,10 @@ TOKEN_TO_CUNEIFORM: Dict[TokenType, str] = {
     TokenType.WITH: "𒁕",
     TokenType.COPY: "𒃮𒊑",
     TokenType.AS: "𒁶",
+    TokenType.DERIVE: "𒁴",
+    TokenType.LENGTH: "𒁍",
+    TokenType.APPEND: "𒈭",
+    TokenType.ENTRY: "𒉻",
 }
 
 TOKEN_TO_SCHOLAR: Dict[TokenType, str] = {
@@ -393,4 +411,6 @@ TOKEN_TO_SCHOLAR: Dict[TokenType, str] = {
     TokenType.HISTORY: "history",
     TokenType.AS: "as",
     TokenType.SEEK: "seek",
+    TokenType.LENGTH: "length",
+    TokenType.APPEND: "append",
 }

@@ -42,6 +42,20 @@ from dubsar.ast import (
     StringLiteral,
     TupleExpr,
     UnaryOp,
+    ConsultTablet,
+    CreateWorkingTablet,
+    CopyTablet,
+    DeriveTablet,
+    InscribeTablet,
+    PutEntry,
+    AppendEntry,
+    ReplaceEntry,
+    RemoveEntry,
+    TakeEntry,
+    SeekEntry,
+    TabletHistory,
+    SequenceLength,
+    IterateEntries,
 )
 from dubsar.lexer import Lexer
 from dubsar.parser import Parser
@@ -190,6 +204,55 @@ class Formatter:
         elif isinstance(stmt, ExpressionStatement):
             return f"{pad}{self._format_expression(stmt.expr, is_tablet)}"
 
+        elif isinstance(stmt, ConsultTablet):
+            kw = "𒅆 𒁾" if is_tablet else "consult tablet"
+            t_str = self._format_expression(stmt.tablet_name, is_tablet)
+            v_str = f" version {self._format_expression(stmt.version, is_tablet)}" if stmt.version else ""
+            a_str = f" as {stmt.alias}" if stmt.alias else ""
+            return f"{pad}{kw} {t_str}{v_str}{a_str}"
+
+        elif isinstance(stmt, CreateWorkingTablet):
+            kw = "𒁾" if is_tablet else "working"
+            l_str = f" of length {self._format_expression(stmt.length, is_tablet)}" if stmt.length else ""
+            if stmt.fields:
+                field_lines = [f"{pad}{kw} {stmt.name}{l_str}:"]
+                for f in stmt.fields:
+                    field_lines.append(self._format_statement(f, indent=indent + 4, is_tablet=is_tablet))
+                return "\n".join(field_lines)
+            return f"{pad}{kw} {stmt.name}{l_str}"
+
+        elif isinstance(stmt, AppendEntry):
+            kw = "𒈭" if is_tablet else "append"
+            prep = "𒀀" if is_tablet else "to"
+            val_str = self._format_expression(stmt.value, is_tablet)
+            return f"{pad}{kw} {val_str} {prep} {stmt.working_name}"
+
+        elif isinstance(stmt, PutEntry):
+            kw = "𒃻" if is_tablet else "put"
+            prep = "𒀀" if is_tablet else "into"
+            val_str = self._format_expression(stmt.value, is_tablet)
+            k_str = f" at {self._format_expression(stmt.key, is_tablet)}" if stmt.key is not None else ""
+            return f"{pad}{kw} {val_str} {prep} {stmt.working_name}{k_str}"
+
+        elif isinstance(stmt, InscribeTablet):
+            kw = "𒊬 𒁾" if is_tablet else "inscribe tablet"
+            prep = "𒀀" if is_tablet else "into"
+            tgt_str = self._format_expression(stmt.target_name, is_tablet)
+            return f"{pad}{kw} {stmt.working_name} {prep} {tgt_str}"
+
+        elif isinstance(stmt, IterateEntries):
+            kw = "𒄀" if is_tablet else "consider"
+            prep = "𒊭" if is_tablet else "of"
+            tab_str = self._format_expression(stmt.tablet, is_tablet)
+            if stmt.key_target:
+                tgt = f"{stmt.key_target}, {stmt.value_target}"
+            else:
+                tgt = f"entries"
+            lines = [f"{pad}{kw} {tgt} {prep} {tab_str}:"]
+            for s in stmt.body:
+                lines.append(self._format_statement(s, indent=indent + 4, is_tablet=is_tablet))
+            return "\n".join(lines)
+
         return ""
 
     def _format_expression(self, expr: Expression, is_tablet: bool = True) -> str:
@@ -217,6 +280,8 @@ class Formatter:
                             "absolute": "𒋼", "add": "𒍣", "subtract": "𒋫",
                             "multiply": "𒊭", "divide": "𒉌", "lesser": "𒌉",
                             "greater": "𒃲", "equal": "𒊓",
+                            "take": "𒋗", "put": "𒃻", "append": "𒈭",
+                            "length": "𒁍",
                         }
                         parts.append(tablet_ops.get(step.lower(), step))
                     else:
@@ -281,6 +346,32 @@ class Formatter:
 
         elif isinstance(expr, TupleExpr):
             return ", ".join(self._format_expression(e, is_tablet) for e in expr.elements)
+
+        elif isinstance(expr, SequenceLength):
+            kw = "𒁍" if is_tablet else "length"
+            prep = "𒊭" if is_tablet else "of"
+            return f"{kw} {prep} {self._format_expression(expr.tablet, is_tablet)}"
+
+        elif isinstance(expr, TakeEntry):
+            kw = "𒉻" if is_tablet else "take entry"
+            prep = "𒋫" if is_tablet else "from"
+            k_str = self._format_expression(expr.key, is_tablet)
+            t_str = self._format_expression(expr.tablet, is_tablet)
+            return f"{kw} {k_str} {prep} {t_str}"
+
+        elif isinstance(expr, SeekEntry):
+            kw = "seek"
+            prep = "in"
+            m_str = f" {expr.mode}" if expr.mode != "nearest" else " nearest"
+            tgt = f" {self._format_expression(expr.target, is_tablet)}" if expr.target is not None else ""
+            t_str = self._format_expression(expr.tablet, is_tablet)
+            return f"{kw}{m_str}{tgt} {prep} {t_str}"
+
+        elif isinstance(expr, TabletHistory):
+            kw = "igi-kar" if is_tablet else "history"
+            prep = "𒊭" if is_tablet else "of"
+            t_str = self._format_expression(expr.tablet, is_tablet)
+            return f"{kw} {prep} {t_str}"
 
         return ""
 

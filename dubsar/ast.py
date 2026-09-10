@@ -150,6 +150,12 @@ class TabletHistory(Expression):
     tablet: Expression = field(default_factory=Expression)
 
 
+@dataclass
+class SequenceLength(Expression):
+    """Query length of a sequence / tablet: length of signal / signal length (§14)."""
+    tablet: Expression = field(default_factory=Expression)
+
+
 # ==============================================================================
 # Statements / Prescriptions
 # ==============================================================================
@@ -255,9 +261,11 @@ class ConsultTablet(Statement):
 
 @dataclass
 class CreateWorkingTablet(Statement):
-    """Create a temporary mutable working tablet: working name."""
+    """Create a temporary mutable working tablet: working name [of length N] [: fields]."""
     name: str = ""
     shape: str = "table"
+    length: Optional[Expression] = None
+    fields: Optional[List[Statement]] = None
 
 
 @dataclass
@@ -292,6 +300,13 @@ class PutEntry(Statement):
 
 
 @dataclass
+class AppendEntry(Statement):
+    """Append entry to working tablet: append value to working (§16)."""
+    working_name: str = ""
+    value: Expression = field(default_factory=Expression)
+
+
+@dataclass
 class ReplaceEntry(Statement):
     """Replace entry in working tablet: [working] replace entry key with value."""
     working_name: str = ""
@@ -304,6 +319,15 @@ class RemoveEntry(Statement):
     """Remove entry from working tablet: remove entry key from working."""
     working_name: str = ""
     key: Expression = field(default_factory=Expression)
+
+
+@dataclass
+class IterateEntries(Statement):
+    """Iterate entries of tablet: consider entries of tablet: body (§23)."""
+    key_target: Optional[str] = None
+    value_target: str = "entry"
+    tablet: Expression = field(default_factory=Expression)
+    body: List[Statement] = field(default_factory=list)
 
 
 # ==============================================================================

@@ -1,0 +1,24 @@
+# DUB.SAR 1.0 — Persistent Tablet Sequences (Scholar Mode)
+# Demonstrates inscribing a working sequence and consulting persistent entries.
+
+problem:
+
+    working powers of length 0
+    append 1 to powers
+    append 2 to powers
+    append 4 to powers
+    append 8 to powers
+    append 16 to powers
+
+    inscribe tablet powers
+
+    consult tablet "powers"
+    n : length of powers
+    first_power : first from powers
+    last_power : last from powers
+
+result:
+
+    n
+    first_power
+    last_power

@@ -1,0 +1,23 @@
+𒑰 DUB.SAR 1.0 — Sequence Generation (Canonical Cuneiform)
+𒑰 Demonstrates working sequence tablets, appending, and length queries.
+
+𒂊𒁹
+
+    working fib of length 0
+
+    fib 1 𒈭
+    fib 1 𒈭
+    fib 2 𒈭
+    fib 3 𒈭
+    fib 5 𒈭
+    fib 8 𒈭
+
+    n : fib 𒁍
+    first_val : fib first
+    last_val : fib last
+
+𒅗𒁹
+
+    n
+    first_val
+    last_val

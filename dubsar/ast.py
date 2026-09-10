@@ -285,9 +285,9 @@ class InscribeTablet(Statement):
 
 @dataclass
 class PutEntry(Statement):
-    """Put entry into working tablet: put value into working at key."""
+    """Put entry into working tablet: put value into working [at key]."""
     working_name: str = ""
-    key: Expression = field(default_factory=Expression)
+    key: Optional[Expression] = None
     value: Expression = field(default_factory=Expression)
 
 

@@ -168,6 +168,14 @@ UNIT_TABLE: Dict[str, Unit] = {
     "year": Unit({"year": 1}, scale=1, name="year"),
     "mu": Unit({"year": 1}, scale=1, name="year"),
     "𒈬": Unit({"year": 1}, scale=1, name="𒈬"),
+
+    # Weight / metrology units (base dimension: mass, base: shekel)
+    "talent": Unit({"mass": 1}, scale=3600, name="talent"),
+    "gun": Unit({"mass": 1}, scale=3600, name="talent"),
+    "𒄘": Unit({"mass": 1}, scale=3600, name="𒄘"),
+    "mina": Unit({"mass": 1}, scale=60, name="mina"),
+    "ma-na": Unit({"mass": 1}, scale=60, name="mina"),
+    "𒈠𒈾": Unit({"mass": 1}, scale=60, name="𒈠𒈾"),
 }
 
 UNIT_TO_CUNEIFORM: Dict[str, str] = {
@@ -177,12 +185,18 @@ UNIT_TO_CUNEIFORM: Dict[str, str] = {
     "iti": "𒌗",
     "year": "𒈬",
     "mu": "𒈬",
+    "talent": "𒄘",
+    "gun": "𒄘",
+    "mina": "𒈠𒈾",
+    "ma-na": "𒈠𒈾",
 }
 
 CUNEIFORM_TO_UNIT_NAME: Dict[str, str] = {
     "𒌓": "day",
     "𒌗": "month",
     "𒈬": "year",
+    "𒄘": "talent",
+    "𒈠𒈾": "mina",
 }
 
 

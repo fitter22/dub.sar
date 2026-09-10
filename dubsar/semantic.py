@@ -387,7 +387,8 @@ class SemanticAnalyzer:
                     source_file=self.source_file,
                 )
             self._analyze_expression(stmt.value)
-            self._analyze_expression(stmt.key)
+            if stmt.key is not None:
+                self._analyze_expression(stmt.key)
 
         elif isinstance(stmt, ReplaceEntry):
             if not self.current_scope.is_defined(stmt.working_name):

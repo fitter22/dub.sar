@@ -46,6 +46,7 @@ from dubsar.ir import Compiler
 from dubsar.lexer import Lexer
 from dubsar.numbers import Rational
 from dubsar.parser import Parser
+from dubsar.semantic import SemanticAnalyzer
 from dubsar.units import DIMENSIONLESS, Quantity, lookup_unit
 from dubsar.vm import VirtualMachine
 
@@ -65,6 +66,7 @@ class TestArchiveInitialization(unittest.TestCase):
         self.assertIn("powers", names)
         self.assertIn("basic-metrology", names)
         self.assertIn("basic-geometry", names)
+        self.assertIn("ea-nasir-shipment", names)
         archive.close()
 
     def test_repeated_startup_idempotence(self):
@@ -79,7 +81,7 @@ class TestArchiveInitialization(unittest.TestCase):
             t2_count = len(a2.list_tablets())
             a2.close()
             self.assertEqual(t1_count, t2_count)
-            self.assertEqual(t1_count, 8)
+            self.assertEqual(t1_count, 9)
 
 
 class TestConsultation(unittest.TestCase):
@@ -377,6 +379,137 @@ class TestArchiveCLI(unittest.TestCase):
         args_hist = parser.parse_args(["archive", "history", "reciprocals", "--archive", ":memory:"])
         ret_hist = handle_archive_command(args_hist)
         self.assertEqual(ret_hist, 0)
+
+
+class TestEaNasirArchiveWorkflow(unittest.TestCase):
+    """End-to-end tests for Ea-nāṣir Tablet Archive workflow."""
+
+    def test_ea_nasir_shipment_consultation_and_entries(self):
+        archive = SQLiteTabletArchive(":memory:")
+        info = archive.consult("ea-nasir-shipment")
+        self.assertEqual(info.name, "ea-nasir-shipment")
+        self.assertEqual(info.metadata.kind, TabletKind.DATA)
+        self.assertEqual(info.metadata.historical_tag, HistoricalTag.MODERN)
+        self.assertIn("fictionalized", info.metadata.notes.lower())
+
+        self.assertEqual(info.get("merchant"), "Ea-nāṣir")
+        self.assertEqual(info.get("promised-quantity"), Quantity(10, lookup_unit("talent")))
+        self.assertEqual(info.get("delivered-quantity"), Quantity(10, lookup_unit("talent")))
+        self.assertEqual(info.get("required-quality"), Rational(1))
+        self.assertEqual(info.get("actual-quality"), Rational(3, 4))  # 0;45
+
+    def test_ea_nasir_assessment_scholar_execution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = os.path.join(tmp, "archive.db")
+            archive = SQLiteTabletArchive(db_path)
+
+            source = Path("examples/ea_nasir_scholar.dub").read_text(encoding="utf-8")
+            prog = Parser(Lexer(source).tokenize()).parse()
+            SemanticAnalyzer().analyze(prog)
+            chunk = Compiler().compile(prog)
+
+            vm = VirtualMachine(archive=archive)
+            out_vm = vm.execute(chunk)
+            self.assertEqual(out_vm, ["Ea-nāṣir", "10 talent", "10 talent", "1", "0;45", "0;15"])
+
+            assessment_tab = archive.consult("ea-nasir-assessment")
+            self.assertEqual(assessment_tab.version, 1)
+            self.assertEqual(assessment_tab.get("merchant"), "Ea-nāṣir")
+            self.assertEqual(assessment_tab.get("promised"), Quantity(10, lookup_unit("talent")))
+            self.assertEqual(assessment_tab.get("delivered"), Quantity(10, lookup_unit("talent")))
+            self.assertEqual(assessment_tab.get("required-quality"), Rational(1))
+            self.assertEqual(assessment_tab.get("actual-quality"), Rational(3, 4))
+            self.assertEqual(assessment_tab.get("deficiency"), Quantity(Rational(1, 4), DIMENSIONLESS))
+
+    def test_ea_nasir_assessment_cuneiform_parity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = os.path.join(tmp, "archive.db")
+            archive = SQLiteTabletArchive(db_path)
+
+            source = Path("examples/ea_nasir.dub").read_text(encoding="utf-8")
+            prog = Parser(Lexer(source).tokenize()).parse()
+            SemanticAnalyzer().analyze(prog)
+            chunk = Compiler().compile(prog)
+
+            vm = VirtualMachine(archive=archive)
+            out_vm = vm.execute(chunk)
+            self.assertEqual(out_vm, ["Ea-nāṣir", "10 talent", "10 talent", "1", "0;45", "0;15"])
+
+            assessment_tab = archive.consult("ea-nasir-assessment")
+            self.assertEqual(assessment_tab.get("deficiency"), Quantity(Rational(1, 4), DIMENSIONLESS))
+
+    def test_ea_nasir_persistence_across_restarts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = os.path.join(tmp, "archive.db")
+            # 1. Run and close
+            arc1 = SQLiteTabletArchive(db_path)
+            source = Path("examples/ea_nasir_scholar.dub").read_text(encoding="utf-8")
+            prog = Parser(Lexer(source).tokenize()).parse()
+            chunk = Compiler().compile(prog)
+            vm1 = VirtualMachine(archive=arc1)
+            vm1.execute(chunk)
+            arc1.close()
+
+            # 2. Reopen and verify persistence
+            arc2 = SQLiteTabletArchive(db_path)
+            persisted = arc2.consult("ea-nasir-assessment")
+            self.assertEqual(persisted.version, 1)
+            self.assertEqual(persisted.get("merchant"), "Ea-nāṣir")
+            self.assertEqual(persisted.get("deficiency"), Quantity(Rational(1, 4), DIMENSIONLESS))
+            arc2.close()
+
+    def test_ea_nasir_versioning_and_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = os.path.join(tmp, "archive.db")
+            archive = SQLiteTabletArchive(db_path)
+
+            # Version 1
+            src1 = Path("examples/ea_nasir_scholar.dub").read_text(encoding="utf-8")
+            prog1 = Parser(Lexer(src1).tokenize()).parse()
+            VirtualMachine(archive=archive).execute(Compiler().compile(prog1))
+
+            v1 = archive.consult("ea-nasir-assessment", version=1)
+            self.assertEqual(len(v1.entries), 6)
+            self.assertIsNone(v1.get("verdict"))
+
+            # Version 2
+            src2 = Path("examples/ea_nasir_revision_scholar.dub").read_text(encoding="utf-8")
+            prog2 = Parser(Lexer(src2).tokenize()).parse()
+            VirtualMachine(archive=archive).execute(Compiler().compile(prog2))
+
+            # Verify v1 unchanged
+            v1_again = archive.consult("ea-nasir-assessment", version=1)
+            self.assertEqual(len(v1_again.entries), 6)
+            self.assertIsNone(v1_again.get("verdict"))
+
+            # Verify v2 has new entry and lineage
+            v2 = archive.consult("ea-nasir-assessment", version=2)
+            self.assertEqual(len(v2.entries), 7)
+            self.assertEqual(v2.get("verdict"), "rejected")
+            self.assertEqual(v2.derived_from_name, "ea-nasir-assessment")
+            self.assertEqual(v2.derived_from_version, 1)
+
+            # History shows both
+            hist = archive.history("ea-nasir-assessment")
+            self.assertEqual(len(hist), 2)
+            self.assertEqual([h.version for h in hist], [1, 2])
+
+    def test_ea_nasir_rendering(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            svg_out = os.path.join(tmp, "test_render.svg")
+            parser = build_parser()
+            args = parser.parse_args([
+                "archive", "render", "ea-nasir-shipment",
+                "--archive", ":memory:",
+                "--style", "svg",
+                "-o", svg_out,
+            ])
+            ret = handle_archive_command(args)
+            self.assertEqual(ret, 0)
+            self.assertTrue(os.path.exists(svg_out))
+            content = Path(svg_out).read_text(encoding="utf-8")
+            self.assertTrue(content.startswith("<svg"))
+            self.assertIn("EA-NASIR-SHIPMENT", content)
 
 
 if __name__ == "__main__":

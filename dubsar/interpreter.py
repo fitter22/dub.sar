@@ -483,9 +483,19 @@ class Interpreter:
                 wt = self.current_env.get(stmt.working_name)
             if not isinstance(wt, WorkingTablet):
                 raise DubSarInvalidTabletError(f"'{stmt.working_name}' is not a working tablet", line=stmt.line, col=stmt.col)
-            k = self._eval_expression(stmt.key)
             v = self._eval_expression(stmt.value)
-            wt.put(k, v)
+            if stmt.key is not None:
+                k = self._eval_expression(stmt.key)
+                wt.put(k, v)
+            else:
+                if isinstance(v, DeterminationValue):
+                    for f_k, f_v in v.fields.items():
+                        wt.put(f_k, f_v)
+                elif isinstance(v, dict):
+                    for f_k, f_v in v.items():
+                        wt.put(f_k, f_v)
+                else:
+                    wt.put(getattr(stmt.value, "name", "value"), v)
 
         elif isinstance(stmt, ReplaceEntry):
             wt = self.working_tablets.get(stmt.working_name)

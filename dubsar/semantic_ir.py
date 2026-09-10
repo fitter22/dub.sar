@@ -266,7 +266,7 @@ class InscribeTabletVerb(SemanticVerb):
 class PutTabletEntryVerb(SemanticVerb):
     """PUT entry into working tablet (§15, §52)."""
     working_name: str = ""
-    key: VerbExpr = field(default_factory=VerbExpr)
+    key: Optional[VerbExpr] = None
     value: VerbExpr = field(default_factory=VerbExpr)
 
 
@@ -510,7 +510,7 @@ def lower_statement_to_sem_ir(stmt: Statement) -> SemanticVerb:
     elif isinstance(stmt, PutEntry):
         return PutTabletEntryVerb(
             working_name=stmt.working_name,
-            key=lower_expression_to_sem_ir(stmt.key),
+            key=lower_expression_to_sem_ir(stmt.key) if stmt.key is not None else None,
             value=lower_expression_to_sem_ir(stmt.value),
             line=stmt.line,
             col=stmt.col,

@@ -1,0 +1,16 @@
+# DUB.SAR 1.0 — Ea-nāṣir Revision: Ruling on Deficiency (Scholar Mode)
+# Demonstrates derivation, working tablet modification, and versioning (v1 -> v2).
+
+problem
+
+    consult tablet "ea-nasir-assessment"
+
+    derive from "ea-nasir-assessment" as working revised-assessment
+
+    put "rejected" into revised-assessment at "verdict"
+
+    inscribe revised-assessment as tablet "ea-nasir-assessment"
+
+result
+
+    "ea-nasir-assessment"

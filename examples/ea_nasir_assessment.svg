@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 404" width="680" height="404">
+  <defs>
+    <!-- Clay gradient -->
+    <linearGradient id="clayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dfb890" />
+      <stop offset="30%" stop-color="#caa074" />
+      <stop offset="70%" stop-color="#b6895b" />
+      <stop offset="100%" stop-color="#9a6e42" />
+    </linearGradient>
+    <!-- Edge shadow gradient -->
+    <linearGradient id="edgeGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#000" stop-opacity="0.35" />
+    </linearGradient>
+    <!-- Filter for clay bevel shadow -->
+    <filter id="clayShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#3c200c" flood-opacity="0.55" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="680" height="404" fill="#2a1f18" />
+
+  <!-- Clay Tablet Body -->
+  <rect x="25" y="25" width="630" height="354" rx="32" ry="32"
+        fill="url(#clayGradient)" filter="url(#clayShadow)" stroke="#744a25" stroke-width="3" />
+  <rect x="25" y="25" width="630" height="354" rx="32" ry="32"
+        fill="url(#edgeGlow)" />
+
+  <!-- Tablet Header / Case Ruling -->
+  <text x="340.0" y="65" text-anchor="middle" font-family="sans-serif, Arial" font-weight="bold" font-size="20" fill="#3a1c06" letter-spacing="2">
+    TABLET: EA-NASIR-ASSESSMENT (v1)
+  </text>
+  <text x="340.0" y="88" text-anchor="middle" font-family="sans-serif, Arial" font-size="12" fill="#5c3413" letter-spacing="1">
+    IM.GID.DA — MATHEMATICAL TABLET PRESCRIPTION
+  </text>
+  <line x1="55" y1="105" x2="625" y2="105" stroke="#683d18" stroke-width="2.5" stroke-linecap="round" />
+  <line x1="55" y1="109" x2="625" y2="109" stroke="#dfb890" stroke-width="1" stroke-linecap="round" />
+
+  <!-- Inscribed Text and Case Registers -->
+  <g font-family="'Noto Sans Cuneiform', 'Segoe UI Historic', monospace" font-size="15" fill="#331904">
+    <line x1="55" y1="138" x2="625" y2="138" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="130">TABLET: EA-NASIR-ASSESSMENT (v1)</text>
+    <line x1="55" y1="166" x2="625" y2="166" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="158">========================================</text>
+    <line x1="55" y1="194" x2="625" y2="194" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="186">          merchant  |  Ea-nāṣir</text>
+    <line x1="55" y1="222" x2="625" y2="222" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="214">          promised  |  10 talent</text>
+    <line x1="55" y1="250" x2="625" y2="250" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="242">         delivered  |  10 talent</text>
+    <line x1="55" y1="278" x2="625" y2="278" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="270">  required-quality  |  1</text>
+    <line x1="55" y1="306" x2="625" y2="306" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="298">    actual-quality  |  0;45</text>
+    <line x1="55" y1="334" x2="625" y2="334" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
+    <text x="65" y="326">        deficiency  |  0;15</text>
+  </g>
+
+  <!-- Colophon Bottom Seal -->
+  <line x1="55" y1="369" x2="625" y2="369" stroke="#683d18" stroke-width="2" />
+  <text x="340.0" y="389" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#6d411b" letter-spacing="1">
+    * DUB.SAR 1.0 CANONICAL TABLET *
+  </text>
+</svg>

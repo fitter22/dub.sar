@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
-[![Tests: 131 Passing](https://img.shields.io/badge/Tests-131%2F131%20Passing-brightgreen.svg)](tests/)
+[![Tests: 137 Passing](https://img.shields.io/badge/Tests-137%2F137%20Passing-brightgreen.svg)](tests/)
 [![Architecture: VM + WASM](https://img.shields.io/badge/Architecture-Interpreter%20%7C%20VM%20%7C%20WASM-purple.svg)](dubsar/)
 [![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#vibe-coded-to-perfection)
 
@@ -349,6 +349,7 @@ Every new DUB.SAR archive automatically initializes with standard scholarly refe
 - `powers`: Powers of fundamental bases ($2$ and $60$).
 - `basic-metrology`: Attested conversion factors for length, area, and capacity.
 - `basic-geometry`: Attested geometric coefficients.
+- `ea-nasir-shipment`: Structured shipment record of copper ingots from Dilmun inspired by tablet UET V 72, recording promised/delivered weights, quality standards, and transaction metadata.
 
 Every scholarly entry retains exact rational representations—no IEEE floating-point approximation or decimal truncation occurs.
 
@@ -372,9 +373,238 @@ bin/dubsar archive export -o archive.json
 # Import tablets from canonical JSON
 bin/dubsar archive import archive.json
 
-# Render a tablet in ASCII/Unicode clay-style grid
+# Render a tablet in ASCII/Unicode clay-style grid or vector SVG
 bin/dubsar archive render "reciprocals"
+bin/dubsar archive render "reciprocals" --style svg -o reciprocals.svg
 ```
+
+### 6. End-to-End Archive Workflow: The Ea-nāṣir Copper Dispute
+
+To demonstrate the full lifecycle of persistent archive consultation, exact rational calculation, mathematical determination, working tablet inscription, and monotonic revision with provenance tracking, DUB.SAR provides an end-to-end accounting workflow inspired by the world's oldest preserved customer complaint tablet (**UET V 72 / British Museum BM 131236**, c. 1750 BCE from Ur).
+
+#### Historical Context vs. Computational Model
+
+> **Historical Disclaimer**:
+> This example is an illustrative computational demonstration of ancient administrative dispute settlement adapted to the DUB.SAR Tablet Archive.
+>
+> Historically, tablet UET V 72 records Nanni's passionate personal complaint to the merchant Ea-nāṣir concerning subpar copper ingots delivered after arduous transit through hostile territory ("What do you take me for, that you treat somebody like me with such contempt?"). The original clay tablet does not preserve modern tabular balance sheets or structured numerical matrices.
+>
+> In DUB.SAR, this historical dispute is formalized as an executable scribal audit workflow: structured delivery records are consulted from the persistent archive, quality deficiency is calculated using exact sexagesimal arithmetic, and an audit assessment tablet is inscribed into the archive with complete version lineage.
+
+#### Conceptual Workflow
+
+```text
+┌─────────────────────────┐
+│   ea-nasir-shipment     │ (Persistent archival record: 10 talent promised/delivered, quality 0;45)
+└────────────┬────────────┘
+             │ consult tablet & take entries
+             ▼
+┌─────────────────────────┐
+│   ea-nasir.dub          │ (Calculates exact deficiency: 1 - 0;45 = 0;15; builds assessment)
+└────────────┬────────────┘
+             │ inscribe working complaint-assessment
+             ▼
+┌─────────────────────────┐
+│  ea-nasir-assessment v1 │ (Immutable assessment tablet committed to archive)
+└────────────┬────────────┘
+             │ derive tablet as working revised-assessment
+             ▼
+┌─────────────────────────┐
+│  ea-nasir_revision.dub  │ (Appends verdict: "rejected"; updates archive)
+└────────────┬────────────┘
+             │ inscribe revised-assessment
+             ▼
+┌─────────────────────────┐
+│  ea-nasir-assessment v2 │ (Version 2 with complete provenance: derived from v1)
+└─────────────────────────┘
+```
+
+#### Step 1: Inscribing the Assessment Tablet (v1)
+
+The audit program consults `ea-nasir-shipment`, extracts the promised and delivered quantities (each 10 talent), retrieves the required quality (`1`) and delivered ingot quality (`0;45`, or $3/4$), computes the exact quality deficiency ($1 - 0;45 = 0;15$), forms a mathematical determination, transfers it into a working tablet, and inscribes `ea-nasir-assessment` into the persistent archive.
+
+##### Scholar Mode (`examples/ea_nasir_scholar.dub`)
+```text
+problem
+
+    consult tablet "ea-nasir-shipment"
+
+    merchant :
+        "merchant"
+        take entry from ea-nasir-shipment
+
+    promised :
+        "promised-quantity"
+        take entry from ea-nasir-shipment
+
+    delivered :
+        "delivered-quantity"
+        take entry from ea-nasir-shipment
+
+    required-quality :
+        "required-quality"
+        take entry from ea-nasir-shipment
+
+    actual-quality :
+        "actual-quality"
+        take entry from ea-nasir-shipment
+
+    deficiency :
+        required-quality
+        actual-quality
+        subtract
+
+    assessment :
+        merchant
+        promised
+        delivered
+        required-quality
+        actual-quality
+        deficiency
+
+    working complaint-assessment
+
+    put assessment into complaint-assessment
+
+    inscribe complaint-assessment as tablet "ea-nasir-assessment"
+
+result
+
+    assessment
+```
+
+##### Canonical Cuneiform Mode (`examples/ea_nasir.dub`)
+```text
+𒂊𒁹
+
+    𒅆 𒁾 "ea-nasir-shipment"
+
+    merchant :
+        "merchant"
+        pad 𒋫 ea-nasir-shipment
+
+    promised :
+        "promised-quantity"
+        pad 𒋫 ea-nasir-shipment
+
+    delivered :
+        "delivered-quantity"
+        pad 𒋫 ea-nasir-shipment
+
+    required-quality :
+        "required-quality"
+        pad 𒋫 ea-nasir-shipment
+
+    actual-quality :
+        "actual-quality"
+        pad 𒋫 ea-nasir-shipment
+
+    deficiency :
+        required-quality
+        actual-quality
+        𒋫
+
+    assessment :
+        merchant
+        promised
+        delivered
+        required-quality
+        actual-quality
+        deficiency
+
+    𒆥 complaint-assessment
+
+    𒃻 assessment 𒀀 complaint-assessment
+
+    𒁹𒀀 complaint-assessment 𒁶 𒁾 "ea-nasir-assessment"
+
+𒅗𒁹
+
+    assessment
+```
+
+#### Step 2: Monotonic Derivation & Verdict (v2)
+
+When an official ruling is pronounced on the dispute, a subsequent program derives a working scratchpad directly from version 1 of `ea-nasir-assessment`, sets a `verdict` entry ("rejected"), and inscribes the revised tablet back to `ea-nasir-assessment`.
+
+Because DUB.SAR tablets are strictly immutable:
+- `ea-nasir-assessment` version 1 remains unaltered in the archive for historical auditability.
+- `ea-nasir-assessment` version 2 is created with cryptographic checksum and provenance metadata: `derived_from: ea-nasir-assessment:v1`.
+
+##### Scholar Mode (`examples/ea_nasir_revision_scholar.dub`)
+```text
+problem
+
+    consult tablet "ea-nasir-assessment"
+
+    derive from "ea-nasir-assessment" as working revised-assessment
+
+    put "rejected" into revised-assessment at "verdict"
+
+    inscribe revised-assessment as tablet "ea-nasir-assessment"
+
+result
+
+    "ea-nasir-assessment"
+```
+
+##### Canonical Cuneiform Mode (`examples/ea_nasir_revision.dub`)
+```text
+𒂊𒁹
+
+    𒅆 𒁾 "ea-nasir-assessment"
+
+    𒁴 𒋫 "ea-nasir-assessment" 𒁶 𒆥 revised-assessment
+
+    𒃻 "rejected" 𒀀 revised-assessment 𒀀 "verdict"
+
+    𒁹𒀀 revised-assessment 𒁶 𒁾 "ea-nasir-assessment"
+
+𒅗𒁹
+
+    "ea-nasir-assessment"
+```
+
+#### Persistent Tablet Entries and Metadata
+
+| Tablet | Version | Key | Value | Metadata / Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `ea-nasir-shipment` | `1` | `merchant` | `"Ea-nāṣir"` | `origin`: `"Dilmun"`, `destination`: `"Ur"` |
+| | | `promised-quantity` | `10 talent` | Metrological standard: 1 talent = 60 mina = 3600 shekels |
+| | | `delivered-quantity` | `10 talent` | Full weight delivered |
+| | | `required-quality` | `1` | Grade 1 (pure standard copper) |
+| | | `actual-quality` | `0;45` | Grade 3/4 (substandard ingots) |
+| `ea-nasir-assessment` | `1` | `deficiency` | `0;15` | Exact rational: $1 - 0;45 = 0;15$ ($1/4$ deficit) |
+| `ea-nasir-assessment` | `2` | `verdict` | `"rejected"` | `derived_from`: `"ea-nasir-assessment:v1"` |
+
+#### Inspecting and Rendering via CLI
+
+Manage and inspect the audit workflow directly from the terminal:
+
+```bash
+# 1. View the original shipment record in the persistent archive
+bin/dubsar archive show "ea-nasir-shipment"
+
+# 2. Execute the assessment program (inscribes ea-nasir-assessment v1)
+bin/dubsar run examples/ea_nasir_scholar.dub
+
+# 3. View the newly inscribed assessment tablet
+bin/dubsar archive show "ea-nasir-assessment"
+
+# 4. Execute the revision program (derives and inscribes ea-nasir-assessment v2)
+bin/dubsar run examples/ea_nasir_revision_scholar.dub
+
+# 5. Trace the complete immutable version lineage and parent links
+bin/dubsar archive history "ea-nasir-assessment"
+
+# 6. Render the assessment tablet to terminal clay grid or vector SVG artwork
+bin/dubsar archive render "ea-nasir-assessment"
+bin/dubsar archive render "ea-nasir-assessment" --style svg -o examples/ea_nasir_assessment.svg
+```
+
+Pre-rendered clay tablet artwork artifacts for both tablets are available in the repository:
+- [`examples/ea_nasir_shipment.svg`](examples/ea_nasir_shipment.svg) (Original shipment tablet)
+- [`examples/ea_nasir_assessment.svg`](examples/ea_nasir_assessment.svg) (Inscribed assessment tablet)
 
 ---
 
@@ -550,6 +780,13 @@ Explore the [`examples/`](examples/) directory for complete, verified tablets av
 - **Unit Conversions & Dimensional Safety**:
   - [`unit_conversion.dub`](examples/unit_conversion.dub) (Canonical Cuneiform)
   - [`unit_conversion_scholar.dub`](examples/unit_conversion_scholar.dub) (Scholar Mode)
+- **The Ea-nāṣir Copper Dispute (Tablet Archive & Provenance)**:
+  - [`ea_nasir.dub`](examples/ea_nasir.dub) (Canonical Cuneiform Assessment)
+  - [`ea_nasir_scholar.dub`](examples/ea_nasir_scholar.dub) (Scholar Mode Assessment)
+  - [`ea_nasir_revision.dub`](examples/ea_nasir_revision.dub) (Canonical Cuneiform Revision v2)
+  - [`ea_nasir_revision_scholar.dub`](examples/ea_nasir_revision_scholar.dub) (Scholar Mode Revision v2)
+  - [`ea_nasir_shipment.svg`](examples/ea_nasir_shipment.svg) (Clay Tablet Artwork: Shipment)
+  - [`ea_nasir_assessment.svg`](examples/ea_nasir_assessment.svg) (Clay Tablet Artwork: Assessment)
 - **Language Conformance Suite**:
   - [`conformance.dub`](examples/conformance.dub) (Canonical Cuneiform)
   - [`conformance_scholar.dub`](examples/conformance_scholar.dub) (Scholar Mode)
@@ -563,7 +800,7 @@ Run the full automated test suite:
 python3 -m unittest discover -s tests -p "test_*.py"
 ```
 
-**131 unit, integration, and mathematical conformance test cases** cover:
+**137 unit, integration, and mathematical conformance test cases** cover:
 - **Exhaustive Numeric Conformance**: Values `0`, `1`, `2`, `59`, `60`, `1;0`, `1;30`, `1;59,59`, `365;14,31,55`, `-1;30`, round-trip normalization, and exact arithmetic.
 - **Static Unit Type Checking**: Compile-time detection of incompatible units (`1 day + 2 year`), dimensional products, cancellations, and explicit conversions.
 - **Semantic IR & Verbs**: Verification of high-level mathematical verbs (`ESTABLISH`, `TAKE`, `POSTFIX`, `REPEAT`, `RETAIN`, `DETERMINE`).

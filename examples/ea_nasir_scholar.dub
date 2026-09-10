@@ -1,0 +1,50 @@
+# DUB.SAR 1.0 — Ea-nāṣir Copper Assessment (Scholar Mode)
+# Thematic Inspiration: Historical Ea-nāṣir copper complaint tablet (UET V 72).
+# Fictionalized computational example for demonstrating the Tablet Archive.
+
+problem
+
+    consult tablet "ea-nasir-shipment"
+
+    merchant :
+        "merchant"
+        take entry from ea-nasir-shipment
+
+    promised :
+        "promised-quantity"
+        take entry from ea-nasir-shipment
+
+    delivered :
+        "delivered-quantity"
+        take entry from ea-nasir-shipment
+
+    required-quality :
+        "required-quality"
+        take entry from ea-nasir-shipment
+
+    actual-quality :
+        "actual-quality"
+        take entry from ea-nasir-shipment
+
+    deficiency :
+        required-quality
+        actual-quality
+        subtract
+
+    assessment :
+        merchant
+        promised
+        delivered
+        required-quality
+        actual-quality
+        deficiency
+
+    working complaint-assessment
+
+    put assessment into complaint-assessment
+
+    inscribe complaint-assessment as tablet "ea-nasir-assessment"
+
+result
+
+    assessment

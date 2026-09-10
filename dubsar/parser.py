@@ -1043,7 +1043,10 @@ class Parser:
 
     def _parse_derive(self) -> DeriveTablet:
         tok = self._advance()  # consume derive
-        self._expect(TokenType.FROM, "Expected 'from' after derive")
+        if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫"):
+            self._advance()
+        else:
+            self._expect(TokenType.FROM, "Expected 'from' after derive")
         source_expr = self._parse_primary()
         version_expr = None
         if self._check(TokenType.VERSION) or self.current.raw in ("version", "mu", "𒈬"):
@@ -1063,9 +1066,12 @@ class Parser:
         if self._check(TokenType.INTO) or self.current.raw in ("into", "in", "a", "𒀀"):
             self._advance()
         working_tok = self._expect(TokenType.IDENTIFIER, "Expected working tablet identifier after into")
+        key_expr = None
         if self._check(TokenType.AT) or self._check(TokenType.INTO) or self.current.raw in ("at", "a", "𒀀"):
             self._advance()
-        key_expr = self._parse_expression()
+            key_expr = self._parse_expression()
+        elif not self._check(TokenType.NEWLINE) and not self._is_at_end():
+            key_expr = self._parse_expression()
         self._match(TokenType.NEWLINE)
         return PutEntry(working_name=working_tok.value, key=key_expr, value=val_expr, line=tok.line, col=tok.col)
 
@@ -1298,11 +1304,21 @@ class Parser:
         # String literal
         if self._check(TokenType.STRING):
             str_tok = self._advance()
-            return StringLiteral(
+            str_lit = StringLiteral(
                 value=str_tok.value,
                 line=str_tok.line,
                 col=str_tok.col,
             )
+            # Check if followed by: take [entry] from <tablet>
+            if self._check(TokenType.TAKE) or self.current.raw in ("take", "shu", "šu"):
+                take_tok = self._advance()
+                if self._check(TokenType.ENTRY) or self.current.raw in ("entry", "entries", "pad"):
+                    self._advance()
+                if self._check(TokenType.FROM) or self.current.raw in ("from", "ta", "𒋫"):
+                    self._advance()
+                tablet_expr = self._parse_primary()
+                return TakeEntry(tablet=tablet_expr, key=str_lit, line=take_tok.line, col=take_tok.col)
+            return str_lit
 
         # Empty literal: empty / none / nu / 𒉡
         if self._check(TokenType.EMPTY) or tok.raw in ("empty", "none", "nu", "𒉡"):

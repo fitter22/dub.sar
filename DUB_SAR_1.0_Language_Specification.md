@@ -1519,6 +1519,7 @@ Every new DUB.SAR archive automatically initializes with standard scholarly refe
 6. `powers`: Powers of fundamental bases (powers of $2$ and $60$).
 7. `basic-metrology`: Attested conversion factors for length, area, and capacity.
 8. `basic-geometry`: Geometric coefficients (e.g. circle constant approximations).
+9. `ea-nasir-shipment`: Structured shipment record of copper ingots inspired by tablet UET V 72 (British Museum BM 131236), recording promised and delivered quantities, quality ratings, and transaction metadata.
 
 Each tablet carries explicit historical provenance tags: `attested` (historically attested in cuneiform corpus), `reconstructed`, or `modern`.
 
@@ -1579,5 +1580,4 @@ Outside source execution, the `dubsar archive` CLI suite allows scholars and dev
 - `dubsar archive history <name>`: Trace complete version lineage and parent links.
 - `dubsar archive export [--out file.json]`: Export archive to a deterministic canonical JSON bundle.
 - `dubsar archive import <file.json>`: Safely import tablets into an archive.
-- `dubsar archive render <name>`: Render tablet layout as an ASCII/Unicode clay-style grid.
-
+- `dubsar archive render <name> [--style text|tablet|svg] [-o output]`: Render tablet layout as an ASCII/Unicode clay-style grid or vector SVG artwork.

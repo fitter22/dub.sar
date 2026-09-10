@@ -331,7 +331,10 @@ class Compiler:
             chunk.emit(OpCode.TABLET_INSCRIBE, verb.working_name, verb.line)
 
         elif isinstance(verb, PutTabletEntryVerb):
-            self._compile_verb_expr(verb.key)
+            if verb.key is not None:
+                self._compile_verb_expr(verb.key)
+            else:
+                chunk.emit(OpCode.EMPTY, None, verb.line)
             self._compile_verb_expr(verb.value)
             chunk.emit(OpCode.WORKING_PUT, verb.working_name, verb.line)
 
@@ -631,7 +634,10 @@ class Compiler:
             chunk.emit(OpCode.TABLET_INSCRIBE, stmt.working_name, stmt.line)
 
         elif isinstance(stmt, PutEntry):
-            self._compile_expression(stmt.key)
+            if stmt.key is not None:
+                self._compile_expression(stmt.key)
+            else:
+                chunk.emit(OpCode.EMPTY, None, stmt.line)
             self._compile_expression(stmt.value)
             chunk.emit(OpCode.WORKING_PUT, stmt.working_name, stmt.line)
 

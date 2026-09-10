@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Tuple
 from dubsar.archive.models import HistoricalTag, TabletKind, TabletMetadata, TabletShape
 from dubsar.archive.working import WorkingTablet
 from dubsar.numbers import Rational
+from dubsar.units import Quantity, lookup_unit
 
 
 STANDARD_ARCHIVE_VERSION = "Scribal Archive 1"
@@ -214,5 +215,28 @@ def build_standard_tablets() -> List[WorkingTablet]:
     for k, v in geom_entries:
         geom_tablet.put(k, v)
     tablets.append(geom_tablet)
+
+    # 9. Ea-nāṣir Copper Shipment (Thematic Inspiration: UET V 72)
+    ea_nasir_metadata = TabletMetadata(
+        title="Ea-nāṣir copper shipment",
+        kind=TabletKind.DATA,
+        historical_tag=HistoricalTag.MODERN,
+        period="Old Babylonian (Ur, c. 1750 BCE thematic context)",
+        confidence="high",
+        source="Inspired by tablet UET V 72 (British Museum BM 131236)",
+        provenance="Modern fictionalized computational example",
+        notes="Fictionalized computational data inspired by the Ea-nāṣir copper complaint tablet. Not a historical transcription.",
+    )
+    ea_nasir_tablet = WorkingTablet("ea-nasir-shipment", shape=TabletShape.TABLE, kind=TabletKind.DATA, metadata=ea_nasir_metadata)
+    ea_nasir_entries = [
+        ("merchant", "Ea-nāṣir"),
+        ("promised-quantity", Quantity(10, lookup_unit("talent"))),
+        ("delivered-quantity", Quantity(10, lookup_unit("talent"))),
+        ("required-quality", Rational(1)),
+        ("actual-quality", Rational(45, 60)),  # 0;45
+    ]
+    for k, v in ea_nasir_entries:
+        ea_nasir_tablet.put(k, v)
+    tablets.append(ea_nasir_tablet)
 
     return tablets

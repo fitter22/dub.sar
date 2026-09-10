@@ -505,7 +505,17 @@ class VirtualMachine:
                     wt = frame.env.get(working_name)
                 if not isinstance(wt, WorkingTablet):
                     raise DubSarInvalidTabletError(f"'{working_name}' is not a working tablet", line=instr.line)
-                wt.put(k, val)
+                if k is None or isinstance(k, EmptySentinel) or (isinstance(k, DeterminationValue) and k.is_empty) or k == "":
+                    if isinstance(val, DeterminationValue):
+                        for f_k, f_v in val.fields.items():
+                            wt.put(f_k, f_v)
+                    elif isinstance(val, dict):
+                        for f_k, f_v in val.items():
+                            wt.put(f_k, f_v)
+                    else:
+                        wt.put(getattr(val, "name", "value"), val)
+                else:
+                    wt.put(k, val)
 
             elif op == OpCode.WORKING_REPLACE:
                 working_name = arg

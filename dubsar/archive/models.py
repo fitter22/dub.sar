@@ -191,7 +191,7 @@ def serialize_value(val: Any) -> Any:
     if isinstance(val, DeterminationValue):
         return {
             "_type": "determination",
-            "name": val.name,
+            "name": getattr(val, "name", "determination"),
             "fields": {k: serialize_value(v) for k, v in val.fields.items()},
         }
     if isinstance(val, EmptySentinel):

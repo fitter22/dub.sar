@@ -177,6 +177,7 @@ CUNEIFORM_KEYWORDS: Dict[str, TokenType] = {
     "𒁶": TokenType.AS,
     "𒊬": TokenType.INSCRIBE,
     "𒀀": TokenType.INTO,
+    "𒁴": TokenType.DERIVE,
 }
 
 # Scholar / Transliteration keyword mappings (§2.2, §4, §6, §60)

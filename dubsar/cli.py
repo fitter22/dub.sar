@@ -163,6 +163,12 @@ def build_parser() -> argparse.ArgumentParser:
     arc_rend = arc_sub.add_parser("render", help="Render tablet entries")
     arc_rend.add_argument("name", type=str, help="Tablet name")
     arc_rend.add_argument("--version", type=int, default=None, help="Explicit tablet version")
+    arc_rend.add_argument(
+        "--style",
+        choices=["text", "tablet", "svg"],
+        default="text",
+        help="Rendering presentation style: text table or clay tablet SVG",
+    )
     arc_rend.add_argument("-o", "--output", type=str, default=None, help="Output destination file")
     arc_rend.add_argument("--archive", type=str, default=None, help="Path to archive database (.db)")
 
@@ -232,14 +238,26 @@ def handle_archive_command(args: argparse.Namespace) -> int:
             version = getattr(args, "version", None)
             info = archive.consult(args.name, version=version)
             lines = [f"TABLET: {info.name.upper()} (v{info.version})", "=" * 40]
+            if info.metadata.title:
+                lines.append(f"Title: {info.metadata.title}")
             for k, v in info.entries:
                 v_str = v.format() if hasattr(v, "format") else str(v)
                 k_str = str(k)
                 lines.append(f"{k_str:>8}  |  {v_str}")
             rendered = "\n".join(lines)
-            if getattr(args, "output", None):
-                Path(args.output).write_text(rendered, encoding="utf-8")
-                print(f"Rendered tablet written to: {args.output}")
+            output_path = getattr(args, "output", None)
+            style = getattr(args, "style", "text")
+            if (output_path and output_path.endswith(".svg")) or style in ("tablet", "svg"):
+                from dubsar.renderer import render_svg
+                svg_content = render_svg(rendered, title=f"TABLET: {info.name.upper()} (v{info.version})")
+                if output_path:
+                    Path(output_path).write_text(svg_content, encoding="utf-8")
+                    print(f"Clay tablet SVG artwork rendered to: {output_path}")
+                else:
+                    print(svg_content)
+            elif output_path:
+                Path(output_path).write_text(rendered, encoding="utf-8")
+                print(f"Rendered tablet written to: {output_path}")
             else:
                 print(rendered)
             return 0

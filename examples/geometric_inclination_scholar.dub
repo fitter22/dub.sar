@@ -1,0 +1,32 @@
+# DUB.SAR 1.0 — Geometric Inclination and Direction (Scholar Mode)
+# Layers C, D, E, G: Proportional slopes, directions, turn rotations, and directed quantities.
+
+problem:
+
+    # 1. Consult Old Babylonian ramp inclinations from the Tablet Archive (BM 85194)
+    ramp_info : take "standard-ramp" from "inclinations"
+    hist_inc : ramp_info.inclination
+    hist_feed : ramp_info.feed
+
+    # 2. Form an inclination determination from rise and run
+    # 1 rise, 2 run (steep ramp)
+    slope : 1 2 inclination
+    inc : slope.inclination
+    fd : slope.feed
+
+    # 3. Form a direction from a turn fraction and rotate by an eighth-turn
+    base_dir : quarter-turn direction
+    rotated_dir : base_dir eighth-turn rotate
+
+    # 4. Construct a directed quantity and rotate it
+    force : 10 meter quarter-turn rotate
+
+result:
+
+    hist_inc
+    hist_feed
+    inc
+    fd
+    base_dir
+    rotated_dir
+    force

@@ -69,6 +69,18 @@ class TokenType(Enum):
     AS = auto()           # 𒁶 / as / gim
     SEEK = auto()         # seek / find
 
+    # Geometric & Fourier Mathematics (§5, §9, §10, §14, §16)
+    SQUARE = auto()       # 𒅁 / square / ib / íb
+    SQUARE_ROOT = auto()  # 𒁀𒋛 / square-root / sqrt / ba-si / íb-si8
+    RIGHT_TRIANGLE = auto() # right-triangle / right_triangle
+    INCLINATION = auto()  # inclination / feed / mūṣû / kussû
+    DIRECTION = auto()    # direction
+    TURN = auto()         # turn / whole-turn / half-turn / quarter-turn / eighth-turn
+    ROTATE = auto()       # rotate
+    APPROXIMATE = auto()  # approximate
+    DFT = auto()          # dft
+    FFT = auto()          # fft
+
     # Assignment & Punctuation
     ASSIGN = auto()       # :=
     COLON = auto()        # :
@@ -184,6 +196,8 @@ CUNEIFORM_KEYWORDS: Dict[str, TokenType] = {
     "𒍑": TokenType.LENGTH,
     "𒈭": TokenType.APPEND,
     "𒉻": TokenType.ENTRY,
+    "𒅁": TokenType.SQUARE,
+    "𒁀𒋛": TokenType.SQUARE_ROOT,
 }
 
 # Scholar / Transliteration keyword mappings (§2.2, §4, §6, §60)
@@ -313,10 +327,38 @@ SCHOLAR_KEYWORDS: Dict[str, TokenType] = {
     "append": TokenType.APPEND,
     "dah": TokenType.APPEND,
     "tah": TokenType.APPEND,
+    "square": TokenType.SQUARE,
+    "ib": TokenType.SQUARE,
+    "íb": TokenType.SQUARE,
+    "square-root": TokenType.SQUARE_ROOT,
+    "sqrt": TokenType.SQUARE_ROOT,
+    "ba-si": TokenType.SQUARE_ROOT,
+    "ib-si8": TokenType.SQUARE_ROOT,
+    "íb-si8": TokenType.SQUARE_ROOT,
+    "right-triangle": TokenType.RIGHT_TRIANGLE,
+    "right_triangle": TokenType.RIGHT_TRIANGLE,
+    "inclination": TokenType.INCLINATION,
+    "feed": TokenType.INCLINATION,
+    "mūṣû": TokenType.INCLINATION,
+    "musu": TokenType.INCLINATION,
+    "kussû": TokenType.INCLINATION,
+    "kussu": TokenType.INCLINATION,
+    "direction": TokenType.DIRECTION,
+    "turn": TokenType.TURN,
+    "whole-turn": TokenType.TURN,
+    "half-turn": TokenType.TURN,
+    "quarter-turn": TokenType.TURN,
+    "eighth-turn": TokenType.TURN,
+    "rotate": TokenType.ROTATE,
+    "approximate": TokenType.APPROXIMATE,
+    "dft": TokenType.DFT,
+    "fft": TokenType.FFT,
 }
 
 # Reverse mapping for canonical transliteration / cuneiformization
 TOKEN_TO_CUNEIFORM: Dict[TokenType, str] = {
+    TokenType.SQUARE: "𒅁",
+    TokenType.SQUARE_ROOT: "𒁀𒋛",
     TokenType.PROBLEM: "𒂊𒁹",
     TokenType.RECIPE: "𒁾𒊬",
     TokenType.RESULT: "𒅗𒁹",

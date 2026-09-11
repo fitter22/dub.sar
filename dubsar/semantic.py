@@ -68,8 +68,16 @@ STANDARD_TABLETS: Set[str] = {
     "squares",
     "square-roots",
     "cubes",
+    "powers",
     "metrology",
+    "basic-metrology",
     "coefficients",
+    "basic-geometry",
+    "right-triangles",
+    "inclinations",
+    "powers-of-two",
+    "turn-divisions",
+    "ea-nasir-shipment",
 }
 from dubsar.errors import (
     DubSarNameError,
@@ -696,6 +704,40 @@ class SemanticAnalyzer:
                         unit_stack.pop() if unit_stack else None
                         unit_stack.append(None)
                     elif step in ("first", "last"):
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(None)
+                    elif step == "square":
+                        u = unit_stack.pop() if unit_stack else None
+                        unit_stack.append(u * u if u is not None else None)
+                    elif step == "square-root":
+                        u = unit_stack.pop() if unit_stack else None
+                        unit_stack.append(None)
+                    elif step == "right-triangle":
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(None)
+                    elif step in ("validate-triangle", "validate_triangle"):
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(DIMENSIONLESS)
+                    elif step in ("inclination", "feed"):
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(DIMENSIONLESS)
+                    elif step == "direction":
+                        unit_stack.pop() if unit_stack else None
+                        unit_stack.append(None)
+                    elif step in ("turn", "whole-turn", "half-turn", "quarter-turn", "eighth-turn"):
+                        if step == "turn":
+                            unit_stack.pop() if unit_stack else None
+                        unit_stack.append(DIMENSIONLESS)
+                    elif step == "rotate":
+                        unit_stack.pop() if unit_stack else None
+                        target_u = unit_stack.pop() if unit_stack else None
+                        unit_stack.append(target_u)
+                    elif step == "approximate":
+                        u = unit_stack.pop() if unit_stack else None
+                        unit_stack.append(u)
+                    elif step in ("dft", "fft", "inverse-dft", "inverse-fft"):
                         unit_stack.pop() if unit_stack else None
                         unit_stack.append(None)
                     elif step in ("<", "<=", ">", ">=", "==", "!=", "lesser", "greater", "equal", "not-equal"):

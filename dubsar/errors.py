@@ -97,6 +97,16 @@ class DubSarDeterminationError(DubSarError):
     pass
 
 
+class DubSarMathError(DubSarError):
+    """Mathematical domain, non-rational exactness, or arithmetic violation."""
+    pass
+
+
+class DubSarGeometricError(DubSarError):
+    """Geometric relationship, orientation, or triangle inconsistency."""
+    pass
+
+
 # ==============================================================================
 # Tablet Archive Errors (§44)
 # ==============================================================================

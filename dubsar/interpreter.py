@@ -98,6 +98,15 @@ from dubsar.units import (
     to_quantity,
 )
 from dubsar.values import DeterminationValue, EmptySentinel
+from dubsar.geometry import (
+    ApproximateQuantity,
+    Direction,
+    DirectedQuantity,
+    RightTriangleValue,
+    Turn,
+    reference_dft,
+    recursive_fft,
+)
 
 
 class ReturnSignal(Exception):
@@ -335,7 +344,7 @@ class Interpreter:
                     val = Quantity(val.value, u)
                 else:
                     val = Quantity(val, u)
-            elif not isinstance(val, (Quantity, str, EmptySentinel, DeterminationValue)):
+            elif isinstance(val, (int, float, Rational)):
                 val = Quantity(val, DIMENSIONLESS)
             self.current_env.update(stmt.name, val)
 
@@ -452,6 +461,8 @@ class Interpreter:
             else:
                 if isinstance(val, EmptySentinel):
                     out_str = "empty"
+                elif isinstance(val, bool):
+                    out_str = "1" if val else "0"
                 elif isinstance(val, str):
                     out_str = val
                 elif isinstance(val, (WorkingTablet, TabletVersionInfo)):
@@ -709,6 +720,8 @@ class Interpreter:
             rec_val = self._eval_expression(expr.record)
             if isinstance(rec_val, DeterminationValue):
                 return rec_val.get(expr.field)
+            elif hasattr(rec_val, expr.field):
+                return getattr(rec_val, expr.field)
             elif isinstance(rec_val, EmptySentinel):
                 return EmptySentinel()
             raise DubSarNameError(f"Cannot access field '{expr.field}' on non-determination value: {rec_val}")
@@ -815,6 +828,69 @@ class Interpreter:
                     elif op == "last":
                         tab = stack.pop()
                         stack.append(self._eval_seek_entry(tab, None, mode="last", line=expr.line, col=expr.col))
+                    elif op == "square":
+                        v = to_quantity(stack.pop())
+                        stack.append(v.square())
+                    elif op == "square-root":
+                        v = to_quantity(stack.pop())
+                        stack.append(v.square_root(allow_approx=True))
+                    elif op == "right-triangle":
+                        b = stack.pop()
+                        a = stack.pop()
+                        stack.append(RightTriangleValue.determine(short_side=a, long_side=b))
+                    elif op in ("validate-triangle", "validate_triangle"):
+                        tri = stack.pop()
+                        if hasattr(tri, "is_valid"):
+                            stack.append(tri.is_valid())
+                        else:
+                            stack.append(False)
+                    elif op in ("inclination", "feed", "mūṣû", "musu", "kussû", "kussu"):
+                        run = to_quantity(stack.pop())
+                        rise = to_quantity(stack.pop())
+                        if op in ("feed", "mūṣû", "musu"):
+                            stack.append(run / rise)
+                        else:
+                            from dubsar.geometry import make_inclination
+                            stack.append(make_inclination(rise=rise, run=run))
+                    elif op == "direction":
+                        v = stack.pop()
+                        if isinstance(v, Turn):
+                            stack.append(Direction(v))
+                        else:
+                            stack.append(Direction.from_components(x=1, y=0).rotate(v))
+                    elif op in ("turn", "whole-turn", "half-turn", "quarter-turn", "eighth-turn"):
+                        if op == "whole-turn":
+                            stack.append(Turn.whole())
+                        elif op == "half-turn":
+                            stack.append(Turn.half())
+                        elif op == "quarter-turn":
+                            stack.append(Turn.quarter())
+                        elif op == "eighth-turn":
+                            stack.append(Turn.eighth())
+                        else:
+                            frac = stack.pop()
+                            stack.append(Turn(frac))
+                    elif op == "rotate":
+                        turn_val = stack.pop()
+                        target = stack.pop()
+                        if hasattr(target, "rotate"):
+                            stack.append(target.rotate(turn_val))
+                        elif isinstance(target, (Quantity, Rational, int)):
+                            dq = DirectedQuantity(target)
+                            stack.append(dq.rotate(turn_val))
+                        else:
+                            raise DubSarTypeError(f"Cannot rotate target of type {type(target)}")
+                    elif op == "approximate":
+                        val = stack.pop()
+                        stack.append(ApproximateQuantity(val, precision=6))
+                    elif op in ("dft", "inverse-dft", "idft"):
+                        tab = stack.pop()
+                        tab_obj = self._resolve_tablet(tab)
+                        stack.append(reference_dft(tab_obj, inverse=(op in ("inverse-dft", "idft"))))
+                    elif op in ("fft", "inverse-fft", "ifft"):
+                        tab = stack.pop()
+                        tab_obj = self._resolve_tablet(tab)
+                        stack.append(recursive_fft(tab_obj, inverse=(op in ("inverse-fft", "ifft"))))
                     else:
                         raise DubSarSyntaxError(f"Unknown postfix operation: {op}")
                 elif isinstance(step, ApplyRecipe):

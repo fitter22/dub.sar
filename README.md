@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
-[![Tests: 154 Passing](https://img.shields.io/badge/Tests-154%2F154%20Passing-brightgreen.svg)](tests/)
+[![Tests: 184 Passing](https://img.shields.io/badge/Tests-184%2F184%20Passing-brightgreen.svg)](tests/)
 [![Architecture: VM + WASM](https://img.shields.io/badge/Architecture-Interpreter%20%7C%20VM%20%7C%20WASM-purple.svg)](dubsar/)
 [![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#vibe-coded-to-perfection)
 
@@ -16,7 +16,7 @@
   DUB.SAR is not a Python dialect in cuneiform costume. It is an executable Mesopotamian mathematical tablet language engineered from first principles — featuring exact arbitrary-precision rational arithmetic, algebraic dimensional unit safety, bounded mathematical search domains, postfix calculation pipelines, atomic selections, a high-level Semantic IR, a stack bytecode virtual machine, and a WebAssembly compiler.
 </p>
 
-[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Tablet Archive](#the-tablet-archive) • [Tablet Data Model](#the-tablet-oriented-data-model-sequences-tables-and-structured-records) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
+[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Tablet Archive](#the-tablet-archive) • [Tablet Data Model](#the-tablet-oriented-data-model-sequences-tables-and-structured-records) • [Geometric & Fourier Mathematics](#geometric-mathematics-foundation--coherent-path-to-fourier-mathematics) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
 
 ---
 
@@ -340,7 +340,7 @@ Persistent tablets are strictly **immutable**. Once inscribed, a version cannot 
 
 ### 4. Standard Scholarly Archive ("Scribal Archive 1")
 
-Every new DUB.SAR archive automatically initializes with standard scholarly reference tablets:
+Every new DUB.SAR archive automatically initializes with 13 standard scholarly reference tablets:
 - `reciprocals`: Authentic Old Babylonian reciprocal pairs ($2 \to 0;30$, $3 \to 0;20$, $4 \to 0;15$, $5 \to 0;12$, $6 \to 0;10$, $8 \to 0;07,30$, etc.).
 - `common-fractions`: Exact sexagesimal representations of fundamental fractions ($1/2, 1/3, 2/3, 1/4, 3/4, 1/5, 5/6$).
 - `squares`: Exact integer squares for numbers $1$ through $60$.
@@ -350,6 +350,10 @@ Every new DUB.SAR archive automatically initializes with standard scholarly refe
 - `basic-metrology`: Attested conversion factors for length, area, and capacity.
 - `basic-geometry`: Attested geometric coefficients.
 - `ea-nasir-shipment`: Structured shipment record of copper ingots from Dilmun inspired by tablet UET V 72, recording promised/delivered weights, quality standards, and transaction metadata.
+- `right-triangles`: Verified integer right triangles (Pythagorean triples) such as $(3, 4, 5)$, $(5, 12, 13)$, $(8, 15, 17)$, $(7, 24, 25)$, $(20, 21, 29)$, $(12, 35, 37)$, $(9, 40, 41)$, $(28, 45, 53)$, $(11, 60, 61)$, $(16, 63, 65)$, $(33, 56, 65)$, $(48, 55, 73)$, $(13, 84, 85)$, $(36, 77, 85)$, $(39, 80, 89)$, and $(65, 72, 97)$, connecting directly to Plimpton 322 scribal traditions.
+- `inclinations`: Standard scribal slopes, ratios, inclinations (rise/run), and feeds (run/rise) for embankments, ramps, and canal construction.
+- `powers-of-two`: Exact integer powers $2^0$ through $2^{12}$ alongside exact reciprocal fractions, validating sequence lengths for Radix-2 FFT algorithms.
+- `turn-divisions`: Sexagesimal subdivisions of a full cycle ($1/1, 1/2, 1/3, 1/4, 1/5, 1/6, 1/8, 1/10, 1/12, 1/60, 1/360$), bridging historical Babylonian circular divisions (post-450 BCE zodiac) and modern harmonic analysis.
 
 Every scholarly entry retains exact rational representations—no IEEE floating-point approximation or decimal truncation occurs.
 
@@ -675,6 +679,152 @@ The repository includes four end-to-end runnable examples demonstrating the tabl
 
 ---
 
+## Geometric Mathematics Foundation & Coherent Path to Fourier Mathematics
+
+DUB.SAR extends its mathematical model toward advanced numerical mathematics and harmonic analysis through an 8-layer progression grounded in ancient Mesopotamian scribal geometry:
+
+```text
+Exact Quantity (Universal Bedrock)
+      │
+      ▼
+Ratio & Reciprocal
+      │
+      ▼
+Geometric Determination (Right Triangles)
+      │
+      ▼
+Inclination & Feed (Proportional Geometry)
+      │
+      ▼
+Direction Abstraction (Ray Orientations)
+      │
+      ▼
+The Turn System (Equal Circular Divisions)
+      │
+      ▼
+Directed Quantities (Magnitude + Direction)
+      │
+      ▼
+Tablet Fourier Mathematics (DFT & Radix-2 FFT)
+```
+
+Rather than bolting on modern floating-point primitives (`sin`, `cos`, `tan`, `exp(iθ)`, `complex`), DUB.SAR builds harmonic analysis organically from exact ratios, tablet sequences, and directed quantities.
+
+### 1. The 8 Geometric & Fourier Layers
+
+#### Layer A: Exact Quantity and Ratio (Universal Bedrock) `[attested]`
+Every mathematical calculation in DUB.SAR operates on arbitrary-precision exact rationals ($p/q$) with compile-time algebraic dimensional safety. Quantities multiply, divide, and invert without silent floating-point conversions. Ratios and reciprocals are exact scribal pairings.
+
+#### Layer B: Geometric Determinations and Right Triangles `[attested]`
+Mesopotamian mathematics calculated with squares, square roots, and right triangles centuries before Pythagoras:
+- **Exact Squares & Roots**: `square` and `square-root` compute exact integer squares and roots.
+- **Right Triangle Determination**: `right-triangle` constructs a structured determination with fields `width`, `length`, `diagonal`, and boolean `is_valid` ($w^2 + l^2 = d^2$).
+- **Missing Side Solver**: Given any two sides, `right-triangle` solves for the exact missing third side (or errors if non-integer).
+- **Pythagorean Validation**: `validate-triangle` verifies whether three sides form a true integer right triangle.
+
+```text
+# Solving missing hypotenuse for base 3, height 4:
+tri : 3 4 empty right-triangle
+hypotenuse : tri.diagonal       # 5
+valid : tri.is_valid            # 1
+```
+
+> **Scholarly Note on Plimpton 322**:
+> Tablet Plimpton 322 (c. 1820–1762 BCE, Larsa) contains 15 rows of right triangle parameters. DUB.SAR maintains scholarly neutrality between:
+> 1. **Eleanor Robson's scribal/pedagogical analysis**: Reciprocal pairs $(x, 1/x)$ generated within Old Babylonian scribal schooling.
+> 2. **Mansfield & Wildberger's ratio-based trigonometry**: Exact ratio-based right-triangle geometry without circular angles.
+> Both perspectives validate DUB.SAR's ratio-based geometric model.
+
+#### Layer C: Inclination, Feed, and Proportional Geometry `[attested]`
+Ancient canal, ramp, and ziggurat construction relied on proportional slopes rather than modern angles:
+- **Inclination (*mūlû*)**: $\text{rise} / \text{run}$ — vertical rise per unit horizontal run.
+- **Feed (*mūrqītu* / *šikittum*)**: $\text{run} / \text{rise}$ — horizontal setback per unit vertical rise.
+- The `inclination` operator consumes `run` and `rise` to produce a determination with fields `rise`, `run`, `inclination`, and `feed`.
+- The `feed` operator computes the reciprocal ratio directly.
+
+#### Layer D: Direction Abstraction `[reconstructed]`
+Direction in DUB.SAR represents an invariant ray orientation:
+- Constructed from orthogonal components: `(run, rise) direction`.
+- Constructed from circular fractions: `T direction` (where $T$ is a turn).
+- Normalizes to unit components without exposing transcendental functions (`horizontal` and `vertical` coordinates).
+
+#### Layer E: The Turn System `[attested / reconstructed]`
+A turn represents a fraction of a full revolution $p/q \in [0, 1)$:
+- Declared as `(p, q) turn`, capturing quarter-turns ($1/4$), half-turns ($1/2$), and sexagesimal steps ($1/60$, $1/360$).
+- Addition, subtraction, and scaling wrap cyclically modulo $1$.
+
+> **Historical Dating of the 360-Degree Division**:
+> The 360-degree division of the circle was **not** a Sumerian invention. It was developed in **5th-century BCE Babylonian astronomy** (Achaemenid period, post-450 BCE) for the mathematical zodiac, dividing the ecliptic into 12 equal signs of 30 degrees.
+
+#### Layer F: Directed Quantities `[reconstructed]`
+A directed quantity binds a physical magnitude to an invariant direction:
+- Constructed via `(magnitude, direction) directed`.
+- Supports vector addition, scalar scaling, and rotation: `Q T rotate`.
+- Rotation composes directions by adding turn fractions: $\text{Turn}_A + \text{Turn}_B \pmod 1$.
+
+#### Layer G: Explicit Approximate Determinations `[reconstructed]`
+When irrationals arise (such as the diagonal of a unit square, $\sqrt{2}$ on tablet YBC 7289):
+- DUB.SAR never silently converts to IEEE float.
+- Explicit approximation via `X approximate` executes bounded Babylonian Heron iterations:
+  $$x_{n+1} = \frac{1}{2}\left(x_n + \frac{S}{x_n}\right)$$
+- Yields a determination with fields `value` (rational estimate), `iterations`, and `error_bound`.
+
+#### Layer H: Fourier Mathematics on Tablets (DFT & FFT) `[modern]`
+DUB.SAR synthesizes ancient tablet sequences and directed rotations into modern harmonic analysis:
+- **Sequence Tablet as Signal**: Time-domain and frequency-domain signals are represented purely as sequence tablets of directed quantities.
+- **Harmonic Roots of Unity**: Rotations by $W_N^k = \text{turn}(-k/N)$ replace complex exponentials $e^{-2\pi i k / N}$.
+- **Reference Discrete Fourier Transform (`dft`)**:
+  $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot \text{turn}\left(-\frac{k \cdot n}{N}\right)$$
+- **Radix-2 Fast Fourier Transform (`fft`)**: Recursive Cooley-Tukey decimation-in-time algorithm for sequences of length $N = 2^m$.
+- **Inverse Transforms (`inverse-dft`, `inverse-fft`)**: Normalized exact reconstruction ($1/N$ factor) satisfying energy conservation (Parseval's theorem).
+
+### 2. First-Class Geometric & Fourier Operations
+
+| Operation | Scholar Mode (Prefix / Postfix) | Canonical Cuneiform | Semantics |
+| :--- | :--- | :--- | :--- |
+| **Square** | `X square` | `X 𒉏` | Computes $X \cdot X$ |
+| **Square Root** | `X square-root` | `X square-root` | Computes exact integer $\sqrt{X}$ (errors if non-square) |
+| **Right Triangle** | `w l d right-triangle` | `w l d right-triangle` | Constructs right triangle determination; solves missing side |
+| **Validate Triangle** | `w l d validate-triangle` | `w l d validate-triangle` | Validates if $w^2 + l^2 = d^2$ (returns 1 or 0) |
+| **Inclination** | `run rise inclination` | `run rise inclination` | Constructs determination with `rise`, `run`, `inclination`, `feed` |
+| **Feed** | `run rise feed` | `run rise feed` | Computes horizontal feed ratio ($\text{run} / \text{rise}$) |
+| **Direction** | `dx dy direction` | `dx dy direction` | Constructs direction from orthogonal run/rise components |
+| **Turn** | `p q turn` | `p q turn` | Constructs turn fraction $p/q \pmod 1$ |
+| **Directed Quantity** | `mag dir directed` | `mag dir directed` | Binds scalar magnitude to directional ray |
+| **Rotation** | `Q T rotate` | `Q T rotate` | Rotates directed quantity $Q$ by turn $T$ |
+| **Approximation** | `X approximate` | `X approximate` | Computes bounded Heron-method rational approximation |
+| **Discrete Fourier Transform** | `S dft` | `S dft` | Computes reference $O(N^2)$ DFT on sequence tablet $S$ |
+| **Fast Fourier Transform** | `S fft` | `S fft` | Computes Cooley-Tukey $O(N \log N)$ FFT for length $2^m$ |
+| **Inverse DFT** | `S inverse-dft` | `S inverse-dft` | Computes normalized inverse DFT reconstruction |
+| **Inverse FFT** | `S inverse-fft` | `S inverse-fft` | Computes normalized inverse Radix-2 FFT reconstruction |
+
+### 3. Historical Provenance Framework
+
+To maintain scientific and historical integrity, DUB.SAR categorizes all mathematical constructs into explicit provenance tiers:
+
+- **`[attested]`**: Directly verified in excavated cuneiform tablets.
+  - Reciprocal tables, multiplication tables, squares, cubes.
+  - Right triangle relationships (Plimpton 322, BM 85196, BM 34568).
+  - Inclinations and feeds for embankments and ramps (*mūlû*, *mūrqītu*).
+  - 360-degree circular division in 5th-century BCE Babylonian astronomy.
+- **`[reconstructed]`**: Historically plausible scribal formalizations.
+  - Direction abstraction based on run/rise ratios.
+  - Rational turn arithmetic.
+  - Bounded approximation determinations.
+- **`[modern]`**: 20th-century computational mathematics synthesized into Mesopotamian paradigm.
+  - Discrete Fourier Transform (DFT).
+  - Radix-2 Cooley-Tukey Fast Fourier Transform (FFT).
+  - Sequence-tablet harmonic decomposition without complex numbers.
+
+### 4. Canonical Examples
+
+The repository includes complete, runnable examples of geometric and Fourier computation:
+- **Right Triangles & Pythagorean Geometry** ([`examples/geometry_triangle_scholar.dub`](examples/geometry_triangle_scholar.dub) / [`examples/geometry_triangle.dub`](examples/geometry_triangle.dub)): Solves missing hypotenuse, validates triangle triples, and consults the `right-triangles` archival tablet.
+- **Slopes, Feeds & Directed Quantities** ([`examples/geometric_inclination_scholar.dub`](examples/geometric_inclination_scholar.dub) / [`examples/geometric_inclination.dub`](examples/geometric_inclination.dub)): Computes canal ramp inclination, feed, constructs directed vectors, and performs quarter-turn rotations.
+- **Fourier Transform & Harmonic Analysis** ([`examples/fourier_dft_scholar.dub`](examples/fourier_dft_scholar.dub) / [`examples/fourier_dft.dub`](examples/fourier_dft.dub)): Verifies sequence length against `powers-of-two`, generates harmonic signal, executes both reference DFT and recursive Radix-2 FFT, and reconstructs signal via inverse DFT.
+
+---
+
 ## Compiler & Runtime Architecture
 
 ```text
@@ -854,6 +1004,20 @@ Explore the [`examples/`](examples/) directory for complete, verified tablets av
   - [`ea_nasir_revision_scholar.dub`](examples/ea_nasir_revision_scholar.dub) (Scholar Mode Revision v2)
   - [`ea_nasir_shipment.svg`](examples/ea_nasir_shipment.svg) (Clay Tablet Artwork: Shipment)
   - [`ea_nasir_assessment.svg`](examples/ea_nasir_assessment.svg) (Clay Tablet Artwork: Assessment)
+- **Tablet Data Model (Sequences, Tables & Persistent Records)**:
+  - [`reciprocal_lookup.dub`](examples/reciprocal_lookup.dub) / [`reciprocal_lookup_scholar.dub`](examples/reciprocal_lookup_scholar.dub) (Mathematical Table Lookup)
+  - [`sequence_generation.dub`](examples/sequence_generation.dub) / [`sequence_generation_scholar.dub`](examples/sequence_generation_scholar.dub) (Sequence Generation)
+  - [`sequence_transformation.dub`](examples/sequence_transformation.dub) / [`sequence_transformation_scholar.dub`](examples/sequence_transformation_scholar.dub) (Sequence Transformation)
+  - [`persistent_sequence.dub`](examples/persistent_sequence.dub) / [`persistent_sequence_scholar.dub`](examples/persistent_sequence_scholar.dub) (Persistent Inscribed Sequence)
+- **Right Triangles & Pythagorean Geometry**:
+  - [`geometry_triangle.dub`](examples/geometry_triangle.dub) (Canonical Cuneiform)
+  - [`geometry_triangle_scholar.dub`](examples/geometry_triangle_scholar.dub) (Scholar Mode)
+- **Geometric Inclinations, Feeds & Directed Quantities**:
+  - [`geometric_inclination.dub`](examples/geometric_inclination.dub) (Canonical Cuneiform)
+  - [`geometric_inclination_scholar.dub`](examples/geometric_inclination_scholar.dub) (Scholar Mode)
+- **Discrete & Fast Fourier Transform (DFT / Radix-2 FFT)**:
+  - [`fourier_dft.dub`](examples/fourier_dft.dub) (Canonical Cuneiform)
+  - [`fourier_dft_scholar.dub`](examples/fourier_dft_scholar.dub) (Scholar Mode)
 - **Language Conformance Suite**:
   - [`conformance.dub`](examples/conformance.dub) (Canonical Cuneiform)
   - [`conformance_scholar.dub`](examples/conformance_scholar.dub) (Scholar Mode)
@@ -867,12 +1031,16 @@ Run the full automated test suite:
 python3 -m unittest discover -s tests -p "test_*.py"
 ```
 
-**137 unit, integration, and mathematical conformance test cases** cover:
+**184 unit, integration, and mathematical conformance test cases** cover:
 - **Exhaustive Numeric Conformance**: Values `0`, `1`, `2`, `59`, `60`, `1;0`, `1;30`, `1;59,59`, `365;14,31,55`, `-1;30`, round-trip normalization, and exact arithmetic.
 - **Static Unit Type Checking**: Compile-time detection of incompatible units (`1 day + 2 year`), dimensional products, cancellations, and explicit conversions.
 - **Semantic IR & Verbs**: Verification of high-level mathematical verbs (`ESTABLISH`, `TAKE`, `POSTFIX`, `REPEAT`, `RETAIN`, `DETERMINE`).
 - **Mathematical Redesign Conformance**: Quantities, multiline postfix pipelines, bounded domains, determinations, field lookups, atomic selections, and implicit result inscriptions.
 - **Tablet Archive & Persistent Memory**: SQLite-backed embedded house of tablets, Scribal Archive 1 seeding, version pinning, provenance tracking, working tablet mutations, atomic inscriptions, and exact rational preservation.
+- **Tablet Data Model**: Sequence allocation, indexed append, associative tables, nearest-key lookup, entry removal, and iteration.
+- **Geometric Mathematics & Triangles**: Verification of exact squares, integer square roots, right-triangle determinations, Pythagorean validation, missing-side solving, and Plimpton 322 archival table lookup.
+- **Inclinations, Directions & Turns**: Exact calculation of slope (rise/run) and feed (run/rise), directional ray normalization, modular turn arithmetic ($p/q \pmod 1$), directed quantities, vector additions, and quarter-turn rotations.
+- **Fourier Transforms & Harmonic Reconstruction**: Exact sequence tablet processing, reference DFT ($O(N^2)$), recursive Cooley-Tukey Radix-2 FFT ($O(N \log N)$), normalized inverse transforms ($1/N$), and Parseval energy conservation.
 - **Trimodal Source Equivalence**: Tablet, Scholar, and Mixed mode equivalence.
 - **Independent Algorithm Validation**: Continued-fraction best rational approximations verified against bounded mathematical brute force.
 - **Deterministic Leap Distribution**: Bresenham accumulator distribution.

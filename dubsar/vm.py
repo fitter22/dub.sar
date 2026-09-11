@@ -24,6 +24,7 @@ from dubsar.errors import (
     DubSarInvalidEntryError,
     DubSarTabletNotFoundError,
     DubSarConsultationError,
+    DubSarTypeError,
 )
 from dubsar.archive.archive import SQLiteTabletArchive, TabletArchive
 from dubsar.archive.models import (
@@ -338,6 +339,8 @@ class VirtualMachine:
                 field_name = arg
                 if isinstance(rec, DeterminationValue):
                     self.operand_stack.append(rec.get(field_name))
+                elif hasattr(rec, field_name):
+                    self.operand_stack.append(getattr(rec, field_name))
                 else:
                     self.operand_stack.append(rec)
 
@@ -385,6 +388,87 @@ class VirtualMachine:
             elif op == OpCode.ABS:
                 a = to_quantity(self.operand_stack.pop())
                 self.operand_stack.append(abs(a))
+
+            elif op == OpCode.SQUARE:
+                a = to_quantity(self.operand_stack.pop())
+                self.operand_stack.append(a.square())
+
+            elif op == OpCode.SQUARE_ROOT:
+                a = to_quantity(self.operand_stack.pop())
+                self.operand_stack.append(a.square_root(allow_approx=True))
+
+            elif op == OpCode.RIGHT_TRIANGLE:
+                b = self.operand_stack.pop()
+                a = self.operand_stack.pop()
+                from dubsar.geometry import RightTriangleValue
+                self.operand_stack.append(RightTriangleValue.determine(short_side=a, long_side=b))
+
+            elif op == OpCode.VALIDATE_TRIANGLE:
+                tri = self.operand_stack.pop()
+                if hasattr(tri, "is_valid"):
+                    self.operand_stack.append(tri.is_valid())
+                else:
+                    self.operand_stack.append(False)
+
+            elif op == OpCode.INCLINATION:
+                run = to_quantity(self.operand_stack.pop())
+                rise = to_quantity(self.operand_stack.pop())
+                if arg in ("feed", "mūṣû", "musu"):
+                    self.operand_stack.append(run / rise)
+                else:
+                    from dubsar.geometry import make_inclination
+                    self.operand_stack.append(make_inclination(rise=rise, run=run))
+
+            elif op == OpCode.DIRECTION:
+                v = self.operand_stack.pop()
+                from dubsar.geometry import Direction, Turn
+                if isinstance(v, Turn):
+                    self.operand_stack.append(Direction(v))
+                else:
+                    self.operand_stack.append(Direction.from_components(x=1, y=0).rotate(v))
+
+            elif op == OpCode.TURN:
+                from dubsar.geometry import Turn
+                if arg == "whole-turn":
+                    self.operand_stack.append(Turn.whole())
+                elif arg == "half-turn":
+                    self.operand_stack.append(Turn.half())
+                elif arg == "quarter-turn":
+                    self.operand_stack.append(Turn.quarter())
+                elif arg == "eighth-turn":
+                    self.operand_stack.append(Turn.eighth())
+                else:
+                    frac = self.operand_stack.pop()
+                    self.operand_stack.append(Turn(frac))
+
+            elif op == OpCode.ROTATE:
+                turn_val = self.operand_stack.pop()
+                target = self.operand_stack.pop()
+                from dubsar.geometry import DirectedQuantity
+                if hasattr(target, "rotate"):
+                    self.operand_stack.append(target.rotate(turn_val))
+                elif isinstance(target, (Quantity, Rational, int)):
+                    dq = DirectedQuantity(target)
+                    self.operand_stack.append(dq.rotate(turn_val))
+                else:
+                    raise DubSarTypeError(f"Cannot rotate target of type {type(target)}")
+
+            elif op == OpCode.APPROXIMATE:
+                val = self.operand_stack.pop()
+                from dubsar.geometry import ApproximateQuantity
+                self.operand_stack.append(ApproximateQuantity(val, precision=6))
+
+            elif op == OpCode.FOURIER_DFT:
+                tab = self.operand_stack.pop()
+                from dubsar.geometry import reference_dft
+                tab_obj = self._resolve_tablet(tab, instr.line)
+                self.operand_stack.append(reference_dft(tab_obj, inverse=bool(arg)))
+
+            elif op == OpCode.FOURIER_FFT:
+                tab = self.operand_stack.pop()
+                from dubsar.geometry import recursive_fft
+                tab_obj = self._resolve_tablet(tab, instr.line)
+                self.operand_stack.append(recursive_fft(tab_obj, inverse=bool(arg)))
 
             # Procedures and Calls
             elif op == OpCode.CALL:

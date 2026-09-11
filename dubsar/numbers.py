@@ -16,7 +16,7 @@ import re
 from fractions import Fraction
 from typing import Optional, Tuple, Union
 
-from dubsar.errors import DubSarDivisionByZero, DubSarSyntaxError
+from dubsar.errors import DubSarDivisionByZero, DubSarMathError, DubSarSyntaxError
 
 
 class Rational:
@@ -225,6 +225,73 @@ class Rational:
             # round away from zero for negative
             abs_res = (2 * abs_num + den) // (2 * den)
             return -abs_res
+
+    def is_perfect_square(self) -> bool:
+        """Returns True if self is a non-negative rational whose numerator and denominator are both perfect squares."""
+        if self._num < 0:
+            return False
+        if self._num == 0:
+            return True
+        sn = math.isqrt(self._num)
+        sd = math.isqrt(self._den)
+        return (sn * sn == self._num) and (sd * sd == self._den)
+
+    def exact_sqrt(self) -> Optional[Rational]:
+        """Returns exact square root if rational perfect square, else None."""
+        if self._num < 0:
+            raise DubSarMathError("Negative quantity has no real square root")
+        if self._num == 0:
+            return Rational(0, 1)
+        sn = math.isqrt(self._num)
+        sd = math.isqrt(self._den)
+        if (sn * sn == self._num) and (sd * sd == self._den):
+            return Rational(sn, sd)
+        return None
+
+    def sqrt_babylonian(self, iterations: int = 4) -> Rational:
+        """Computes rational square root using the Old Babylonian iterative method (YBC 7289).
+
+        x_{k+1} = (x_k + S / x_k) / 2
+        Returns exact square root if perfect square, or a high-accuracy exact rational approximation.
+        """
+        if self._num < 0:
+            raise DubSarMathError("Negative quantity has no real square root")
+        if self._num == 0:
+            return Rational(0, 1)
+        if self.is_perfect_square():
+            res = self.exact_sqrt()
+            assert res is not None
+            return res
+
+        num, den = self._num, self._den
+        # Prevent denominator explosion by bounding precision to ~40 bits (~12 decimal digits)
+        max_bits = max(num.bit_length(), den.bit_length())
+        if max_bits > 45:
+            shift = max_bits - 40
+            num >>= shift
+            den >>= shift
+            if den == 0:
+                den = 1
+
+        S = Rational(num, den)
+        sn = math.isqrt(num) or 1
+        sd = math.isqrt(den) or 1
+        x = Rational(sn, sd)
+
+        half = Rational(1, 2)
+        for _ in range(iterations):
+            x = (x + S / x) * half
+            xn, xd = x.numerator, x.denominator
+            x_bits = max(xn.bit_length(), xd.bit_length())
+            if x_bits > 50:
+                s = x_bits - 40
+                xn >>= s
+                xd >>= s
+                if xd == 0:
+                    xd = 1
+                x = Rational(xn, xd)
+        return x
+
 
 
 def to_rational(val: Union[Rational, int, str, float, Fraction]) -> Rational:

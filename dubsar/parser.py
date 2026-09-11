@@ -632,7 +632,12 @@ class Parser:
                         col=name_tok.col,
                     )
                 # 3) single postfix line
-                if len(flat) >= 2 and any(self._is_op_token(t) for t in flat) and self._is_op_token(flat[-1]):
+                if (
+                    len(flat) >= 2
+                    and TokenType.DOT not in [t.type for t in flat]
+                    and any(self._is_op_token(t) for t in flat)
+                    and self._is_op_token(flat[-1])
+                ):
                     steps = self._parse_postfix_steps(block_tokens)
                     return Declaration(
                         name=name_tok.value,
@@ -761,7 +766,11 @@ class Parser:
         self._match(TokenType.NEWLINE)
 
         # Check for single-line postfix calculation
-        if len(line_tokens) > 1 and any(self._is_op_token(t) for t in line_tokens):
+        if (
+            len(line_tokens) > 1
+            and TokenType.DOT not in [t.type for t in line_tokens]
+            and any(self._is_op_token(t) for t in line_tokens)
+        ):
             # Check if this is a postfix expression (ends with operator)
             if self._is_op_token(line_tokens[-1]):
                 steps = self._parse_postfix_steps([line_tokens])
@@ -815,6 +824,16 @@ class Parser:
             TokenType.APPEND,
             TokenType.LENGTH,
             TokenType.REMOVE,
+            TokenType.SQUARE,
+            TokenType.SQUARE_ROOT,
+            TokenType.RIGHT_TRIANGLE,
+            TokenType.INCLINATION,
+            TokenType.DIRECTION,
+            TokenType.TURN,
+            TokenType.ROTATE,
+            TokenType.APPROXIMATE,
+            TokenType.DFT,
+            TokenType.FFT,
         ):
             return True
         r = tok.raw.lower()
@@ -837,10 +856,38 @@ class Parser:
             "length", "gid", "gíd", "us", "uš", "𒁍", "𒍑",
             "remove", "delete",
             "first", "last",
+            "square", "ib", "íb", "𒅁",
+            "square-root", "sqrt", "ba-si", "ib-si8", "íb-si8", "𒁀𒋛",
+            "right-triangle", "right_triangle", "validate-triangle", "validate_triangle",
+            "inclination", "feed", "mūṣû", "musu", "kussû", "kussu",
+            "direction", "turn", "whole-turn", "half-turn", "quarter-turn", "eighth-turn",
+            "rotate", "approximate", "dft", "fft", "idft", "ifft", "inverse-dft", "inverse-fft",
         )
 
     def _canonical_op_name(self, tok: Token) -> str:
         r = tok.raw.lower()
+        if tok.type == TokenType.SQUARE or r in ("square", "ib", "íb", "𒅁"):
+            return "square"
+        if tok.type == TokenType.SQUARE_ROOT or r in ("square-root", "sqrt", "ba-si", "ib-si8", "íb-si8", "𒁀𒋛"):
+            return "square-root"
+        if tok.type == TokenType.RIGHT_TRIANGLE or r in ("right-triangle", "right_triangle"):
+            return "right-triangle"
+        if r in ("validate-triangle", "validate_triangle"):
+            return "validate-triangle"
+        if tok.type == TokenType.INCLINATION or r in ("inclination", "feed", "mūṣû", "musu", "kussû", "kussu"):
+            return "inclination"
+        if tok.type == TokenType.DIRECTION or r == "direction":
+            return "direction"
+        if tok.type == TokenType.TURN or r in ("turn", "whole-turn", "half-turn", "quarter-turn", "eighth-turn"):
+            return r if r in ("whole-turn", "half-turn", "quarter-turn", "eighth-turn") else "turn"
+        if tok.type == TokenType.ROTATE or r == "rotate":
+            return "rotate"
+        if tok.type == TokenType.APPROXIMATE or r == "approximate":
+            return "approximate"
+        if tok.type == TokenType.DFT or r in ("dft", "inverse-dft", "idft"):
+            return "inverse-dft" if r in ("inverse-dft", "idft") else "dft"
+        if tok.type == TokenType.FFT or r in ("fft", "inverse-fft", "ifft"):
+            return "inverse-fft" if r in ("inverse-fft", "ifft") else "fft"
         if tok.type == TokenType.TAKE or r in ("take", "shu", "šu", "𒋗"):
             return "take"
         if tok.type == TokenType.PUT or r in ("put", "gar", "𒃻"):
@@ -920,8 +967,9 @@ class Parser:
                     steps.append(FieldAccess(record=Identifier(name=flat[i + 2].value, line=t.line, col=t.col), field=t.value, line=t.line, col=t.col))
                     i += 3
                 # Field access id.field
-                elif i + 2 < n and flat[i + 1].type == TokenType.DOT and flat[i + 2].type == TokenType.IDENTIFIER:
-                    steps.append(FieldAccess(record=Identifier(name=t.value, line=t.line, col=t.col), field=flat[i + 2].value, line=t.line, col=t.col))
+                elif i + 2 < n and flat[i + 1].type == TokenType.DOT:
+                    fname = str(flat[i + 2].raw or flat[i + 2].value)
+                    steps.append(FieldAccess(record=Identifier(name=t.value, line=t.line, col=t.col), field=fname, line=t.line, col=t.col))
                     i += 3
                 else:
                     steps.append(Identifier(name=t.value, line=t.line, col=t.col))
@@ -948,6 +996,35 @@ class Parser:
             targets.append(nxt.value)
 
         self._expect(TokenType.ASSIGN, "Expected ':=' in assignment")
+
+        # Check if remainder of line is a single-line postfix calculation
+        rem_toks: List[Token] = []
+        k = 0
+        while True:
+            tk = self._peek(k)
+            if tk.type in (TokenType.NEWLINE, TokenType.EOF):
+                break
+            rem_toks.append(tk)
+            k += 1
+
+        if (
+            len(targets) == 1
+            and len(rem_toks) >= 2
+            and TokenType.DOT not in [t.type for t in rem_toks]
+            and any(self._is_op_token(t) for t in rem_toks)
+            and self._is_op_token(rem_toks[-1])
+        ):
+            for _ in range(len(rem_toks)):
+                self._advance()
+            steps = self._parse_postfix_steps([rem_toks])
+            val_expr = PostfixExpr(steps=steps, line=line, col=col)
+            self._match(TokenType.NEWLINE)
+            return Assignment(
+                targets=targets,
+                value=val_expr,
+                line=line,
+                col=col,
+            )
 
         first_expr = self._parse_expression()
         if len(targets) > 1 and self._match(TokenType.COMMA):
@@ -1561,10 +1638,15 @@ class Parser:
 
             # Record field access: record.field
             if self._match(TokenType.DOT):
-                field_tok = self._expect(TokenType.IDENTIFIER, "Expected field identifier after '.'")
+                if not self._check(TokenType.NEWLINE) and not self._check(TokenType.EOF) and not self._check(TokenType.DEDENT):
+                    field_name = str(self.current.raw or self.current.value)
+                    self._advance()
+                else:
+                    field_tok = self._expect(TokenType.IDENTIFIER, "Expected field identifier after '.'")
+                    field_name = field_tok.value
                 return FieldAccess(
                     record=Identifier(name=str(ident_tok.value), line=ident_tok.line, col=ident_tok.col),
-                    field=field_tok.value,
+                    field=field_name,
                     line=ident_tok.line,
                     col=ident_tok.col,
                 )

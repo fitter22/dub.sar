@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Tuple
 
 from dubsar.archive.models import HistoricalTag, TabletKind, TabletMetadata, TabletShape
 from dubsar.archive.working import WorkingTablet
+from dubsar.geometry import RightTriangleValue, Turn, make_inclination
 from dubsar.numbers import Rational
 from dubsar.units import Quantity, lookup_unit
 
@@ -203,20 +204,112 @@ def build_standard_tablets() -> List[WorkingTablet]:
         kind=TabletKind.MATHEMATICAL,
         historical_tag=HistoricalTag.ATTESTED,
         period="Old Babylonian",
-        provenance="Susa mathematical tablets (TMS 3)",
+        provenance="Susa mathematical tablets (TMS 3), YBC 7289",
+        notes="Standard geometric coefficients: circle perimeter and area, square diagonal (TMS 3 1;25 and YBC 7289 1;24,51,10).",
     )
     geom_tablet = WorkingTablet("basic-geometry", shape=TabletShape.TABLE, kind=TabletKind.MATHEMATICAL, metadata=geom_metadata)
     geom_entries = [
         ("circle-circumference-ratio", Rational(3)),
         ("circle-area-coefficient", Rational(1, 12)),        # 0;05
-        ("square-diagonal-coefficient", Rational(17, 12)),    # 1;25
+        ("square-diagonal-coefficient", Rational(17, 12)),    # 1;25 (TMS 3)
+        ("square-diagonal-ybc7289", Rational(305470, 216000)), # 1;24,51,10 (YBC 7289)
         ("equilateral-triangle-coefficient", Rational(7, 16)), # 0;26,15
     ]
     for k, v in geom_entries:
         geom_tablet.put(k, v)
     tablets.append(geom_tablet)
 
-    # 9. Ea-nāṣir Copper Shipment (Thematic Inspiration: UET V 72)
+    # 9. Right Triangles and Triples (§5, §7)
+    rt_metadata = TabletMetadata(
+        title="Old Babylonian Right Triangles and Pythagorean Triples",
+        kind=TabletKind.MATHEMATICAL,
+        historical_tag=HistoricalTag.ATTESTED,
+        period="Old Babylonian (c. 1900-1600 BCE)",
+        confidence="high",
+        source="Plimpton 322 (Columbia University), CBS 2075, UET 6/2 236",
+        notes="Exact right triangles with short-side, long-side, diagonal, and inclination. "
+              "Represents shared mathematical substrate neutral between Robson's reciprocal/pedagogical analysis "
+              "and Mansfield-Wildberger's ratio-based trigonometry.",
+    )
+    rt_tablet = WorkingTablet("right-triangles", shape=TabletShape.TABLE, kind=TabletKind.MATHEMATICAL, metadata=rt_metadata)
+    rt_triples = [
+        ("3-4-5", RightTriangleValue(3, 4, 5)),
+        ("5-12-13", RightTriangleValue(5, 12, 13)),
+        ("8-15-17", RightTriangleValue(8, 15, 17)),
+        ("20-21-29", RightTriangleValue(20, 21, 29)),
+        ("119-120-169", RightTriangleValue(119, 120, 169)),  # Plimpton 322 row 1
+        ("3367-3456-4825", RightTriangleValue(3367, 3456, 4825)),  # Plimpton 322 row 2
+        ("4601-4800-6649", RightTriangleValue(4601, 4800, 6649)),  # Plimpton 322 row 3
+    ]
+    for idx, (name, tri_val) in enumerate(rt_triples, start=1):
+        rt_tablet.put(idx, tri_val)
+        rt_tablet.put(name, tri_val)
+    tablets.append(rt_tablet)
+
+    # 10. Inclinations and Slopes (§5.4, §6, §7)
+    inc_metadata = TabletMetadata(
+        title="Old Babylonian Inclinations, Batters, and Ramp Feeds",
+        kind=TabletKind.MATHEMATICAL,
+        historical_tag=HistoricalTag.ATTESTED,
+        period="Old Babylonian",
+        confidence="high",
+        source="Old Babylonian mathematical problem texts (BM 85194, YBC 4675)",
+        notes="Attested rise/run slope ratios (kussû and mūṣû) for ramps, walls, and ditch excavations.",
+    )
+    inc_tablet = WorkingTablet("inclinations", shape=TabletShape.TABLE, kind=TabletKind.MATHEMATICAL, metadata=inc_metadata)
+    inc_entries = [
+        ("gentle-ramp", make_inclination(rise=1, run=5)),
+        ("standard-ramp", make_inclination(rise=1, run=3)),
+        ("steep-ramp", make_inclination(rise=1, run=2)),
+        ("diagonal-slope", make_inclination(rise=1, run=1)),
+        ("wall-batter", make_inclination(rise=6, run=1)),
+    ]
+    for idx, (name, inc_val) in enumerate(inc_entries, start=1):
+        inc_tablet.put(idx, inc_val)
+        inc_tablet.put(name, inc_val)
+    tablets.append(inc_tablet)
+
+    # 11. Powers of Two (§15, §7)
+    p2_metadata = TabletMetadata(
+        title="Scholarly Table of Powers of Two",
+        kind=TabletKind.MATHEMATICAL,
+        historical_tag=HistoricalTag.RECONSTRUCTED,
+        period="Scholarly computational table",
+        confidence="high",
+        notes="Exact integer powers of 2 for length matching, domain bounds, and radix-2 Fourier determination.",
+    )
+    p2_tablet = WorkingTablet("powers-of-two", shape=TabletShape.TABLE, kind=TabletKind.MATHEMATICAL, metadata=p2_metadata)
+    for exp in range(0, 17):
+        p_val = Rational(2 ** exp)
+        p2_tablet.put(exp, p_val)
+        p2_tablet.put(f"2^{exp}", p_val)
+        # Also index by value to check if length is power of 2
+        p2_tablet.put(f"len-{2 ** exp}", Rational(exp))
+    tablets.append(p2_tablet)
+
+    # 12. Turn Divisions (§9, §13, §7)
+    td_metadata = TabletMetadata(
+        title="Regular Harmonic Divisions of a Full Turn",
+        kind=TabletKind.MATHEMATICAL,
+        historical_tag=HistoricalTag.MODERN,
+        period="DUB.SAR Mathematical Foundation",
+        confidence="high",
+        notes="Equal cycle fractions of a turn (tau) without premature modern degrees or radians.",
+    )
+    td_tablet = WorkingTablet("turn-divisions", shape=TabletShape.TABLE, kind=TabletKind.MATHEMATICAL, metadata=td_metadata)
+    td_entries = [
+        ("whole-turn", Turn.whole()),
+        ("half-turn", Turn.half()),
+        ("quarter-turn", Turn.quarter()),
+        ("eighth-turn", Turn.eighth()),
+        ("sixteenth-turn", Turn.division(1, 16)),
+    ]
+    for idx, (name, t_val) in enumerate(td_entries, start=1):
+        td_tablet.put(idx, t_val)
+        td_tablet.put(name, t_val)
+    tablets.append(td_tablet)
+
+    # 13. Ea-nāṣir Copper Shipment (Thematic Inspiration: UET V 72)
     ea_nasir_metadata = TabletMetadata(
         title="Ea-nāṣir copper shipment",
         kind=TabletKind.DATA,
@@ -240,3 +333,4 @@ def build_standard_tablets() -> List[WorkingTablet]:
     tablets.append(ea_nasir_tablet)
 
     return tablets
+

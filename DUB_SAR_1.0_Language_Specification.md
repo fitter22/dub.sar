@@ -188,6 +188,7 @@ parameter        ::= identifier ;
 block            ::= NEWLINE INDENT statement+ DEDENT ;
 
 statement        ::= declaration
+                   | assignment
                    | determination
                    | retain-statement
                    | repetition
@@ -207,7 +208,11 @@ statement        ::= declaration
 
 declaration      ::= identifier ":" expression unit?
                    | identifier ":" NEWLINE INDENT postfix-step+ DEDENT
+                   | identifier ":" postfix-step+
                    | identifier ":" ("𒉡" | "empty") ;
+
+assignment       ::= identifier ":=" expression
+                   | identifier ":=" postfix-step+ ;
 
 determination    ::= identifier ":" identifier ("," identifier)+
                    | identifier ":" NEWLINE INDENT identifier+ DEDENT ;
@@ -227,7 +232,7 @@ output-statement ::= ("𒁹𒀀" | "output" | "inscribe") expression ;
 input-expression ::= ("𒀀𒁹" | "ask" | "input") ("(" string ")" | string) ;
 
 consult-statement   ::= ("𒅆" | "consult" | "examine") expression (("version" | "mu" | "𒈬") expression)? (("𒁶" | "as") identifier)? ;
-working-statement   ::= ("create")? ("𒆥" | "working") ("𒁾" | "tablet")? identifier ;
+working-statement   ::= ("create")? ("𒆥" | "working") ("𒁾" | "tablet")? identifier ("of" "length" expression)? ;
 copy-statement      ::= ("𒃮𒊑" | "copy") (expression)? (("version" | "mu" | "𒈬") expression)? ("𒁶" | "as") ("𒆥" | "working")? identifier ;
 derive-statement    ::= "derive" ("𒋫" | "from") expression (("version" | "mu" | "𒈬") expression)? ("𒁶" | "as") ("𒆥" | "working")? identifier ;
 inscribe-statement  ::= ("𒁹𒀀" | "output" | "inscribe" | "𒊬") identifier ("𒁶" | "as") expression ;
@@ -249,8 +254,13 @@ unary            ::= ("-" | "𒉡" | "not")? primary ;
 postfix-step     ::= primary | postfix-op | apply-recipe ;
 apply-recipe     ::= ("𒀝" | "apply") identifier ;
 postfix-op       ::= "floor" | "ceil" | "nearest" | "absolute"
-                   | "add" | "subtract" | "multiply" | "divide" | "take"
-                   | "𒄥" | "𒉏" | "𒊑" | "𒋼" | "𒍣" | "𒋫" | "𒊭" | "𒉌" | "𒋗" ;
+                   | "add" | "subtract" | "multiply" | "divide"
+                   | "square" | "square-root" | "right-triangle" | "validate-triangle"
+                   | "inclination" | "feed" | "direction" | "turn" | "rotate" | "approximate"
+                   | "dft" | "fft" | "inverse-dft" | "inverse-fft"
+                   | "take" | "put" | "append" | "length" | "remove"
+                   | "first" | "last"
+                   | "𒄥" | "𒉏" | "𒊑" | "𒋼" | "𒍣" | "𒋫" | "𒊭" | "𒉌" | "𒅁" | "𒁀𒋛" | "𒋗" | "𒃻" | "𒈭" | "𒁍" ;
 
 primary          ::= number quantity-unit?
                    | field-access
@@ -1655,3 +1665,122 @@ consult tablet "reciprocals"
 v : take entry 99 from reciprocals   # ERROR: DubSarEntryNotFoundError: Entry 99 not found
 ```
 For approximate mathematical tables, programs use `seek entry nearest target in T` to locate the closest entry without raising an error.
+
+---
+
+## 38. Geometric Mathematics Foundation and Coherent Path to Fourier Mathematics
+
+### 38.1 Architectural Objective
+
+DUB.SAR 1.0 extends its exact-rational and tablet-oriented data model into advanced numerical mathematics and Fourier analysis via a coherent 8-layer geometric progression:
+
+```text
+exact quantity
+  -> ratio / reciprocal
+  -> square / square-root / geometric determination
+  -> right triangle
+  -> inclination / feed / proportional geometry
+  -> direction
+  -> rotation / turn
+  -> equal divisions of a turn
+  -> directed quantities
+  -> Fourier roots / DFT
+  -> FFT
+```
+
+The language avoids premature modern primitives:
+- Complex numbers, radians, degrees, and Euler's formula ($e^{i\theta}$) are **not** exposed in DUB.SAR syntax.
+- Trigonometric functions (`sin`, `cos`, `tan`) are **not** language builtins.
+- Floating-point numbers and silent conversions are strictly forbidden. Exact rational arithmetic remains the bedrock of the entire mathematical system.
+
+### 38.2 Provenance Classification
+
+To preserve scholarly integrity, DUB.SAR strictly distinguishes between three classes of knowledge:
+
+1. **Attested (`historical_tag: attested`)**:
+   - Directly attested in the Mesopotamian cuneiform corpus.
+   - Examples: YBC 7289 diagonal approximation ($1;24,51,10$), TMS 3 coefficients ($1;25$ and $17/24$), Plimpton 322 right-triangle table, and BM 85194 ramp slope problems.
+2. **Reconstructed (`historical_tag: reconstructed`)**:
+   - Historically plausible computational reconstructions adhering to scribal mathematical methods.
+   - Examples: Powers-of-two lookup table for domain verification, and extended reciprocal table completions.
+3. **Modern (`historical_tag: modern`)**:
+   - Modern DUB.SAR mathematical abstractions bridging historical practice with modern discrete analysis.
+   - Examples: Turn system ($\tau$), Direction orientation, Directed quantities, Discrete Fourier Transform (DFT), and Cooley-Tukey Radix-2 FFT.
+
+### 38.3 Scholarly Analysis and Neutrality
+
+#### Plimpton 322
+There is an ongoing scholarly debate regarding Old Babylonian tablet Plimpton 322 (Columbia University):
+- **Eleanor Robson** demonstrates that Plimpton 322 belongs to the Old Babylonian scribal reciprocal and pedagogical tradition, arguing that retrofitting modern trigonometry onto it is anachronistic.
+- **Daniel Mansfield and Norman Wildberger** argue that Plimpton 322 represents a novel form of exact, ratio-based trigonometry constructed without an angle concept.
+
+DUB.SAR takes a principled, neutral stance: it implements the uncontroversial shared mathematical reality. Old Babylonian mathematics computed with exact right-triangle ratios, inclinations, and feeds without modern angles or continuous trigonometric functions. Plimpton 322 is represented in the standard tablet archive (`right-triangles`) as exact right triangles.
+
+#### Babylonian Zodiac Dating
+The fully developed Babylonian 360-part zodiac system belongs to Late Babylonian mathematical astronomy (fifth century BCE, with the earliest attested texts post-450 BCE; Steele 2007, de Jong 2018). It is an astronomical coordinate convention, not a Sumerian or Old Babylonian geometry primitive.
+
+### 38.4 The Eight Coherent Layers
+
+#### Layer A — Exact Scalar Quantities
+Every quantity in DUB.SAR is an exact rational paired with physical or dimensioned units. Calculations never silently degrade to IEEE-754 floating-point representations.
+
+#### Layer B — Ratios and Reciprocals
+Division between quantities of compatible physical dimensions produces an exact dimensionless rational ratio scaled by base metrological units:
+$$\frac{60\text{ sec}}{1\text{ min}} = 1, \quad \frac{12\text{ kùš}}{6\text{ kùš}} = 2$$
+Reciprocal pairs are preserved in the persistent archive tablet `reciprocals`.
+
+#### Layer C — Geometric Relations
+- **Squares and Roots**: `square` (`𒅁`) and `square-root` (`𒁀𒋛`). Exact rational roots are determined when the radicand is a rational perfect square. Non-square quantities require explicit approximation (`allow_approx=True`) or raise `DubSarMathError`.
+- **Right Triangles**: Structured determination `RightTriangleValue` containing `short-side`, `long-side`, `diagonal`, `inclination`, `feed`, and `area`. Given any two sides, the third is determined via the Pythagorean relation:
+  $$\text{short}^2 + \text{long}^2 = \text{diagonal}^2$$
+- **Validation**: `validate-triangle` verifies exact Pythagorean consistency.
+- **Inclination and Feed**: Proportional slopes defined by ratios:
+  $$\text{inclination} = \frac{\text{rise}}{\text{run}}, \quad \text{feed} = \frac{\text{run}}{\text{rise}}$$
+
+#### Layer D — Direction
+A planar orientation defined relative to a reference axis without degrees or radians. Directions are constructed from:
+1. Inclination ratios ($\text{rise} / \text{run}$).
+2. Turn fractions ($\tau$).
+
+Directions provide exact rational Cartesian components for cardinal quarter-turns and attested eighth-turn diagonals:
+- Reference ($0$ turn): $(1, 0)$
+- Perpendicular ($1/4$ turn): $(0, 1)$
+- Opposite ($1/2$ turn): $(-1, 0)$
+- Three-quarter ($3/4$ turn): $(0, -1)$
+- Eighth-turn diagonal ($1/8$ turn): $(17/24, 17/24)$ (TMS 3 attested approximation)
+
+#### Layer E — Turn System
+The parent abstraction for circular cycles and rotation is the **Turn** ($\tau \in [0, 1)$):
+- Standard divisions: `whole-turn` ($0$), `half-turn` ($1/2$), `quarter-turn` ($1/4$), `eighth-turn` ($1/8$).
+- Equal divisions of a turn: `Turn.division(k, n)` ($k/n$).
+- Modular arithmetic on $[0, 1)$ with exact addition, subtraction, and scaling.
+
+#### Layer F — Explicit Approximation
+Approximations cannot participate in silent equality checks:
+- `ApproximateQuantity` records precision and tolerance.
+- Exact equality checks (`==`) raise `DubSarTypeError`.
+- Comparisons must use explicit tolerance verification: `val within tolerance tol`.
+
+#### Layer G — Directed Quantities
+A magnitude associated with a direction ($\text{magnitude} + \text{direction}$):
+- Represents vectors and harmonic components without complex primitives.
+- **Rotation**: `dq rotate turn` rotates orientation while preserving magnitude.
+- **Scaling**: `dq scale factor` scales magnitude.
+- **Vector Addition**: `dq1 + dq2` combines unit components and determines resultant magnitude and direction.
+
+#### Layer H — Fourier Mathematics
+The universal container for time-series and harmonic data is the **sequence tablet**:
+- **Reference DFT (`dft`, `inverse-dft`)**: Evaluates the finite discrete Fourier transform using equal turn divisions $k/N$:
+  $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot \text{rotate}\left(-\frac{n \cdot k}{N}\right)$$
+- **Radix-2 FFT (`fft`, `inverse-fft`)**: Recursive Cooley-Tukey decomposition for sequence lengths verified against the `powers-of-two` standard tablet ($N = 2^p$).
+- **Equivalence**: The reference DFT and recursive FFT produce mathematically equivalent results within declared approximation tolerance.
+- **Invertibility**: Applying the inverse transform recovers the original signal scaled by $1/N$.
+
+### 38.5 Standard Geometric and Harmonic Archive Tablets
+
+Four standard reference tablets support geometric and Fourier computing in the Tablet Archive:
+
+1. `right-triangles`: Old Babylonian Pythagorean triples ($3\text{-}4\text{-}5$, $5\text{-}12\text{-}13$, $8\text{-}15\text{-}17$, $20\text{-}21\text{-}29$, and Plimpton 322 rows 1–3).
+2. `inclinations`: Historical ramp slopes and wall batters (BM 85194, YBC 4675).
+3. `powers-of-two`: Exact integer powers $2^0$ through $2^{16}$ for sequence length verification and domain bounds.
+4. `turn-divisions`: Regular harmonic divisions of a turn ($1, 1/2, 1/4, 1/8, 1/16$).

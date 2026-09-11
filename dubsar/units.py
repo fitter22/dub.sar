@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Dict, Optional, Tuple, Union
 
-from dubsar.errors import DubSarDivisionByZero, DubSarUnitError
+from dubsar.errors import DubSarDivisionByZero, DubSarMathError, DubSarUnitError
 from dubsar.numbers import Rational, to_rational
 
 
@@ -176,6 +176,18 @@ UNIT_TABLE: Dict[str, Unit] = {
     "mina": Unit({"mass": 1}, scale=60, name="mina"),
     "ma-na": Unit({"mass": 1}, scale=60, name="mina"),
     "𒈠𒈾": Unit({"mass": 1}, scale=60, name="𒈠𒈾"),
+
+    # Length units (base dimension: length, base unit: kus / cubit)
+    "kus": Unit({"length": 1}, scale=1, name="kus"),
+    "kùš": Unit({"length": 1}, scale=1, name="kus"),
+    "cubit": Unit({"length": 1}, scale=1, name="kus"),
+    "su-si": Unit({"length": 1}, scale=Rational(1, 30), name="su-si"),
+    "finger": Unit({"length": 1}, scale=Rational(1, 30), name="su-si"),
+    "gi": Unit({"length": 1}, scale=6, name="gi"),
+    "reed": Unit({"length": 1}, scale=6, name="gi"),
+    "nindan": Unit({"length": 1}, scale=12, name="nindan"),
+    "meter": Unit({"length": 1}, scale=1, name="meter"),
+    "m": Unit({"length": 1}, scale=1, name="meter"),
 }
 
 UNIT_TO_CUNEIFORM: Dict[str, str] = {
@@ -189,6 +201,8 @@ UNIT_TO_CUNEIFORM: Dict[str, str] = {
     "gun": "𒄘",
     "mina": "𒈠𒈾",
     "ma-na": "𒈠𒈾",
+    "gi": "𒄀",
+    "reed": "𒄀",
 }
 
 CUNEIFORM_TO_UNIT_NAME: Dict[str, str] = {
@@ -197,6 +211,7 @@ CUNEIFORM_TO_UNIT_NAME: Dict[str, str] = {
     "𒈬": "year",
     "𒄘": "talent",
     "𒈠𒈾": "mina",
+    "𒄀": "gi",
 }
 
 
@@ -314,12 +329,53 @@ class Quantity:
         other_q = to_quantity(other)
         if other_q._value == 0:
             raise DubSarDivisionByZero("Division by zero")
-        new_val = self._value / other_q._value
         new_unit = self._unit / other_q._unit
+        if new_unit.is_dimensionless:
+            # Dimensionless ratio: scale by base values so that compatible dimensions reduce accurately
+            # (e.g. 60 second / 1 minute = 1, 12 ud / 6 ud = 2)
+            new_val = (self._value * self._unit.scale) / (other_q._value * other_q._unit.scale)
+            return Quantity(new_val, DIMENSIONLESS)
+        new_val = self._value / other_q._value
         return Quantity(new_val, new_unit)
 
     def __rtruediv__(self, other: Union[Quantity, Rational, int]) -> Quantity:
         return to_quantity(other).__truediv__(self)
+
+    def square(self) -> Quantity:
+        """Returns the square of this quantity: self * self."""
+        return self * self
+
+    def square_root(self, allow_approx: bool = False, iterations: int = 6) -> Quantity:
+        """Determines the square root of the quantity.
+
+        Requires dimension exponents to be even.
+        Returns exact rational square root if rational perfect square.
+        If non-square, requires allow_approx=True or raises DubSarMathError.
+        """
+        for d, exp in self._unit.dimensions.items():
+            if exp % 2 != 0:
+                raise DubSarUnitError(
+                    f"Cannot take square root of unit {self._unit} with odd dimension exponent: {d}^{exp}"
+                )
+        new_dims = {d: exp // 2 for d, exp in self._unit.dimensions.items()}
+        scale_root = self._unit.scale.exact_sqrt()
+        if scale_root is None:
+            if allow_approx:
+                scale_root = self._unit.scale.sqrt_babylonian(iterations=iterations)
+            else:
+                raise DubSarUnitError(f"Cannot determine exact square root for unit scale: {self._unit.scale}")
+        new_unit = Unit(new_dims, scale=scale_root)
+
+        if self._value.is_perfect_square():
+            exact_v = self._value.exact_sqrt()
+            assert exact_v is not None
+            return Quantity(exact_v, new_unit)
+        if allow_approx:
+            approx_v = self._value.sqrt_babylonian(iterations=iterations)
+            return Quantity(approx_v, new_unit)
+        raise DubSarMathError(
+            f"Quantity {self} is not an exact rational square; explicit approximation required"
+        )
 
     def __mod__(self, other: Union[Quantity, Rational, int]) -> Quantity:
         other_q = to_quantity(other)

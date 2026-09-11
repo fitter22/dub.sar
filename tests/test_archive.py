@@ -81,7 +81,7 @@ class TestArchiveInitialization(unittest.TestCase):
             t2_count = len(a2.list_tablets())
             a2.close()
             self.assertEqual(t1_count, t2_count)
-            self.assertEqual(t1_count, 9)
+            self.assertEqual(t1_count, 13)
 
 
 class TestConsultation(unittest.TestCase):

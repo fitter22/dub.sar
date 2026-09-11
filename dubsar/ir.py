@@ -88,6 +88,17 @@ class OpCode(Enum):
     ITER_START = auto()     # Pop tablet; begin iteration
     ITER_NEXT = auto()      # Advance iteration: arg=(key_var, val_var, exit_addr)
     ITER_END = auto()       # End iteration
+    SQUARE = auto()         # Pop a; push a.square()
+    SQUARE_ROOT = auto()    # Pop a; push a.square_root(allow_approx=True)
+    RIGHT_TRIANGLE = auto() # Pop b, a; push RightTriangleValue.determine(short_side=a, long_side=b)
+    VALIDATE_TRIANGLE = auto() # Pop tri; push tri.is_valid()
+    INCLINATION = auto()    # Pop run, rise; push rise / run (or feed)
+    DIRECTION = auto()      # Pop v; push Direction(v)
+    TURN = auto()           # Pop frac; push Turn(frac)
+    ROTATE = auto()         # Pop turn, target; push target.rotate(turn)
+    APPROXIMATE = auto()    # Pop val; push ApproximateQuantity(val)
+    FOURIER_DFT = auto()    # Pop tab; push reference_dft(tab, inverse=arg)
+    FOURIER_FFT = auto()    # Pop tab; push recursive_fft(tab, inverse=arg)
     HALT = auto()           # End execution
 
 
@@ -548,6 +559,28 @@ class Compiler:
                         chunk.emit(OpCode.WORKING_REMOVE_STACK, None, expr.line)
                     elif step in ("first", "last"):
                         chunk.emit(OpCode.ENTRY_SEEK, step, expr.line)
+                    elif step == "square":
+                        chunk.emit(OpCode.SQUARE, None, expr.line)
+                    elif step == "square-root":
+                        chunk.emit(OpCode.SQUARE_ROOT, None, expr.line)
+                    elif step == "right-triangle":
+                        chunk.emit(OpCode.RIGHT_TRIANGLE, None, expr.line)
+                    elif step in ("validate-triangle", "validate_triangle"):
+                        chunk.emit(OpCode.VALIDATE_TRIANGLE, None, expr.line)
+                    elif step in ("inclination", "feed"):
+                        chunk.emit(OpCode.INCLINATION, step, expr.line)
+                    elif step == "direction":
+                        chunk.emit(OpCode.DIRECTION, None, expr.line)
+                    elif step in ("turn", "whole-turn", "half-turn", "quarter-turn", "eighth-turn"):
+                        chunk.emit(OpCode.TURN, step, expr.line)
+                    elif step == "rotate":
+                        chunk.emit(OpCode.ROTATE, None, expr.line)
+                    elif step == "approximate":
+                        chunk.emit(OpCode.APPROXIMATE, None, expr.line)
+                    elif step in ("dft", "inverse-dft"):
+                        chunk.emit(OpCode.FOURIER_DFT, (step == "inverse-dft"), expr.line)
+                    elif step in ("fft", "inverse-fft"):
+                        chunk.emit(OpCode.FOURIER_FFT, (step == "inverse-fft"), expr.line)
 
         elif isinstance(expr, TakeTabletEntry):
             self._compile_verb_expr(expr.tablet)

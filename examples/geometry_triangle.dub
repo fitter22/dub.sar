@@ -1,0 +1,27 @@
+𒑰 DUB.SAR 1.0 — Right Triangle Determination (Canonical Cuneiform)
+𒑰 Layer C: Exact right triangles, missing side determination, and Pythagorean validation.
+
+𒂊𒁹
+
+    𒑰 1. Determine a right triangle from two known sides
+    𒑰 5 and 12 gives diagonal 13
+    tri : 5 12 right-triangle
+    valid : tri validate-triangle
+
+    diag : tri.diagonal
+    inc : tri.inclination
+    fd : tri.feed
+    area : tri.area
+
+    𒑰 2. Consult historical Pythagorean triples from the Tablet Archive (Plimpton 322)
+    p322_tri : take "3-4-5" from "right-triangles"
+    p322_valid : p322_tri validate-triangle
+
+𒅗𒁹
+
+    𒁹𒀀 valid
+    𒁹𒀀 diag
+    𒁹𒀀 inc
+    𒁹𒀀 fd
+    𒁹𒀀 area
+    𒁹𒀀 p322_valid

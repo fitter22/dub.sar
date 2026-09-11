@@ -229,6 +229,23 @@ class TabletVersionInfo:
 # Canonical Serialization (§13, §14, §65, §66)
 # ==============================================================================
 
+_GEOM_CLASSES = None
+
+
+def _get_geom_classes():
+    global _GEOM_CLASSES
+    if _GEOM_CLASSES is None:
+        from dubsar.geometry import (
+            ApproximateQuantity,
+            DirectedQuantity,
+            Direction,
+            RightTriangleValue,
+            Turn,
+        )
+        _GEOM_CLASSES = (Turn, Direction, ApproximateQuantity, DirectedQuantity, RightTriangleValue)
+    return _GEOM_CLASSES
+
+
 def serialize_value(val: Any) -> Any:
     """Serializes a DUB.SAR runtime value into canonical exact JSON representation."""
     if isinstance(val, Rational):
@@ -238,6 +255,38 @@ def serialize_value(val: Any) -> Any:
             "_type": "quantity",
             "val": serialize_value(val.value),
             "unit": str(val.unit),
+        }
+    Turn, Direction, ApproximateQuantity, DirectedQuantity, RightTriangleValue = _get_geom_classes()
+    if isinstance(val, RightTriangleValue):
+        return {
+            "_type": "right_triangle",
+            "short_side": serialize_value(val.fields["short-side"]),
+            "long_side": serialize_value(val.fields["long-side"]),
+            "diagonal": serialize_value(val.fields["diagonal"]),
+        }
+    if isinstance(val, Turn):
+        return {
+            "_type": "turn",
+            "fraction": serialize_value(val.fraction),
+        }
+    if isinstance(val, Direction):
+        return {
+            "_type": "direction",
+            "turn": serialize_value(val.turn),
+            "name": getattr(val, "_name", None),
+        }
+    if isinstance(val, ApproximateQuantity):
+        return {
+            "_type": "approximate_quantity",
+            "quantity": serialize_value(val.quantity),
+            "precision": val.precision,
+            "tolerance": serialize_value(val.tolerance) if val.tolerance is not None else None,
+        }
+    if isinstance(val, DirectedQuantity):
+        return {
+            "_type": "directed_quantity",
+            "magnitude": serialize_value(val.magnitude),
+            "direction": serialize_value(val.direction),
         }
     if isinstance(val, DeterminationValue):
         return {
@@ -273,6 +322,36 @@ def deserialize_value(data: Any) -> Any:
             val = deserialize_value(data["val"])
             u = lookup_unit(data["unit"])
             return Quantity(val if isinstance(val, Rational) else Rational(val), u)
+        if t == "right_triangle":
+            Turn, Direction, ApproximateQuantity, DirectedQuantity, RightTriangleValue = _get_geom_classes()
+            return RightTriangleValue(
+                short_side=deserialize_value(data["short_side"]),
+                long_side=deserialize_value(data["long_side"]),
+                diagonal=deserialize_value(data["diagonal"]),
+            )
+        if t == "turn":
+            Turn, Direction, ApproximateQuantity, DirectedQuantity, RightTriangleValue = _get_geom_classes()
+            return Turn(deserialize_value(data["fraction"]))
+        if t == "direction":
+            Turn, Direction, ApproximateQuantity, DirectedQuantity, RightTriangleValue = _get_geom_classes()
+            return Direction(
+                turn=deserialize_value(data["turn"]),
+                name=data.get("name"),
+            )
+        if t == "approximate_quantity":
+            Turn, Direction, ApproximateQuantity, DirectedQuantity, RightTriangleValue = _get_geom_classes()
+            tol = deserialize_value(data["tolerance"]) if data.get("tolerance") is not None else None
+            return ApproximateQuantity(
+                quantity=deserialize_value(data["quantity"]),
+                precision=data.get("precision", 6),
+                tolerance=tol,
+            )
+        if t == "directed_quantity":
+            Turn, Direction, ApproximateQuantity, DirectedQuantity, RightTriangleValue = _get_geom_classes()
+            return DirectedQuantity(
+                magnitude=deserialize_value(data["magnitude"]),
+                direction=deserialize_value(data["direction"]),
+            )
         if t == "determination":
             fields = {k: deserialize_value(v) for k, v in data.get("fields", {}).items()}
             return DeterminationValue(name=data.get("name", "determination"), fields=fields)

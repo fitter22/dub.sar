@@ -1,0 +1,42 @@
+𒑰 DUB.SAR 1.0 — Discrete Fourier Transform (Canonical Cuneiform)
+𒑰 Layer H: Equal divisions of a turn, reference DFT, and Radix-2 recursive FFT.
+
+𒂊𒁹
+
+    𒑰 1. Consult the Powers of Two table to verify sequence length is a harmonic power of 2
+    len_check : take "len-4" from "powers-of-two"
+
+    𒑰 2. Construct an input sequence tablet of discrete signal samples
+    working sig of length 0
+    sig 1 𒈭
+    sig 0 𒈭
+    sig 0 𒈭
+    sig 0 𒈭
+
+    𒑰 3. Compute the Discrete Fourier Transform (reference DFT)
+    fwd_dft : sig dft
+    dft_len : fwd_dft 𒁍
+
+    𒑰 4. Compute the Fast Fourier Transform (Radix-2 FFT)
+    fwd_fft : sig fft
+    fft_len : fwd_fft 𒁍
+
+    𒑰 5. Extract first harmonic bin magnitude from both transforms
+    bin0_dft : fwd_dft 0 𒋗
+    bin0_fft : fwd_fft 0 𒋗
+    mag_dft : bin0_dft.magnitude
+    mag_fft : bin0_fft.magnitude
+
+    𒑰 6. Reconstruct the original signal using inverse DFT
+    recon : fwd_dft inverse-dft
+    first_recon : recon 0 𒋗
+    orig_val : first_recon.magnitude
+
+𒅗𒁹
+
+    𒁹𒀀 len_check
+    𒁹𒀀 dft_len
+    𒁹𒀀 fft_len
+    𒁹𒀀 mag_dft
+    𒁹𒀀 mag_fft
+    𒁹𒀀 orig_val

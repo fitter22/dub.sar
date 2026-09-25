@@ -1019,9 +1019,13 @@ The first release SHOULD be an interpreter. Once the interpreter passes the lang
 Reference commands:
 
 ```text
-dubsar run tablet.dub [--backend=vm|ast] [--input=...]
+dubsar run tablet.dub [--backend=vm|ast|native] [--input=...]
 dubsar check tablet.dub
 dubsar format tablet.dub [--mode=tablet|scholar]
+dubsar compile tablet.dub --target=native [-o output_binary] [--opt-level=-O3]
+dubsar compile tablet.dub --target=c [-o output.c]
+dubsar compile tablet.dub --target=llvm [-o output.ll]
+dubsar compile tablet.dub --target=shared [-o output.dylib|.so]
 dubsar compile tablet.dub --target=bytecode
 dubsar compile tablet.dub --target=wasm
 dubsar compile tablet.dub --target=wat
@@ -1035,11 +1039,14 @@ dubsar render tablet.dub --style=tablet --strip-comments
 ```
 
 Supported compilation targets:
+- `native` — Standalone native executable binary compiled via host C/LLVM toolchain (`clang`/`gcc`) with exact 128-bit rational acceleration;
+- `c` — Clean, standalone ANSI C99 source code;
+- `llvm` / `ll` — Textual LLVM Intermediate Representation (.ll);
+- `shared` / `dylib` / `so` — Dynamically linked shared object or dynamic library;
 - `bytecode` — Stack bytecode chunk for the DUB.SAR VM;
 - `wasm` / `wat` — WebAssembly text format with 64-bit rational runtime;
 - `ir` — High-level mathematical Semantic IR;
-- `json` — Abstract syntax tree serialized as JSON;
-- `native` — Native LLVM machine code (planned Stage 4).
+- `json` — Abstract syntax tree serialized as JSON.
 
 `render` is a presentation feature; case lines, tablet borders and similar visual features do not affect program semantics.
 
@@ -1784,3 +1791,95 @@ Four standard reference tablets support geometric and Fourier computing in the T
 2. `inclinations`: Historical ramp slopes and wall batters (BM 85194, YBC 4675).
 3. `powers-of-two`: Exact integer powers $2^0$ through $2^{16}$ for sequence length verification and domain bounds.
 4. `turn-divisions`: Regular harmonic divisions of a turn ($1, 1/2, 1/4, 1/8, 1/16$).
+
+---
+
+## 39. Native Compilation Architecture (Stage 4)
+
+DUB.SAR 1.0 implements a unified native compilation pipeline enabling ahead-of-time (AOT) compilation of tablets into native machine code, textual LLVM Intermediate Representation, standalone ANSI C99 source files, or shared libraries.
+
+### 39.1 Pipeline Architecture
+
+The native compiler lowers the mathematical AST and Semantic Program through the following stages:
+
+```
++--------------------+
+|  DUB.SAR Source    |  (.dub tablet)
++---------+----------+
+          |
+          v
++---------+----------+
+|  Lexer & Parser    |
++---------+----------+
+          |
+          v
++---------+----------+
+| Semantic Analysis  |  (Unit checking, dimensional consistency)
++---------+----------+
+          |
+          v
++---------+----------+
+| Semantic IR Lower  |  (SemanticProgram verbs and expressions)
++---------+----------+
+          |
+          v
++---------+----------+
+| C99 Native Codegen |  (dubsar/native/codegen.py)
++---------+----------+
+          |
+     +----+--------------------------------+
+     |                                     |
+     v                                     v
++----+-------------------+      +----------+---------+
+| Standalone C99 Source  |      | Host C/LLVM Driver |  (clang / gcc)
++------------------------+      +----------+---------+
+                                           |
+                    +----------------------+----------------------+
+                    |                      |                      |
+                    v                      v                      v
+          +---------+---------+  +---------+---------+  +---------+---------+
+          | Native Executable |  |  Textual LLVM IR  |  |  Shared Library   |
+          |  (Mach-O / ELF)   |  |       (.ll)       |  |  (.dylib / .so)   |
+          +-------------------+  +-------------------+  +-------------------+
+```
+
+### 39.2 Native Runtime Subsystem (`dubsar_runtime.h` / `dubsar_runtime.c`)
+
+The native runtime is implemented in standard C99 with zero external library dependencies beyond the standard C library and host math library (`-lm`):
+
+1. **Exact 128-Bit Rational Arithmetic**:
+   - `dubsar_rat_t` stores 64-bit numerator and denominator (`int64_t num, den`).
+   - Multiplication and addition cross-products are evaluated in 128-bit integer hardware registers (`__int128_t`) before Euclidean GCD reduction, preventing premature arithmetic overflow without floating-point conversion.
+   - Exact Babylonian square root extraction (`dubsar_rat_sqrt_babylonian`) maintains exact rationals for perfect squares and bounded rational approximations for irrationals.
+
+2. **Unified Tagged Value Model (`dubsar_val_t`)**:
+   - Encapsulates exact rationals, dimensioned quantities, determinations, tablets (sequences and tables), triangles, inclinations, turns, directions, and directed quantities.
+   - Tagged value dispatch implements polymorphic arithmetic, relational comparisons, and field lookups (`.width`, `.diagonal`, `.inclination`, `.feed`, `.area`, `.magnitude`, `.direction`).
+
+3. **Mesopotamian Sexagesimal Formatting**:
+   - `dubsar_format_canonical_rat` formats numbers in authentic Mesopotamian sexagesimal notation (e.g. `2;24` for $12/5$, `0;25` for $5/12$, `0;22,30` for $3/8$).
+
+4. **Tablet Architecture**:
+   - Dynamic sequences (`dubsar_tablet_t`) with contiguous memory storage and $O(1)$ amortized append.
+   - Built-in reference archive lookups for `right-triangles` (Plimpton 322), `inclinations` (BM 85194), and `powers-of-two`.
+
+5. **Harmonic Computing**:
+   - Reference Discrete Fourier Transform (`dubsar_tablet_dft`) and Cooley-Tukey Radix-2 Fast Fourier Transform (`dubsar_tablet_fft`).
+   - Quarter-turn and half-turn twiddle factors use exact rational orthogonal components.
+
+### 39.3 Toolchain Driver & Compilation Targets
+
+The `NativeCompiler` class in `dubsar/native/compiler.py` drives the compilation workflow:
+
+| Target | Flag | Output | Description |
+| :--- | :--- | :--- | :--- |
+| **Native Executable** | `--target=native` | Binary (Mach-O / ELF) | Standalone executable binary compiled with `-O3` |
+| **C Source** | `--target=c` | `.c` file | Portable C99 source with embedded runtime headers |
+| **LLVM IR** | `--target=llvm` | `.ll` file | Textual LLVM Intermediate Representation |
+| **Shared Library** | `--target=shared` | `.dylib` / `.so` | Position-independent dynamic library (`-fPIC -shared`) |
+
+Direct execution is available through the CLI:
+
+```bash
+dubsar run tablet.dub --backend=native
+```

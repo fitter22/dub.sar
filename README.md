@@ -7,8 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
-[![Tests: 184 Passing](https://img.shields.io/badge/Tests-184%2F184%20Passing-brightgreen.svg)](tests/)
-[![Architecture: VM + WASM](https://img.shields.io/badge/Architecture-Interpreter%20%7C%20VM%20%7C%20WASM-purple.svg)](dubsar/)
+[![Tests: 200 Passing](https://img.shields.io/badge/Tests-200%2F200%20Passing-brightgreen.svg)](tests/)
+[![Architecture: Native + WASM + VM](https://img.shields.io/badge/Architecture-Native%20%7C%20WASM%20%7C%20VM-purple.svg)](dubsar/)
 [![Vibe Coded](https://img.shields.io/badge/Built%20With-100%25%20Vibe%20Coding-ff69b4.svg)](#vibe-coded-to-perfection)
 
 <p align="center">
@@ -209,24 +209,31 @@ bin/dubsar run examples/planetary_leap.dub --input="365.2422"
 The `dubsar` command-line tool provides end-to-end capabilities:
 
 ```bash
-# 1. Execute via Virtual Machine (default) or AST Interpreter
-bin/dubsar run examples/planetary_leap.dub --input="365.2422"
+# 1. Execute via Native binary (AOT), Virtual Machine (default), or AST Interpreter
+bin/dubsar run examples/planetary_leap.dub --backend=native --input="365.2422"
+bin/dubsar run examples/planetary_leap.dub --backend=vm --input="365.2422"
 bin/dubsar run examples/planetary_leap.dub --backend=ast --input="365.2422"
 
-# 2. Verify syntax and static dimensional safety
+# 2. Ahead-of-Time Native Compilation (Executable, C99, LLVM IR, Shared Library)
+bin/dubsar compile examples/planetary_leap.dub --target=native -o planetary_leap
+bin/dubsar compile examples/planetary_leap.dub --target=c -o tablet.c
+bin/dubsar compile examples/planetary_leap.dub --target=llvm -o tablet.ll
+bin/dubsar compile examples/planetary_leap.dub --target=shared -o libtablet.dylib
+
+# 3. Verify syntax and static dimensional safety
 bin/dubsar check examples/planetary_leap.dub
 
-# 3. Canonical code formatter (Tablet or Scholar layout)
+# 4. Canonical code formatter (Tablet or Scholar layout)
 bin/dubsar format examples/planetary_leap.dub --mode=tablet
 bin/dubsar format examples/planetary_leap.dub --mode=scholar
 
-# 4. Disassemble to stack bytecode
+# 5. Disassemble to stack bytecode
 bin/dubsar compile examples/planetary_leap.dub --target=bytecode
 
-# 5. Compile to WebAssembly Text (.wat)
+# 6. Compile to WebAssembly Text (.wat)
 bin/dubsar compile examples/planetary_leap.dub --target=wasm -o tablet.wat
 
-# 6. Export AST to JSON
+# 7. Export AST to JSON
 bin/dubsar compile examples/planetary_leap.dub --target=json
 
 # 7. Bidirectional Transliteration
@@ -854,31 +861,38 @@ The repository includes complete, runnable examples of geometric and Fourier com
                      │ (dubsar/semantic_ir.py)│  TAKE, POSTFIX, RETAIN, DETERMINE)
                      └───────────┬───────────┘
                                  │
-                 ┌───────────────┼───────────────┐
-                 │               │               │
-                 ▼               ▼               ▼
-        ┌────────────────┐┌─────────────┐┌───────────────┐
-        │  AST Evaluator ││ Bytecode IR ││ WASM Compiler │
-        │ (Interpreter)  ││ Compiler    ││ (dubsar/      │
-        │                ││ (dubsar/    ││   wasm.py)    │
-        │                ││   ir.py)    ││               │
-        └────────────────┘└──────┬──────┘└───────────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │ Virtual Machine │ (Operand Stack, Call Frames,
-                        │ (dubsar/vm.py)  │  Exact Rational Engine)
-                        └─────────────────┘
+                 ┌───────────────┼───────────────┬───────────────┐
+                 │               │               │               │
+                 ▼               ▼               ▼               ▼
+        ┌────────────────┐┌─────────────┐┌───────────────┐┌───────────────┐
+        │  AST Evaluator ││ Bytecode IR ││ WASM Compiler ││Native Compiler│
+        │ (Interpreter)  ││ Compiler    ││ (dubsar/      ││ (dubsar/      │
+        │                ││ (dubsar/    ││   wasm.py)    ││   native/)    │
+        │                ││   ir.py)    ││               ││               │
+        └────────────────┘└──────┬──────┘└───────────────┘└───────┬───────┘
+                                 │                                │
+                                 ▼                                ▼
+                        ┌─────────────────┐              ┌─────────────────┐
+                        │ Virtual Machine │              │Host C99/LLVM CC │
+                        │ (dubsar/vm.py)  │              │ (clang / gcc)   │
+                        └─────────────────┘              └────────┬────────┘
+                                                                  │
+                                               ┌──────────────────┼──────────────────┐
+                                               ▼                  ▼                  ▼
+                                       ┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+                                       │Native Binary  │  │Textual LLVM IR│  │Shared Library │
+                                       │(Mach-O / ELF) │  │    (.ll)      │  │(.dylib / .so) │
+                                       └───────────────┘  └───────────────┘  └───────────────┘
 ```
 
 ### Compiler Targets
 | Target | Status | Description |
 | :--- | :--- | :--- |
+| **Native Compiler** | **Complete** | AOT compilation to standalone binaries, textual LLVM IR, C99, and shared libraries with 128-bit hardware rational acceleration |
 | **Reference AST Interpreter** | **Complete** | Full language support, exact arbitrary-precision rationals |
 | **Stack Bytecode VM** | **Complete** | Stack IR, constant table, activation frames, determination ops |
 | **Semantic IR** | **Complete** | Mathematical verbs layer (ESTABLISH, TAKE, POSTFIX, RETAIN, etc.) |
 | **WebAssembly (.wat)** | **Complete** | Scalar-replaced determinations, bounded loops, 64-bit rational runtime |
-| **Native Compiler** | *Planned* | LLVM / Cranelift native code generation backend |
 
 ---
 

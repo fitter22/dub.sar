@@ -1,8 +1,7 @@
 # DUB.SAR 1.0 — Sequence Transformation (Scholar Mode)
 # Demonstrates iterating entries of a tablet and constructing a transformed sequence.
 
-problem:
-
+problem
     working raw_values of length 0
     append 12 to raw_values
     append 24 to raw_values
@@ -19,8 +18,7 @@ problem:
     doubled_len : length of doubled
     final_entry : last from doubled
 
-result:
-
+result
     total
     doubled_len
     final_entry

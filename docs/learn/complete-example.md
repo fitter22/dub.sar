@@ -7,20 +7,20 @@ This comprehensive example searches for the optimal calendar intercalation cycle
 ## Scholar Mode
 
 ```dubsar
-problem:
-    solar_year : 365.2422
+problem
+    solar-year : 365.2422
     limit : 200
-    whole_days := solar_year floor
-    fraction := solar_year - whole_days
+    whole-days := solar-year floor
+    fraction := solar-year whole-days subtract
 
     best : empty
     consider cycle from 1 through limit:
-        leaps := cycle * fraction nearest
-        approx := whole_days + (leaps / cycle)
-        error := (approx - solar_year) absolute
+        leaps := cycle fraction multiply nearest
+        approx := whole-days + (leaps / cycle)
+        error := approx solar-year subtract absolute
         candidate : cycle, leaps, error
         retain candidate when error of candidate is lesser than error of best
-result:
+result
     best.cycle
     best.leaps
     best.error

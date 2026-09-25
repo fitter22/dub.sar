@@ -1,8 +1,7 @@
 # DUB.SAR 1.0 — Discrete Fourier Transform (Scholar Mode)
 # Layer H: Equal divisions of a turn, reference DFT, and Radix-2 recursive FFT.
 
-problem:
-
+problem
     # 1. Consult the Powers of Two table to verify sequence length is a harmonic power of 2
     len_check : take "len-4" from "powers-of-two"
 
@@ -32,8 +31,7 @@ problem:
     first_recon : recon 0 take
     orig_val : first_recon.magnitude
 
-result:
-
+result
     len_check
     dft_len
     fft_len

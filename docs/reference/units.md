@@ -1,32 +1,54 @@
 # Units Reference
 
-Comprehensive catalog of supported physical and metrological units in DUB.SAR.
+Comprehensive catalog of supported physical, astronomical, and metrological units in DUB.SAR.
 
 ---
 
-## Length Units
+## 1. Standard Units Table
 
-| Unit Identifier | Base Ratio (Meters) | Description |
-| :--- | :--- | :--- |
-| `meter` / `m` | 1 | SI Base Unit of length |
-| `centimeter` / `cm` | 0.01 | Metric subunit |
-| `millimeter` / `mm` | 0.001 | Metric subunit |
-| `kilometer` / `km` | 1000 | Metric multiple |
-| `shu-si` | 1/60 | Finger (~1.67 cm) |
-| `kush3` | 1/2 | Cubit (30 fingers = 0.5 m) |
-| `nindan` | 6 | Rod (12 cubits = 6 m) |
-| `esh2` | 60 | Rope (10 nindan = 60 m) |
-| `danna` | 10800 | League (1800 nindan = 10.8 km) |
+DUB.SAR embeds standard conversion scale factors for units in the physical dimensions of `time`, `mass`, `length`, `month`, and `year`.
+
+### Time Units (Base Dimension: `time`)
+
+| Unit Identifier | Alternative Aliases | Cuneiform Sign | Scale (Seconds) |
+| :--- | :--- | :---: | :--- |
+| `second` | `sec` | - | $1\text{ s}$ |
+| `minute` | `min` | - | $60\text{ s}$ |
+| `hour` | `hr` | - | $3600\text{ s}$ |
+| `day` | `ud` | `𒌓` | $86400\text{ s}$ |
+
+### Calendar Dimensions
+
+Mesopotamian astronomical and calendar calculations treat months and years as discrete cycle dimensions:
+
+| Unit Identifier | Alternative Aliases | Cuneiform Sign | Dimension |
+| :--- | :--- | :---: | :--- |
+| `month` | `iti` | `𒌗` | `month` |
+| `year` | `mu` | `𒈬` | `year` |
+
+### Mass & Weight Units (Base Dimension: `mass`)
+
+| Unit Identifier | Alternative Aliases | Cuneiform Sign | Scale (Shekels) | Ratio to Mina |
+| :--- | :--- | :---: | :--- | :--- |
+| `mina` | `ma-na` | `𒈠𒈾` | $60$ | $1\text{ mina}$ |
+| `talent` | `gun` | `𒄘` | $3600$ | $60\text{ mina}$ |
+
+### Length Units (Base Dimension: `length`)
+
+| Unit Identifier | Alternative Aliases | Cuneiform Sign | Scale (Cubits) |
+| :--- | :--- | :---: | :--- |
+| `su-si` | `finger` | - | $1/30\text{ cubit}$ |
+| `kus` | `kùš`, `cubit` | - | $1\text{ cubit}$ |
+| `gi` | `reed` | `𒄀` | $6\text{ cubits}$ |
+| `nindan` | - | - | $12\text{ cubits}$ |
+| `meter` | `m` | - | $1\text{ standard length}$ |
 
 ---
 
-## Mass Units
+## 2. Dynamic Custom Dimensions
 
-| Unit Identifier | Base Ratio (Grams) | Description |
-| :--- | :--- | :--- |
-| `gram` / `g` | 1 | Metric unit |
-| `kilogram` / `kg` | 1000 | SI Base Unit of mass |
-| `she` | 1/21.6 | Grain (~0.046 g) |
-| `gin2` | 8.333 | Shekel (180 grains = 8.33 g) |
-| `mana` | 500 | Mina (60 shekels = 500 g) |
-| `gun2` | 30000 | Talent (60 minas = 30 kg) |
+Any unit name not present in the standard table above (e.g., `shekel`, `silver`, `copper`, `grain`, `liter`, `step`) is dynamically recognized by the compiler and interpreter as a distinct, first-class base dimension.
+
+- **Dimensional Safety**: Quantities with dynamic units can be multiplied and divided to form composite dimensions (e.g., $10\text{ copper} \times 2\text{ silver} = 20\text{ copper}\cdot\text{silver}$).
+- **Addition & Subtraction Homogeneity**: Quantities can only be added or subtracted if they share the exact identical dimension exponents.
+- **Conversion Limits**: Explicit unit conversion via `convert(qty, target_unit)` requires both units to belong to the same base dimension with defined scaling factors.

@@ -8,6 +8,10 @@ DUB.SAR features a three-mode source model designed to unite authentic visual sc
 
 All three source modes compile into the exact same Abstract Syntax Tree (AST), execute identically across both the reference AST interpreter and bytecode VM, and preserve equivalent semantics.
 
+> [!NOTE]
+> **Historical Inspiration vs Ancient Language Reconstruction**
+> DUB.SAR is an executable programming language designed for modern computational safety and verified sexagesimal mathematics. It is historically inspired by Old Babylonian and Seleucid mathematical tablets and scribal administrative traditions; it is **not** an ancient language reconstruction or natural language translation engine. Authentic cuneiform ideograms and syllabograms map deterministically to strict programming constructs and runtime operations.
+
 ---
 
 ## The Three-Mode Model

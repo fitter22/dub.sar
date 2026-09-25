@@ -13,7 +13,7 @@ Two assignment operators are supported:
 - `:=` **Prescription Assignment**: Calculates an expression and assigns it to a variable.
 
 ```dubsar
-problem:
+problem
     limit : 100
     counter := limit + 1
 ```

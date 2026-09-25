@@ -11,9 +11,9 @@ DUB.SAR captures this calculation style through postfix operation pipelines.
 Expressions can be written using postfix pipelines:
 
 ```dubsar
-problem:
+problem
     hyp := 3 meter 3 meter multiply 4 meter 4 meter multiply add square-root
-result:
+result
     hyp
 ```
 

@@ -7,11 +7,12 @@
 ## Key Pillars
 
 - **The Tablet Paradigm**: Programs are structured as computational tablets (`IM.GID.DA`) with clear scribal sections: a **Problem Statement** (`𒂊𒁹` / `problem`), reusable **Prescription Recipes** (`𒁾𒊬` / `recipe`), and an **Inscribed Result** (`𒅗𒁹` / `result`).
-- **Authentic Dual-Layer Syntax**: Write tablets using Unicode cuneiform signs (Tablet Mode) or transliterated Latin keywords (Scholar Mode). Both forms parse into the identical abstract syntax tree.
-- **Exact Rational Arithmetic**: Fractions and sexagesimal places are preserved exactly as arbitrary-precision rational values ($p/q$), preventing floating-point rounding errors.
-- **First-Class Metrological Dimensionality**: Quantities carry physical units (length, area, volume, mass, time) enforced at parse and compile time with automatic unit conversions.
+- **Three-Mode Source Model**: Write tablets in **Scholar Mode** (clean Latin-script keywords), **Tablet Mode** (authentic Unicode cuneiform signs), or **Mixed Mode** (combining cuneiform identifiers with Latin keywords). All modes compile into identical abstract syntax trees.
+- **Historically Inspired Modern Language**: Inspired by Mesopotamian mathematics, scribal accounting, and sexagesimal computation, DUB.SAR is an executable programming system, not an ancient language reconstruction.
+- **Exact Rational Arithmetic**: Fractions and sexagesimal places are preserved as exact rational numbers ($p/q$), eliminating floating-point drift. The Python reference engine provides arbitrary precision, while the native C99 runtime utilizes 64-bit rational structures with 128-bit intermediate arithmetic.
+- **First-Class Metrological Dimensionality**: Quantities carry physical units enforced at parse and compile time with automatic unit conversions across standard Babylonian and SI units.
 - **Persistent Tablet Archive**: Working tablets can be inscribed into SQLite-backed archives with cryptographic SHA-256 content addressing, immutable version history, and lineage tracking.
-- **Multi-Target Compilation**: Run tablets through the reference AST interpreter, execute stack bytecode on the register VM, or compile ahead-of-time to standalone C99 binaries, native executables, LLVM IR, shared libraries, and WebAssembly (`.wasm`).
+- **Multi-Target Compilation**: Run tablets on the default virtual machine (`vm`), reference AST interpreter (`ast`), or compile ahead-of-time to standalone C99 binaries, native executables, LLVM IR, shared libraries, and WebAssembly (`.wasm`).
 
 ---
 
@@ -34,14 +35,14 @@ To compile to native machine binaries or shared libraries, ensure a C compiler (
 Create a file named `hypotenuse.dub`:
 
 ```dubsar
-problem:
+problem
     width : 3 meter
-    length : 4 meter
+    height : 4 meter
     w_sq := width width multiply
-    l_sq := length length multiply
-    hyp_sq := w_sq l_sq add
+    h_sq := height height multiply
+    hyp_sq := w_sq h_sq add
     hyp := hyp_sq square-root
-result:
+result
     hyp
 ```
 
@@ -62,16 +63,16 @@ Or write the identical tablet using authentic cuneiform signs:
 
 ### Running the Tablet
 
-Execute with the reference interpreter:
+Execute on the virtual machine (default):
 
 ```bash
 dubsar run hypotenuse.dub
 ```
 
-Execute on the register virtual machine:
+Execute with the reference AST interpreter:
 
 ```bash
-dubsar run hypotenuse.dub --backend=vm
+dubsar run hypotenuse.dub --backend=ast
 ```
 
 Compile and run directly as a native executable:

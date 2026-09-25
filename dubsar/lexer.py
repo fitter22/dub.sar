@@ -394,11 +394,11 @@ class Lexer:
         # Check Cuneiform identifier: 1 or more cuneiform characters that are not keywords
         ch = text[0]
         cp = ord(ch)
-        if 0x12000 <= cp <= 0x1247F:
+        if 0x12000 <= cp <= 0x1254F:
             # Cuneiform sign!
             i = 0
             n = len(text)
-            while i < n and 0x12000 <= ord(text[i]) <= 0x1247F:
+            while i < n and 0x12000 <= ord(text[i]) <= 0x1254F:
                 i += 1
             ident_str = text[:i]
 

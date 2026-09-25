@@ -9,7 +9,7 @@ Implements Sections 3, 4, and 6:
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Optional
 
 
 class TokenType(Enum):

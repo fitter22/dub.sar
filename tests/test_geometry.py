@@ -15,12 +15,13 @@ Tests the geometric progression (Layers A through G):
 
 import os
 import tempfile
+import textwrap
 import unittest
 
-from dubsar.archive.models import HistoricalTag, TabletKind, TabletShape
 from dubsar.archive.archive import SQLiteTabletArchive
+from dubsar.archive.models import TabletKind, TabletShape
 from dubsar.archive.working import WorkingTablet
-from dubsar.errors import DubSarGeometricError, DubSarMathError, DubSarTypeError
+from dubsar.errors import DubSarMathError, DubSarTypeError
 from dubsar.geometry import (
     ApproximateQuantity,
     DirectedQuantity,
@@ -30,11 +31,11 @@ from dubsar.geometry import (
     make_inclination,
 )
 from dubsar.interpreter import Interpreter
+from dubsar.ir import Compiler
 from dubsar.lexer import Lexer
 from dubsar.numbers import Rational
 from dubsar.parser import Parser
 from dubsar.units import DIMENSIONLESS, Quantity, lookup_unit
-from dubsar.ir import Compiler
 from dubsar.vm import VirtualMachine
 
 
@@ -224,9 +225,6 @@ class TestDirectedQuantity(unittest.TestCase):
         dq2 = DirectedQuantity(Quantity(4, m), Direction.perpendicular())
         dq_res = dq1 + dq2
         self.assertEqual(dq_res.magnitude, Quantity(5, m))
-
-
-import textwrap
 
 
 class TestLanguageGeometricExecution(unittest.TestCase):

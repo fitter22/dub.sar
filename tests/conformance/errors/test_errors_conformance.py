@@ -1,16 +1,18 @@
 """DUB.SAR 1.0 — Errors Conformance Tests per Section 59 & Section 72."""
 
 import unittest
+
+from dubsar.errors import (
+    DubSarDivisionByZero,
+    DubSarNameError,
+    DubSarSyntaxError,
+    DubSarUnitError,
+)
+from dubsar.interpreter import Interpreter
 from dubsar.lexer import Lexer
 from dubsar.parser import Parser
 from dubsar.semantic import SemanticAnalyzer
-from dubsar.interpreter import Interpreter
-from dubsar.errors import (
-    DubSarSyntaxError,
-    DubSarNameError,
-    DubSarUnitError,
-    DubSarDivisionByZero,
-)
+
 
 class TestErrorsConformance(unittest.TestCase):
     def test_syntax_error(self):
@@ -20,7 +22,7 @@ result
     x
 """
         with self.assertRaises(DubSarSyntaxError):
-            prog = Parser(Lexer(source).tokenize()).parse()
+            Parser(Lexer(source).tokenize()).parse()
 
     def test_name_error(self):
         source = """problem

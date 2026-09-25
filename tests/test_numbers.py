@@ -1,16 +1,12 @@
 """Tests for exact rational arithmetic and sexagesimal numbers."""
 
 import unittest
-from fractions import Fraction
 
 from dubsar.errors import DubSarDivisionByZero, DubSarSyntaxError
 from dubsar.numbers import (
     Rational,
-    format_cuneiform_digit,
     parse_cuneiform_digit,
     parse_number,
-    parse_sexagesimal,
-    to_rational,
 )
 
 

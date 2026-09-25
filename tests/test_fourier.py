@@ -13,14 +13,11 @@ import textwrap
 import unittest
 
 from dubsar.archive.archive import SQLiteTabletArchive
-from dubsar.archive.models import HistoricalTag, TabletKind, TabletShape
-from dubsar.archive.working import WorkingTablet
 from dubsar.geometry import (
     DirectedQuantity,
-    Direction,
     Turn,
-    reference_dft,
     recursive_fft,
+    reference_dft,
     sequence_to_directed_list,
 )
 from dubsar.interpreter import Interpreter
@@ -28,7 +25,6 @@ from dubsar.ir import Compiler
 from dubsar.lexer import Lexer
 from dubsar.numbers import Rational
 from dubsar.parser import Parser
-from dubsar.units import DIMENSIONLESS, Quantity, lookup_unit
 from dubsar.vm import VirtualMachine
 
 

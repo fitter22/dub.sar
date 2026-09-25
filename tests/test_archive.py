@@ -15,7 +15,6 @@ Verifies Sections 68-77 of the Tablet Archive Specification:
 - CLI Subcommands (list, show, history, export, import, render)
 """
 
-import json
 import os
 import tempfile
 import unittest
@@ -25,19 +24,10 @@ from dubsar.archive.archive import SQLiteTabletArchive
 from dubsar.archive.models import (
     HistoricalTag,
     TabletKind,
-    TabletMetadata,
-    TabletShape,
-    TabletVersionInfo,
-    deserialize_value,
-    serialize_value,
 )
-from dubsar.archive.seed import STANDARD_ARCHIVE_VERSION
-from dubsar.archive.working import WorkingTablet
 from dubsar.cli import build_parser, handle_archive_command
 from dubsar.errors import (
-    DubSarConsultationError,
     DubSarInvalidEntryError,
-    DubSarInvalidTabletError,
     DubSarTabletNotFoundError,
     DubSarTabletVersionNotFoundError,
 )

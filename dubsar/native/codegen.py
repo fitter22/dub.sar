@@ -6,11 +6,9 @@ linked against dubsar_runtime.h.
 
 from __future__ import annotations
 
-import re
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 from dubsar.ast import Program
-from dubsar.numbers import Rational
 from dubsar.semantic_ir import (
     AppendTabletEntryVerb,
     ApplyMathVerb,
@@ -18,12 +16,10 @@ from dubsar.semantic_ir import (
     ConcludeVerb,
     ConsultTabletVerb,
     CreateWorkingTabletVerb,
-    DeriveTabletVerb,
     DetermineVerb,
     DiscardVerb,
     EstablishVerb,
     FieldLookup,
-    InscribeTabletVerb,
     InscribeVerb,
     IterateTabletEntriesVerb,
     MakeDetermination,
@@ -42,7 +38,6 @@ from dubsar.semantic_ir import (
     TakeSequenceLength,
     TakeTabletEntry,
     TakeText,
-    TuplePack,
     VerbExpr,
     ast_to_semantic_ir,
 )

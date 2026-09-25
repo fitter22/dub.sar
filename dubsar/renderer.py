@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import html
 import unicodedata
-from typing import List, Optional
+from typing import List
 
 
 def get_char_width(ch: str) -> int:
@@ -70,7 +70,7 @@ def render_svg(
     padding_bottom = 50
     padding_x = 55
 
-    max_line_len = max((len(l) for l in lines), default=20)
+    max_line_len = max((len(line) for line in lines), default=20)
     width = max(680, max_line_len * 14 + padding_x * 2)
     height = max(400, len(lines) * line_height + header_height + padding_top + padding_bottom)
 
@@ -154,7 +154,7 @@ def render_terminal_tablet(
     if strip_comments:
         lines = filter_comment_lines(lines)
 
-    content_widths = [get_display_width(f"  {l}") for l in lines]
+    content_widths = [get_display_width(f"  {line}") for line in lines]
     max_content_w = max(content_widths, default=20)
     title_w = get_display_width(title)
     inner_width = max(64, max_content_w + 4, title_w + 4)

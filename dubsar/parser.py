@@ -8,16 +8,21 @@ Implements Section 6 Grammar and Mathematical Tablet Redesign:
 
 from __future__ import annotations
 
-from typing import Any, List, Optional, Set
+from typing import Any, List, Optional
 
 from dubsar.ast import (
+    AppendEntry,
     ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
     CompareExpr,
     Conditional,
+    ConsultTablet,
+    CopyTablet,
+    CreateWorkingTablet,
     Declaration,
+    DeriveTablet,
     Determination,
     DomainRepetition,
     EmptyLiteral,
@@ -26,36 +31,30 @@ from dubsar.ast import (
     FieldAccess,
     Identifier,
     InputExpr,
+    InscribeTablet,
     IsExpr,
+    IterateEntries,
     NumberLiteral,
     OutputStatement,
     PostfixExpr,
     ProblemSection,
     Procedure,
     Program,
-    Recipe,
+    PutEntry,
+    RemoveEntry,
     Repetition,
+    ReplaceEntry,
     ResultSection,
     RetainStatement,
     ReturnStatement,
+    SeekEntry,
+    SequenceLength,
     Statement,
     StringLiteral,
+    TabletHistory,
+    TakeEntry,
     TupleExpr,
     UnaryOp,
-    ConsultTablet,
-    CreateWorkingTablet,
-    CopyTablet,
-    DeriveTablet,
-    InscribeTablet,
-    PutEntry,
-    AppendEntry,
-    ReplaceEntry,
-    RemoveEntry,
-    TakeEntry,
-    SeekEntry,
-    TabletHistory,
-    SequenceLength,
-    IterateEntries,
 )
 from dubsar.errors import DubSarSyntaxError
 from dubsar.tokens import Token, TokenType
@@ -340,7 +339,6 @@ class Parser:
 
             # Multiple assignment unpack: id1, id2, ... := expr
             if next1.type == TokenType.COMMA:
-                is_tuple_assign = False
                 j = 1
                 while self._peek(j).type in (TokenType.IDENTIFIER, TokenType.COMMA):
                     if self._peek(j).type == TokenType.COMMA and self._peek(j + 1).type == TokenType.IDENTIFIER:
@@ -424,13 +422,13 @@ class Parser:
             ) or (next_t.type == TokenType.IDENTIFIER and self._peek(j + 1).type in (TokenType.COLON, TokenType.ASSIGN)):
                 break
 
-            all_toks = [tok for l in lines for tok in l]
+            all_toks = [tok for line in lines for tok in line]
             if any(self._is_op_token(tok) for tok in all_toks):
                 last_tok = all_toks[-1]
                 if self._is_op_token(last_tok) or (len(all_toks) >= 2 and (all_toks[-2].type == TokenType.APPLY or all_toks[-2].raw in ("apply", "ak", "du", "dù", "𒀝", "𒆕"))):
                     break
 
-        all_toks = [tok for l in lines for tok in l]
+        all_toks = [tok for line in lines for tok in line]
         if len(all_toks) < 2:
             return []
         has_op = any(self._is_op_token(tok) for tok in all_toks) or any(

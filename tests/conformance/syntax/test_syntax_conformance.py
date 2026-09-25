@@ -1,9 +1,11 @@
 """DUB.SAR 1.0 — Syntax Conformance Tests per Section 72."""
 
 import unittest
+
+from dubsar.ast import ProblemSection, Program, ResultSection
 from dubsar.lexer import Lexer
 from dubsar.parser import Parser
-from dubsar.ast import Program, ProblemSection, ResultSection
+
 
 class TestSyntaxConformance(unittest.TestCase):
     def test_minimal_problem_result(self):

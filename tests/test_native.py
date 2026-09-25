@@ -13,8 +13,7 @@ import unittest
 from pathlib import Path
 
 from dubsar.lexer import Lexer
-from dubsar.native.codegen import NativeCodeGen, compile_to_c
-from dubsar.native.compiler import NativeCompiler, NativeCompilerError
+from dubsar.native.compiler import NativeCompiler
 from dubsar.parser import Parser
 
 

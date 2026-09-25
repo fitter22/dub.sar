@@ -14,7 +14,7 @@ Implements the Geometric Mathematics Foundation and Coherent Path to Fourier Mat
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from dubsar.archive.working import WorkingTablet
 from dubsar.errors import (
@@ -24,9 +24,8 @@ from dubsar.errors import (
     DubSarUnitError,
 )
 from dubsar.numbers import Rational, to_rational
-from dubsar.units import DIMENSIONLESS, Quantity, Unit, to_quantity
+from dubsar.units import Quantity, Unit, to_quantity
 from dubsar.values import DeterminationValue
-
 
 # ==============================================================================
 # Layer E: Turn System
@@ -574,9 +573,9 @@ class RightTriangleValue(DeterminationValue):
     def is_valid(self) -> bool:
         """Validates the exact Pythagorean consistency of the triangle."""
         s = self.fields["short-side"]
-        l = self.fields["long-side"]
+        long_side = self.fields["long-side"]
         d = self.fields["diagonal"]
-        return (s.square() + l.square()) == d.square()
+        return (s.square() + long_side.square()) == d.square()
 
     def scale(self, factor: Union[Quantity, Rational, int]) -> RightTriangleValue:
         """Scales the triangle by a scalar ratio, preserving inclination and similarity."""

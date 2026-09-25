@@ -9,7 +9,7 @@ Implements Section 15, 17, 18, 54, 55 of the Tablet Archive Change Request:
 from __future__ import annotations
 
 from collections import OrderedDict
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from dubsar.archive.models import (
     HistoricalTag,
@@ -19,7 +19,7 @@ from dubsar.archive.models import (
     deserialize_value,
     serialize_value,
 )
-from dubsar.errors import DubSarEntryNotFoundError, DubSarInvalidEntryError
+from dubsar.errors import DubSarEntryNotFoundError
 from dubsar.numbers import Rational
 from dubsar.units import Quantity
 

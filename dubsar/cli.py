@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 from dubsar.archive.archive import SQLiteTabletArchive
-from dubsar.archive.models import TabletVersionInfo
 from dubsar.diagnostics import format_diagnostic
 from dubsar.errors import DubSarError
 from dubsar.formatter import detect_source_mode, format_source
@@ -304,7 +303,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
             input_val = args.input
             if input_val is not None:
-                in_fn = lambda prompt: input_val
+                def in_fn(_prompt=""):
+                    return input_val
             else:
                 in_fn = input
 

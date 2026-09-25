@@ -12,6 +12,7 @@ Verifies the mathematical tablet execution model:
 """
 
 import unittest
+
 from dubsar.interpreter import Interpreter
 from dubsar.ir import Compiler
 from dubsar.lexer import Lexer

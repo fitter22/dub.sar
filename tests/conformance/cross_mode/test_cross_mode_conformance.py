@@ -1,11 +1,13 @@
 """DUB.SAR 1.0 — Cross-Mode Conformance Tests per Section 72 & Section 73."""
 
 import unittest
-from dubsar.lexer import Lexer
-from dubsar.parser import Parser
+
 from dubsar.interpreter import Interpreter
 from dubsar.ir import Compiler
+from dubsar.lexer import Lexer
+from dubsar.parser import Parser
 from dubsar.vm import VirtualMachine
+
 
 class TestCrossModeConformance(unittest.TestCase):
     def test_tablet_and_scholar_equivalence(self):

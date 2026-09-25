@@ -14,10 +14,10 @@ from dubsar.semantic import SemanticAnalyzer
 from dubsar.vm import VirtualMachine
 
 EXPECTED_OUTPUTS: dict[tuple[str, int], list[str]] = {
-    ("docs/learn/first-tablet.md", 1): ["42"],
-    ("docs/learn/first-tablet.md", 2): ["42"],
-    ("docs/learn/first-tablet.md", 3): ["42"],
-    ("docs/learn/first-tablet.md", 4): ["42"],
+    ("docs/learn/first-tablet.md", 1): ["5 length"],
+    ("docs/learn/first-tablet.md", 2): ["5 length"],
+    ("docs/index.md", 1): ["5 length"],
+    ("docs/index.md", 2): ["5 length"],
     ("docs/learn/quantities.md", 1): ["12", "0;45", "1;30", "0;20"],
     ("docs/learn/quantities.md", 2): ["5 time"],
     ("docs/learn/pipelines.md", 1): ["5 length"],

@@ -1,82 +1,177 @@
 # 1. Your First Tablet
 
-In DUB.SAR, every program models an ancient clay tablet (`IM.GID.DA`). A tablet is structured into distinct scribal sections representing the problem setup, procedure algorithms, and the final inscribed result.
+In DUB.SAR, every program models an ancient clay tablet (`IM.GID.DA`). A tablet is structured into distinct scribal sections representing the problem setup, optional procedural recipes, and the final inscribed result.
 
 DUB.SAR programs can be written in three interoperable source modes:
-- **Scholar Mode**: Clean Latin-script keywords and alphanumeric identifiers.
-- **Tablet Mode**: Authentic Unicode cuneiform ideograms and syllabograms.
+- **Scholar Mode**: Clean Latin-script keywords, ASCII identifiers, and readable intermediate bindings.
+- **Tablet Mode**: Authentic Unicode cuneiform signs, cuneiform identifiers, and compact postfix prescriptions.
 - **Mixed Mode**: A hybrid allowing cuneiform identifiers alongside Latin keywords or vice versa.
 
 DUB.SAR is historically inspired by Old Babylonian and Seleucid scribal practices, but designed as an executable, statically verifiable programming language.
 
 ---
 
-## Symmetrical Implementations: Scholar & Tablet Modes
+## The Same Calculation in Scholar and Tablet Modes
 
-Every tablet begins with a **Problem Statement** section (`problem` / `𒂊𒁹`) and concludes with a **Result** section (`result` / `𒅗𒁹`).
+Every tablet begins with a **Problem Statement** section (`problem` / `𒂊𒁹`) and concludes with a **Result** section (`result` / `𒅗𒁹`). Notice that neither section header takes a trailing colon.
 
-Notice that neither section header takes a trailing colon.
+To see how DUB.SAR operates, consider computing the hypotenuse of a right triangle with base $3\text{ meter}$ and altitude $4\text{ meter}$ using the Pythagorean relation ($\sqrt{3^2 + 4^2} = 5\text{ meter}$):
 
 ### Scholar Mode
 
-```dubsar
-problem
-    x : 40
-    y : 2
-    sum := x + y
-result
-    sum
-```
-
-Alternatively, written using postfix scribal verb evaluation:
+In Scholar Mode, the computation makes each intermediate quantity explicit with named bindings:
 
 ```dubsar
 problem
-    x : 40
-    y : 2
-    sum :
-        x
-        y
-        add
+    width : 3 meter
+    height : 4 meter
+    w_sq := width width multiply
+    h_sq := height height multiply
+    hyp_sq := w_sq h_sq add
+    hyp := hyp_sq square-root
 result
-    sum
+    hyp
 ```
 
 ### Tablet Mode (Cuneiform)
 
-Here is the structurally identical tablet inscribed in genuine Unicode cuneiform:
+In authentic cuneiform Tablet Mode, the same computation is expressed as a compact postfix mathematical prescription:
 
 ```dubsar
 𒂊𒁹
-    𒊕 : 40
-    𒅎 : 2
-    𒁇 := 𒊕 𒍣 𒅎
-𒅗𒁹
-    𒁇
-```
-
-Or using authentic postfix cuneiform verb invocation:
-
-```dubsar
-𒂊𒁹
-    𒊕 : 40
-    𒅎 : 2
+    𒂼 : 3 meter
+    𒊕 : 4 meter
     𒁇 :
-        𒊕
-        𒅎
+        𒂼 𒅁
+        𒊕 𒅁
         𒍣
+        𒁀𒋛
 𒅗𒁹
     𒁇
 ```
 
-Both forms compile to identical intermediate representations and bytecode, producing the exact result `42`.
+Both programs execute the same calculation and produce the exact dimensional result `5 length` (or `5 meter`).
 
 ---
 
-## Sections Explained
+## Semantic Equivalence vs. Structural Differences
 
-- `problem` (`𒂊𒁹` / `e-diš`): Declares known input quantities, bindings, and initial conditions.
-- `result` (`𒅗𒁹` / `ka-diš`): Specifies the values inscribed onto the tablet as final outputs.
-- `recipe` / `procedure` (`𒁾𒊬` / `dub-sar`): Defines reusable subroutines and mathematical algorithms.
+The Scholar and Tablet implementations above illustrate an important design distinction in DUB.SAR:
 
-Bindings declared with `:` establish initial values or structured blocks. Expressions assigned with `:=` compute intermediate quantities.
+- **Scholar Mode** is optimized for conventional programming readability. It breaks multi-step operations into explicit, named intermediate assignments (`w_sq`, `h_sq`, `hyp_sq`, `hyp`), allowing easy inspection and debugging.
+- **Tablet Mode** expresses the calculation as a unified postfix mathematical prescription (`𒁇 : ...`), reflecting the terse, worked-calculation style of historical scribal clay tablets.
+
+These two styles are **semantically equivalent**, but they are **not structurally identical**:
+
+1. **Different AST Structures**: The Scholar version declares four separate intermediate assignments (`Assignment` AST nodes), whereas the Tablet version defines a single prescription block (`Prescription` AST node) containing a sequence of stack operations.
+2. **Semantic Invariant**: Despite the structural difference, both forms encode identical mathematical semantics and respect identical dimensional rules ($3\text{ m} \times 3\text{ m} \to 9\text{ m}^2$, $4\text{ m} \times 4\text{ m} \to 16\text{ m}^2$, $9\text{ m}^2 + 16\text{ m}^2 \to 25\text{ m}^2$, $\sqrt{25\text{ m}^2} \to 5\text{ m}$).
+3. **Execution Guarantee**: Rather than requiring statement-by-statement bytecode equality, DUB.SAR guarantees semantic invariance: equivalent inputs evaluate to identical computational outputs across the virtual machine, reference interpreter, and native compiler backends.
+
+---
+
+## How the Postfix Tablet Pipeline Executes
+
+In Tablet Mode, the indented block introduced by the colon `:` after `𒁇` is a **postfix prescription**. Operations within this block evaluate over an internal operand stack:
+
+```dubsar
+    𒁇 :
+        𒂼 𒅁
+        𒊕 𒅁
+        𒍣
+        𒁀𒋛
+```
+
+The stack transitions proceed step-by-step:
+
+1. **`𒂼 𒅁` (Square Width)**: The value of variable `𒂼` ($3\text{ meter}$) is pushed onto the stack. The postfix verb `𒅁` (*íb*, square) squares it in place.
+   - *Stack:* `[9 meter^2]`
+2. **`𒊕 𒅁` (Square Height)**: The value of variable `𒊕` ($4\text{ meter}$) is pushed onto the stack. The postfix verb `𒅁` squares it in place.
+   - *Stack:* `[9 meter^2, 16 meter^2]`
+3. **`𒍣` (Sum of Squares)**: The binary verb `𒍣` (*zi*, raise / heap / add) pops the top two values, computes their dimensional sum ($9\text{ meter}^2 + 16\text{ meter}^2$), and pushes the result.
+   - *Stack:* `[25 meter^2]`
+4. **`𒁀𒋛` (Equal Proportion / Root)**: The unary verb `𒁀𒋛` (*ba-si*, square root) pops the sum, computes the root, and pushes the resulting quantity.
+   - *Stack:* `[5 meter]`
+5. **Assignment**: Upon exiting the prescription block, the final value remaining on the stack ($5\text{ meter}$) is bound to the target identifier `𒁇`.
+
+---
+
+## Identifier Semantics: Language Vocabulary vs. User Variables
+
+When inspecting the Tablet Mode example, it is essential to distinguish between **fixed language vocabulary** and **user-defined variable identifiers**:
+
+| Symbol in Example | Role | Nature | Specification Status |
+| :--- | :--- | :--- | :--- |
+| `𒂊𒁹` (*e-diš*) | Problem section header | Language Keyword | Fixed grammar delimiter (`problem`) |
+| `𒅗𒁹` (*ka-diš*) | Result section header | Language Keyword | Fixed grammar delimiter (`result`) |
+| `𒍣` (*zi*) | Addition operator | Mathematical Verb | Fixed built-in verb (`add` / `+`) |
+| `𒅁` (*íb*) | Square operator | Mathematical Verb | Fixed built-in verb (`square`) |
+| `𒁀𒋛` (*ba-si*) | Square-root operator | Mathematical Verb | Fixed built-in verb (`square-root` / `sqrt`) |
+| `meter` | Physical unit | Metrological Unit | Standard length unit |
+| `𒂼` (*dagal*) | Horizontal leg variable | **User Identifier** | Arbitrary variable chosen by programmer |
+| `𒊕` (*sag*) | Vertical leg variable | **User Identifier** | Arbitrary variable chosen by programmer |
+| `𒁇` (*bar*) | Hypotenuse variable | **User Identifier** | Arbitrary variable chosen by programmer |
+
+### Why Were `𒂼`, `𒊕`, and `𒁇` Chosen?
+
+In Mesopotamian field surveys and geometric problem tablets (such as BM 13901 and Plimpton 322), scribes routinely used specific technical terms:
+- `𒂼` (*dagal*): "width" or "breadth" (contrasted with length, *uš*).
+- `𒊕` (*sag*): "front", "head", or "short/vertical side" of a triangle or field.
+- `𒁇` (*bar*): "outside", "remainder", or the unknown target quantity.
+
+In DUB.SAR, these signs are used in the example as an authentic, historically grounded naming convention.
+
+### Crucial Distinction for Scribes
+
+The language specification **does not** bind `𒂼` as a keyword meaning "width", nor is `𒊕` a keyword meaning "height". They are standard user identifiers, exactly like `width`, `height`, `x`, or `y` in Scholar Mode.
+
+When writing your own tablets:
+- You are free to choose any valid cuneiform characters from the Unicode cuneiform blocks (`U+12000`–`U+1254F`) as variable names (e.g., `𒀀`, `𒁉`, `𒌨`, `𒋼`).
+- You can also use ASCII identifiers (`width`, `height`) inside Tablet Mode or Mixed Mode.
+- Only the structural section markers (`𒂊𒁹`, `𒅗𒁹`, `𒁾𒊬`) and mathematical verbs (`𒍣`, `ta`, `ša`, `ni`, `𒅁`, `𒁀𒋛`) have fixed language-level semantics.
+
+---
+
+## How to Write Your Own Tablet Mode Program
+
+To create a new tablet from scratch:
+
+1. **Open the Problem Section**: Begin the tablet with `𒂊𒁹` on its own line (no trailing colon).
+2. **Establish Known Quantities**: Indent lines by 4 spaces and declare known values using the colon `:` operator:
+   ```dubsar
+   𒊕 : 12 cubit
+   ```
+3. **Prescribe Calculations**: Compute unknown values using either single-line infix assignments (`:=`) or multi-line postfix prescription blocks (`:`):
+   ```dubsar
+   𒁇 := 𒊕 * 2
+   ```
+4. **Close with the Result Section**: Add `𒅗𒁹` on its own line and list the variables to inscribe as outputs:
+   ```dubsar
+   𒅗𒁹
+       𒁇
+   ```
+
+---
+
+## Running the Tablet
+
+Save the code above to `hypotenuse.dub` and execute it with the `dubsar` CLI:
+
+Execute on the virtual machine (default backend):
+```bash
+dubsar run hypotenuse.dub
+```
+
+Execute with the reference AST interpreter:
+```bash
+dubsar run hypotenuse.dub --backend=ast
+```
+
+Compile and run directly as an AOT-compiled native binary:
+```bash
+dubsar run hypotenuse.dub --backend=native
+```
+
+Render an authentic clay tablet illustration as an SVG image:
+```bash
+dubsar render hypotenuse.dub -o hypotenuse.svg
+```

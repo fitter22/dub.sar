@@ -3,43 +3,43 @@
 
 𒂊𒁹
 
-    initial-estimate : 1;30
-    steps : 3
-    target-diagonal : 30
+    𒊕 : 1;30
+    𒅎 : 3
+    𒁇 : 30
 
-    approx :
-        initial-estimate
-        steps
-        𒀝 babylonian-sqrt
+    𒃷 :
+        𒊕
+        𒅎
+        𒀝 𒅆𒁀
 
-    diagonal :
-        target-diagonal
-        approx
+    𒋛 :
+        𒁇
+        𒃷
         𒊭
 
-𒁾𒊬 babylonian-sqrt start iterations:
+𒁾𒊬 𒅆𒁀 𒈠 𒅎:
 
-    x : start
-    two : 2
-    half : 0;30
+    𒄿 : 𒈠
+    𒋰 : 2
+    𒈦 : 0;30
 
-    𒄀 step 𒋫 1 𒂗 iterations:
-        next-x :
-            x
-            two
-            x
+    𒄀 𒁄 𒋫 1 𒂗 𒅎:
+        𒈠𒁶 :
+            𒄿
+            𒋰
+            𒄿
             𒉌
             𒍣
-            half
+            𒈦
             𒊭
-        x : next-x
+        𒄿 : 𒈠𒁶
 
-    𒉆 x
+    𒉆 𒄿
 
 𒅗𒁹
 
     𒁹𒀀 "Babylonian sqrt(2) approximation:"
-    𒁹𒀀 approx
+    𒁹𒀀 𒃷
 
     𒁹𒀀 "Square with side 30 has diagonal:"
-    𒁹𒀀 diagonal
+    𒁹𒀀 𒋛

@@ -3,73 +3,73 @@
 
 𒂊𒁹
 
-    cycle : 4
-    leaps : 1
+    𒁄 : 4
+    𒋛 : 1
 
-    y1 :
+    𒈬𒁹 :
         1
-        cycle
-        leaps
-        𒀝 leap-for-year
+        𒁄
+        𒋛
+        𒀝 𒋛𒈬
 
-    y2 :
+    𒈬𒈫 :
         2
-        cycle
-        leaps
-        𒀝 leap-for-year
+        𒁄
+        𒋛
+        𒀝 𒋛𒈬
 
-    y3 :
+    𒈬𒐈 :
         3
-        cycle
-        leaps
-        𒀝 leap-for-year
+        𒁄
+        𒋛
+        𒀝 𒋛𒈬
 
-    y4 :
+    𒈬𒐉 :
         4
-        cycle
-        leaps
-        𒀝 leap-for-year
+        𒁄
+        𒋛
+        𒀝 𒋛𒈬
 
-𒁾𒊬 leap-for-year year cycle leaps:
+𒁾𒊬 𒋛𒈬 𒈬 𒁄 𒋛:
 
-    prev-year :
-        year
+    𒈬𒈦 :
+        𒈬
         1
         -
 
-    cur-count :
-        year
-        leaps
+    𒅎 :
+        𒈬
+        𒋛
         *
-        cycle
+        𒁄
         /
         𒄥
 
-    prev-count :
-        prev-year
-        leaps
+    𒅎𒈦 :
+        𒈬𒈦
+        𒋛
         *
-        cycle
+        𒁄
         /
         𒄥
 
-    is-leap :
-        cur-count
-        prev-count
+    𒋛𒀀 :
+        𒅎
+        𒅎𒈦
         -
 
-    𒉆 is-leap
+    𒉆 𒋛𒀀
 
 𒅗𒁹
 
     𒁹𒀀 "year 1 extra day:"
-    𒁹𒀀 y1
+    𒁹𒀀 𒈬𒁹
 
     𒁹𒀀 "year 2 extra day:"
-    𒁹𒀀 y2
+    𒁹𒀀 𒈬𒈫
 
     𒁹𒀀 "year 3 extra day:"
-    𒁹𒀀 y3
+    𒁹𒀀 𒈬𒐈
 
     𒁹𒀀 "year 4 extra day:"
-    𒁹𒀀 y4
+    𒁹𒀀 𒈬𒐉

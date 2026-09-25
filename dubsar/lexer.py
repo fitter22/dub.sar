@@ -275,28 +275,41 @@ class Lexer:
                 tokens.append(Token(TokenType.STRING, val, line_num, col, raw=line[start_i:i]))
                 continue
 
-            # Cuneiform multi-sign tokens first (e.g. 𒉡𒂊𒀀, 𒂊𒁹, 𒁾𒊬, 𒅗𒁹, etc.)
-            matched_cun = False
-            for length in (3, 2, 1):
-                if i + length <= n:
-                    sub = line[i : i + length]
-                    if sub in CUNEIFORM_KEYWORDS:
-                        tok_type = CUNEIFORM_KEYWORDS[sub]
-                        tokens.append(Token(tok_type, sub, line_num, col))
-                        i += length
-                        matched_cun = True
-                        break
-            if matched_cun:
+            # Cuneiform tokens (Keywords, Numerals, or Identifiers)
+            cp = ord(ch)
+            if 0x12000 <= cp <= 0x1254F:
+                j = i
+                while j < n and 0x12000 <= ord(line[j]) <= 0x1254F and line[j] not in ("𒑰", "𒑱"):
+                    j += 1
+                cun_word = line[i:j]
+
+                # Keyword check (exact token match)
+                if cun_word in CUNEIFORM_KEYWORDS:
+                    tok_type = CUNEIFORM_KEYWORDS[cun_word]
+                    tokens.append(Token(tok_type, cun_word, line_num, col))
+                    i = j
+                    continue
+
+                # Cuneiform numerals (when word consists entirely of numeral signs)
+                if all(c in DUB_SAR_NUMERAL_TABLE for c in cun_word):
+                    num_tok, consumed = self._scan_number(line[i:], line_num, col)
+                    tokens.append(num_tok)
+                    i += consumed
+                    continue
+
+                # Cuneiform identifier
+                tokens.append(Token(TokenType.IDENTIFIER, cun_word, line_num, col))
+                i = j
                 continue
 
-            # Numbers (integer, sexagesimal, decimal, or cuneiform numerals)
-            if ch.isdigit() or (self._is_cuneiform_digit(ch) and not self._is_cuneiform_ident_start(line[i:])):
+            # Numbers (integer, sexagesimal, decimal)
+            if ch.isdigit():
                 num_tok, consumed = self._scan_number(line[i:], line_num, col)
                 tokens.append(num_tok)
                 i += consumed
                 continue
 
-            # Identifiers (ASCII or Cuneiform)
+            # Identifiers (ASCII)
             ident_tok, consumed = self._scan_identifier(line[i:], line_num, col)
             if ident_tok:
                 tokens.append(ident_tok)

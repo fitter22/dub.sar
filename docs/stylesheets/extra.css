@@ -1,0 +1,31 @@
+/* DUB.SAR 1.0 Documentation — Stylesheet */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Cuneiform&family=Cinzel:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --dubsar-cuneiform-font: "Noto Sans Cuneiform", "Segoe UI Historic", "Akkadian", "Cuneiform Composite", serif;
+}
+
+/* Authentic clay tablet inspired colors and cuneiform glyph formatting */
+.cuneiform,
+.md-typeset .cuneiform {
+  font-family: var(--dubsar-cuneiform-font);
+  font-size: 1.2em;
+  line-height: 1.4;
+}
+
+/* Ensure code blocks and inline code render cuneiform signs and sexagesimals clearly */
+.md-typeset code,
+.md-typeset pre,
+.md-typeset kbd {
+  font-family: "JetBrains Mono", var(--dubsar-cuneiform-font), monospace;
+}
+
+/* Tablet box rendering enhancements */
+.tablet-preview {
+  border: 2px solid var(--md-primary-fg-color);
+  border-radius: 8px;
+  background-color: var(--md-code-bg-color);
+  padding: 1rem;
+  margin: 1rem 0;
+}

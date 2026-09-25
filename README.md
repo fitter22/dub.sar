@@ -4,6 +4,7 @@
 
 ### The Executable Mesopotamian Mathematical Tablet Language
 
+[![Documentation: Site](https://img.shields.io/badge/Docs-fitter22.github.io%2Fdub.sar-amber.svg)](https://fitter22.github.io/dub.sar/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Spec: 1.0](https://img.shields.io/badge/Specification-DUB.SAR%201.0-orange.svg)](DUB_SAR_1.0_Language_Specification.md)
@@ -16,11 +17,27 @@
   DUB.SAR is not a Python dialect in cuneiform costume. It is an executable Mesopotamian mathematical tablet language engineered from first principles — featuring exact arbitrary-precision rational arithmetic, algebraic dimensional unit safety, bounded mathematical search domains, postfix calculation pipelines, atomic selections, a high-level Semantic IR, a stack bytecode virtual machine, and a WebAssembly compiler.
 </p>
 
-[Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Tablet Archive](#the-tablet-archive) • [Tablet Data Model](#the-tablet-oriented-data-model-sequences-tables-and-structured-records) • [Geometric & Fourier Mathematics](#geometric-mathematics-foundation--coherent-path-to-fourier-mathematics) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
+[Documentation Site](https://fitter22.github.io/dub.sar/) • [Specification](DUB_SAR_1.0_Language_Specification.md) • [Architecture](#compiler--runtime-architecture) • [Quickstart](#quickstart) • [Tablet Archive](#the-tablet-archive) • [Tablet Data Model](#the-tablet-oriented-data-model-sequences-tables-and-structured-records) • [Geometric & Fourier Mathematics](#geometric-mathematics-foundation--coherent-path-to-fourier-mathematics) • [Examples](examples/) • [Clay Tablet Rendering](#clay-tablet-rendering)
 
 ---
 
 </div>
+
+## Documentation
+
+Comprehensive documentation, tutorials, language guides, and API references are published at:
+
+**[https://fitter22.github.io/dub.sar/](https://fitter22.github.io/dub.sar/)**
+
+- **[Learn](https://fitter22.github.io/dub.sar/learn/)**: Step-by-step tutorial series from first tablets to complete algorithmic pipelines.
+- **[Language Guide](https://fitter22.github.io/dub.sar/guide/)**: In-depth guide to tablet structures, source modes, calculations, and metrology.
+- **[Reference](https://fitter22.github.io/dub.sar/reference/)**: Complete cuneiform signs, keywords, units, CLI options, and diagnostics.
+- **[Examples](https://fitter22.github.io/dub.sar/examples/)**: Annotated catalog of Mesopotamian mathematical tablets and numerical algorithms.
+- **[Compiler](https://fitter22.github.io/dub.sar/compiler/)**: Architecture, bytecode VM, native C99 emission, and WebAssembly targets.
+- **[Concepts](https://fitter22.github.io/dub.sar/concepts/)**: Historical and theoretical background on Mesopotamian mathematics and exact rational arithmetic.
+- **[Specification](https://fitter22.github.io/dub.sar/specification/)**: Normative DUB.SAR 1.0 language specification.
+
+---
 
 ## Why DUB.SAR?
 

@@ -48,51 +48,51 @@
     <line x1="55" y1="222" x2="811" y2="222" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="214"></text>
     <line x1="55" y1="250" x2="811" y2="250" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="242">    solar-year :</text>
+    <text x="65" y="242">    𒈬 :</text>
     <line x1="55" y1="278" x2="811" y2="278" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="270">        𒀀𒁹 &quot;solar year in days&quot;</text>
     <line x1="55" y1="306" x2="811" y2="306" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="298"></text>
     <line x1="55" y1="334" x2="811" y2="334" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="326">    limit :</text>
+    <text x="65" y="326">    𒍠 :</text>
     <line x1="55" y1="362" x2="811" y2="362" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="354">        1000</text>
     <line x1="55" y1="390" x2="811" y2="390" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="382"></text>
     <line x1="55" y1="418" x2="811" y2="418" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="410">    whole-days :</text>
+    <text x="65" y="410">    𒌓 :</text>
     <line x1="55" y1="446" x2="811" y2="446" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="438">        solar-year</text>
+    <text x="65" y="438">        𒈬</text>
     <line x1="55" y1="474" x2="811" y2="474" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="466">        𒄥</text>
     <line x1="55" y1="502" x2="811" y2="502" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="494"></text>
     <line x1="55" y1="530" x2="811" y2="530" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="522">    fraction :</text>
+    <text x="65" y="522">    𒁇 :</text>
     <line x1="55" y1="558" x2="811" y2="558" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="550">        solar-year</text>
+    <text x="65" y="550">        𒈬</text>
     <line x1="55" y1="586" x2="811" y2="586" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="578">        whole-days</text>
+    <text x="65" y="578">        𒌓</text>
     <line x1="55" y1="614" x2="811" y2="614" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="606">        𒋫</text>
     <line x1="55" y1="642" x2="811" y2="642" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="634"></text>
     <line x1="55" y1="670" x2="811" y2="670" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="662">    best :</text>
+    <text x="65" y="662">    𒊕 :</text>
     <line x1="55" y1="698" x2="811" y2="698" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="690">        𒉡</text>
     <line x1="55" y1="726" x2="811" y2="726" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="718"></text>
     <line x1="55" y1="754" x2="811" y2="754" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="746">    𒄀 cycle 𒋫 1 𒂗 limit:</text>
+    <text x="65" y="746">    𒄀 𒁄 𒋫 1 𒂗 𒍠:</text>
     <line x1="55" y1="782" x2="811" y2="782" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="774"></text>
     <line x1="55" y1="810" x2="811" y2="810" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="802">        leaps :</text>
+    <text x="65" y="802">        𒋛 :</text>
     <line x1="55" y1="838" x2="811" y2="838" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="830">            cycle</text>
+    <text x="65" y="830">            𒁄</text>
     <line x1="55" y1="866" x2="811" y2="866" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="858">            fraction</text>
+    <text x="65" y="858">            𒁇</text>
     <line x1="55" y1="894" x2="811" y2="894" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="886">            𒊭</text>
     <line x1="55" y1="922" x2="811" y2="922" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
@@ -100,13 +100,13 @@
     <line x1="55" y1="950" x2="811" y2="950" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="942"></text>
     <line x1="55" y1="978" x2="811" y2="978" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="970">        candidate-year :</text>
+    <text x="65" y="970">        𒈬𒁶 :</text>
     <line x1="55" y1="1006" x2="811" y2="1006" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="998">            whole-days</text>
+    <text x="65" y="998">            𒌓</text>
     <line x1="55" y1="1034" x2="811" y2="1034" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1026">            leaps</text>
+    <text x="65" y="1026">            𒋛</text>
     <line x1="55" y1="1062" x2="811" y2="1062" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1054">            cycle</text>
+    <text x="65" y="1054">            𒁄</text>
     <line x1="55" y1="1090" x2="811" y2="1090" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1082">            𒉌</text>
     <line x1="55" y1="1118" x2="811" y2="1118" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
@@ -114,11 +114,11 @@
     <line x1="55" y1="1146" x2="811" y2="1146" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1138"></text>
     <line x1="55" y1="1174" x2="811" y2="1174" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1166">        error :</text>
+    <text x="65" y="1166">        𒇲 :</text>
     <line x1="55" y1="1202" x2="811" y2="1202" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1194">            solar-year</text>
+    <text x="65" y="1194">            𒈬</text>
     <line x1="55" y1="1230" x2="811" y2="1230" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1222">            candidate-year</text>
+    <text x="65" y="1222">            𒈬𒁶</text>
     <line x1="55" y1="1258" x2="811" y2="1258" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1250">            𒋫</text>
     <line x1="55" y1="1286" x2="811" y2="1286" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
@@ -126,21 +126,21 @@
     <line x1="55" y1="1314" x2="811" y2="1314" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1306"></text>
     <line x1="55" y1="1342" x2="811" y2="1342" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1334">        candidate :</text>
+    <text x="65" y="1334">        𒊮 :</text>
     <line x1="55" y1="1370" x2="811" y2="1370" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1362">            cycle</text>
+    <text x="65" y="1362">            𒁄</text>
     <line x1="55" y1="1398" x2="811" y2="1398" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1390">            leaps</text>
+    <text x="65" y="1390">            𒋛</text>
     <line x1="55" y1="1426" x2="811" y2="1426" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1418">            error</text>
+    <text x="65" y="1418">            𒇲</text>
     <line x1="55" y1="1454" x2="811" y2="1454" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1446"></text>
     <line x1="55" y1="1482" x2="811" y2="1482" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1474">        𒋼 candidate</text>
+    <text x="65" y="1474">        𒋼 𒊮</text>
     <line x1="55" y1="1510" x2="811" y2="1510" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1502">            𒂊𒀀 error 𒊭 candidate</text>
+    <text x="65" y="1502">            𒂊𒀀 𒇲 𒊭 𒊮</text>
     <line x1="55" y1="1538" x2="811" y2="1538" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1530">            𒈨 𒌉 𒋫 error 𒊭 best</text>
+    <text x="65" y="1530">            𒈨 𒌉 𒋫 𒇲 𒊭 𒊕</text>
     <line x1="55" y1="1566" x2="811" y2="1566" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1558"></text>
     <line x1="55" y1="1594" x2="811" y2="1594" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
@@ -148,7 +148,7 @@
     <line x1="55" y1="1622" x2="811" y2="1622" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
     <text x="65" y="1614"></text>
     <line x1="55" y1="1650" x2="811" y2="1650" stroke="#78481e" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.4" />
-    <text x="65" y="1642">    best</text>
+    <text x="65" y="1642">    𒊕</text>
   </g>
 
   <!-- Colophon Bottom Seal -->

@@ -32,22 +32,20 @@ result:
 
 ```dubsar
 𒂊𒁹
-    solar_year : 365.2422
-    limit : 200
-    whole_days := solar_year 𒄥
-    fraction := solar_year whole_days 𒋫
+    𒈬 : 365.2422
+    𒍠 : 200
+    𒌓 := 𒈬 𒄥
+    𒁇 := 𒈬 𒌓 𒋫
 
-    best : 𒉡
-    𒄀 cycle 𒋫 1 𒌗 limit:
-        leaps := cycle fraction 𒊭 𒊑
-        approx := whole_days leaps cycle 𒉌 𒍣
-        error := approx solar_year 𒋫 𒋼
-        candidate : cycle, leaps, error
-        𒋼 candidate 𒂊𒀀 candidate.error 𒌉 best.error
+    𒊕 : 𒉡
+    𒄀 𒁄 𒋫 1 𒂗 𒍠:
+        𒋛 := 𒁄 𒁇 𒊭 𒊑
+        𒈬𒁶 := 𒌓 𒋛 𒁄 𒉌 𒍣
+        𒇲 := 𒈬𒁶 𒈬 𒋫 𒋼
+        𒊮 : 𒁄, 𒋛, 𒇲
+        𒋼 𒊮 𒂊𒀀 𒇲 𒊭 𒊮 𒌉 𒇲 𒊭 𒊕
 𒅗𒁹
-    best.cycle
-    best.leaps
-    best.error
+    𒊕
 ```
 
 The algorithm converges on the 128-year leap cycle (31 leap years), producing an exact error of less than 0.0001 days per year.

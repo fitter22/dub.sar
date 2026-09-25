@@ -342,7 +342,12 @@ class VirtualMachine:
                 cand_name, target_name = arg
                 cond = self.operand_stack.pop()
                 target_val = frame.env.get(target_name) if frame.env.has(target_name) else DeterminationValue({})
-                if bool(cond) or (isinstance(target_val, DeterminationValue) and target_val.is_empty):
+                is_target_empty = (
+                    target_val is None
+                    or isinstance(target_val, EmptySentinel)
+                    or (isinstance(target_val, DeterminationValue) and target_val.is_empty)
+                )
+                if bool(cond) or is_target_empty:
                     cand_val = frame.env.get(cand_name)
                     if isinstance(cand_val, DeterminationValue):
                         frame.env.update(target_name, cand_val.clone())

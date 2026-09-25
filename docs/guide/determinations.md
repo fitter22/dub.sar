@@ -7,12 +7,12 @@ A **Determination** is a structured record that groups related mathematical prop
 ## Declaring Determinations
 
 ```dubsar
-problem:
+problem
     width : 30 meter
     height : 12 meter
     area := width * height
     lot : width, height, area
-result:
+result
     lot.area
 ```
 

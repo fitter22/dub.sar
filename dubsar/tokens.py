@@ -175,6 +175,7 @@ CUNEIFORM_KEYWORDS: Dict[str, TokenType] = {
     "𒋗": TokenType.TAKE,
     "ナム": TokenType.DETERMINE,
     "𒉆": TokenType.DETERMINE,
+    "𒉇": TokenType.DETERMINE,
     "𒄥": TokenType.FLOOR,
     "гур": TokenType.FLOOR,
     "𒉏": TokenType.CEIL,

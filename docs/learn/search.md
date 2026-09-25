@@ -9,11 +9,11 @@ Mesopotamian scribes solved problems through systematic iterative searches over 
 Use `consider ... from ... through ...:` to iterate through a bounded mathematical range:
 
 ```dubsar
-problem:
+problem
     total : 0
     consider n from 1 through 10:
         total := total + n
-result:
+result
     total
 ```
 

@@ -14,4 +14,4 @@ All arithmetic operations compute exact sums, differences, products, and quotien
 
 $$\frac{p_1}{q_1} + \frac{p_2}{q_2} = \frac{p_1 q_2 + p_2 q_1}{q_1 q_2}$$
 
-GCD reduction is performed automatically, maintaining canonical reduced forms across both Python and native compiled C99 runtimes.
+GCD reduction is performed automatically, maintaining canonical reduced forms. The Python reference interpreter and bytecode virtual machine use arbitrary-precision integers for unbounded numerator and denominator growth. The native compiled C99 runtime stores exact rationals using 64-bit integer components (`int64_t num, den`) with 128-bit intermediate arithmetic (`__int128_t`).

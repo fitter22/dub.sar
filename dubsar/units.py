@@ -180,8 +180,10 @@ UNIT_TABLE: Dict[str, Unit] = {
     # Length units (base dimension: length, base unit: kus / cubit)
     "kus": Unit({"length": 1}, scale=1, name="kus"),
     "kùš": Unit({"length": 1}, scale=1, name="kus"),
+    "kush3": Unit({"length": 1}, scale=1, name="kus"),
     "cubit": Unit({"length": 1}, scale=1, name="kus"),
     "su-si": Unit({"length": 1}, scale=Rational(1, 30), name="su-si"),
+    "shu-si": Unit({"length": 1}, scale=Rational(1, 30), name="su-si"),
     "finger": Unit({"length": 1}, scale=Rational(1, 30), name="su-si"),
     "gi": Unit({"length": 1}, scale=6, name="gi"),
     "reed": Unit({"length": 1}, scale=6, name="gi"),

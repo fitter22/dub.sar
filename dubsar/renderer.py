@@ -18,8 +18,8 @@ def get_char_width(ch: str) -> int:
     cp = ord(ch)
     if unicodedata.category(ch) in ("Mn", "Me", "Cf"):
         return 0
-    # Cuneiform blocks (U+12000 to U+1247F) render as double-width (2 columns) in monospace terminals
-    if 0x12000 <= cp <= 0x1247F:
+    # Cuneiform blocks (U+12000 to U+1254F) render as double-width (2 columns) in monospace terminals
+    if 0x12000 <= cp <= 0x1254F:
         return 2
     # East Asian Wide (W) or Fullwidth (F)
     eaw = unicodedata.east_asian_width(ch)

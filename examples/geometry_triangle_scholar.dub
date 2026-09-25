@@ -1,8 +1,7 @@
 # DUB.SAR 1.0 — Right Triangle Determination (Scholar Mode)
 # Layer C: Exact right triangles, missing side determination, and Pythagorean validation.
 
-problem:
-
+problem
     # 1. Determine a right triangle from two known sides
     # 5 and 12 gives diagonal 13
     tri : 5 12 right-triangle
@@ -17,8 +16,7 @@ problem:
     p322_tri : take "3-4-5" from "right-triangles"
     p322_valid : p322_tri validate-triangle
 
-result:
-
+result
     valid
     diag
     inc

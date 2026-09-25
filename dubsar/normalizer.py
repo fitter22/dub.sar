@@ -40,6 +40,7 @@ CUNEIFORM_TO_SCHOLAR_MAP: List[Tuple[str, str]] = [
     ("𒈨", "is"),
     ("𒉆", "determine"),
     ("ナム", "determine"),
+    ("𒉇", "determine"),
     ("𒀝", "apply"),
     ("𒆕", "apply"),
     ("𒂗", "through"),

@@ -1,8 +1,7 @@
 # DUB.SAR 1.0 — Reciprocal Table Lookup (Scholar Mode)
 # Demonstrates consulting the standard reciprocal tablet and exact division.
 
-problem:
-
+problem
     consult tablet "reciprocals"
 
     recip_8 : take entry 8 from reciprocals
@@ -10,7 +9,6 @@ problem:
     dividend : 30
     quotient := dividend * recip_8
 
-result:
-
+result
     recip_8
     quotient

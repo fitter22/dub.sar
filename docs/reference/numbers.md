@@ -1,6 +1,6 @@
 # Numeric Notation Reference
 
-DUB.SAR parses and prints numbers in multiple exact formats.
+DUB.SAR parses, evaluates, and outputs numbers in multiple exact formats.
 
 ---
 
@@ -8,11 +8,14 @@ DUB.SAR parses and prints numbers in multiple exact formats.
 
 1. **Decimal Integers**: Standard digits (`0`, `42`, `1000`).
 2. **Rational Fractions**: Exact integer ratios (`3/4`, `355/113`).
-3. **Sexagesimal Fractions**: Semicolon-delimited base-60 places (`0;30`, `1;24,51,10`).
-4. **Mixed Sexagesimal Integers**: Comma-delimited powers of 60 (`1,30` = 90).
+3. **Sexagesimal Fractions**: Semicolon-delimited base-60 places (`0;30` = $1/2$, `0;20` = $1/3$, `0;7,30` = $1/8$, `1;24,51,10` $\approx \sqrt{2}$).
+4. **Cuneiform Numerals**: Authentic cuneiform numeric signs for digits 1–59 (`𒁹` = 1, `𒌋` = 10, `𒎙` = 20, `𒌍` = 30, `𒐏` = 40, `𒐐` = 50, and compounds like `𒐏𒈫` = 42).
 
 ---
 
-## Precision Guarantee
+## Computational Precision Model
 
-Calculations are evaluated using arbitrary-precision rational arithmetic. Numbers are never cast to floating-point representation during evaluation, eliminating IEEE-754 precision loss.
+Calculations are evaluated using exact rational arithmetic ($p/q$), completely eliminating IEEE-754 binary floating-point rounding drift:
+
+- **Reference Interpreter & VM**: Arbitrary-precision exact integer numerators and denominators.
+- **Native AOT Compiler (C99 Runtime)**: Exact 64-bit rational storage (`int64_t num, den`) using 128-bit intermediate products (`__int128_t`) with canonical Euclidean GCD normalization.

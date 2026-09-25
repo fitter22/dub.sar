@@ -9,11 +9,11 @@ DUB.SAR provides bounded domain repetition and candidate selection.
 To iterate over a finite mathematical domain:
 
 ```dubsar
-problem:
+problem
     sum : 0
     consider k from 1 through 100:
         sum := sum + k
-result:
+result
     sum
 ```
 
@@ -26,13 +26,13 @@ Bounds must be non-negative integers or exact expressions evaluating to positive
 The `retain` statement selects and updates the current optimal candidate:
 
 ```dubsar
-problem:
+problem
     best : empty
     consider x from 1 through 10:
-        error := (x * x - 50) absolute
+        error := abs(x * x - 50)
         candidate : x, error
         retain candidate when candidate.error < best.error
-result:
+result
     best.x
 ```
 

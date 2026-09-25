@@ -339,7 +339,7 @@ DUB_SAR_NUMERAL_TABLE: dict[str, int] = {
     "𒐍": 8,   # U+1240D (EIGHT DISH)
     "𒐆": 8,   # U+12406 (EIGHT ASH)
     "𒐜": 8,   # U+1241C (EIGHT GESH2)
-    "证券投资基金业协会": 9,   # U+1240E (NINE DISH)
+    "𒑆": 9,   # U+1240E (NINE DISH)
     "𒐇": 9,   # U+12407 (NINE ASH)
     "𒐝": 9,   # U+1241D (NINE GESH2)
 
@@ -363,7 +363,7 @@ _ones_signs = [
     ("𒐋", 6),
     ("𒐌", 7),
     ("𒐍", 8),
-    ("证券投资基金业协会", 9),
+    ("𒑆", 9),
 ]
 
 for t_sign, t_val in _tens_signs:
@@ -514,6 +514,6 @@ def format_cuneiform_digit(val: int) -> str:
         6: "𒐋",
         7: "𒐌",
         8: "𒐍",
-        9: "证券投资基金业协会",
+        9: "𒑆",
     }.get(ones, "")
     return tens_sign + ones_sign

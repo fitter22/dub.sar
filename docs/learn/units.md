@@ -1,18 +1,18 @@
 # 4. Units & Dimensional Safety
 
-Physical numbers in DUB.SAR carry explicit unit dimensions. Operations between quantities enforce dimensional consistency.
+Physical numbers in DUB.SAR carry explicit unit dimensions. Operations between quantities enforce strict dimensional consistency.
 
 ---
 
 ## Supported Metrological Systems
 
-DUB.SAR includes both modern SI units and historical Mesopotamian units:
+DUB.SAR provides both built-in standard units with defined conversion scales and extensible dynamic dimensions:
 
-- **Length**: `meter`, `centimeter`, `millimeter`, `kilometer`, and Mesopotamian `shu-si` (finger), `kush3` (cubit), `nindan` (rod), `danna` (league).
-- **Area**: `sq_meter`, `sar` (garden plot), `iku` (field), `bur3`.
-- **Volume & Capacity**: `liter`, `sila3` (bowl), `ban2`, `barig`, `gur` (royal bushel).
-- **Mass & Weight**: `gram`, `kilogram`, `she` (grain), `gin2` (shekel), `mana` (mina), `gun2` (talent).
-- **Time**: `second`, `minute`, `hour`, `day`, `year`, `gesh` (double hour).
+- **Standard Length**: `meter`, `cubit` (`kus` / `kùš` / `kush3`), `finger` (`su-si` / `shu-si`), `reed` (`gi`), `nindan` (rod = 12 cubits).
+- **Standard Time**: `second`, `minute`, `hour`, `day` (`ud` / `𒌓`).
+- **Standard Mass**: `mina` (`ma-na` / `𒈠𒈾`), `talent` (`gun` / `𒄘`).
+- **Calendar Dimensions**: `month` (`iti` / `𒌗`), `year` (`mu` / `𒈬`).
+- **Dynamic Custom Units**: User-defined unit labels (such as `shekel`, `silver`, `copper`, `sila3`, `sar`, `step`) automatically form custom base dimensions.
 
 ---
 
@@ -21,12 +21,12 @@ DUB.SAR includes both modern SI units and historical Mesopotamian units:
 Operations between quantities automatically check dimensional rules:
 
 ```dubsar
-problem:
+problem
     rod : 2 nindan
     depth : 1 kush3
-    # rod + depth converts to base meters correctly
+    # rod + depth converts to common length dimension
     length_sum := rod + depth
-result:
+result
     length_sum
 ```
 

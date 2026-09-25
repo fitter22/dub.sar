@@ -9,9 +9,9 @@ In addition to traditional algebraic expressions, DUB.SAR supports authentic Mes
 In a postfix pipeline, values are pushed onto a temporary evaluation stack and verbs operate on the topmost items:
 
 ```dubsar
-problem:
+problem
     result_val := 15 4 multiply 10 add 2 divide
-result:
+result
     result_val
 ```
 

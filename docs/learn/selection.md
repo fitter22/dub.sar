@@ -9,12 +9,12 @@ Approximation and search algorithms generate multiple candidate evaluations. DUB
 A determination packages named variables into a coherent compound record:
 
 ```dubsar
-problem:
+problem
     width : 3 meter
-    length : 4 meter
-    area := width * length
-    sample : width, length, area
-result:
+    height : 4 meter
+    area := width * height
+    sample : width, height, area
+result
     sample.area
 ```
 
@@ -25,12 +25,12 @@ result:
 Within search loops, `retain candidate when ...` keeps the best candidate according to an explicit condition:
 
 ```dubsar
-problem:
+problem
     best : empty
     consider i from 1 through 5:
         c : i * i
         retain c when c is greater than best
-result:
+result
     best
 ```
 

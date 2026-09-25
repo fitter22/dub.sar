@@ -19,11 +19,11 @@ DUB.SAR programs represent computational clay tablets (`IM.GID.DA`), structured 
 +------------------------------------+
 ```
 
-### 1. Problem Section (`problem:` / `𒂊𒁹`)
+### 1. Problem Section (`problem` / `𒂊𒁹`)
 Introduces given parameters and initial state:
 
 ```dubsar
-problem:
+problem
     width : 10 meter
     height : 5 meter
 ```
@@ -36,10 +36,10 @@ procedure double_value(x):
     return x * 2
 ```
 
-### 3. Result Section (`result:` / `𒅗𒁹`)
+### 3. Result Section (`result` / `𒅗𒁹`)
 Specifies the outputs inscribed into clay:
 
 ```dubsar
-result:
+result
     double_value(width)
 ```

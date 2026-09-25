@@ -21,11 +21,11 @@ In cuneiform script (Tablet Mode):
 
 ```dubsar
 𒂊𒁹
-    x : 40
-    y : 2
-    sum := x + y
+    𒊕 : 40
+    𒅎 : 2
+    𒁇 := 𒊕 + 𒅎
 𒅗𒁹
-    sum
+    𒁇
 ```
 
 ---

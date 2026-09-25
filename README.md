@@ -77,57 +77,57 @@ DUB.SAR provides dual canonical representations of the same mathematical tablet:
 
 𒂊𒁹
 
-    solar-year :
+    𒈬 :
         𒀀𒁹 "solar year in days"
 
-    limit :
+    𒍠 :
         1000
 
-    whole-days :
-        solar-year
+    𒌓 :
+        𒈬
         𒄥
 
-    fraction :
-        solar-year
-        whole-days
+    𒁇 :
+        𒈬
+        𒌓
         𒋫
 
-    best :
+    𒊕 :
         𒉡
 
-    𒄀 cycle 𒋫 1 𒂗 limit:
+    𒄀 𒁄 𒋫 1 𒂗 𒍠:
 
-        leaps :
-            cycle
-            fraction
+        𒋛 :
+            𒁄
+            𒁇
             𒊭
             𒊑
 
-        candidate-year :
-            whole-days
-            leaps
-            cycle
+        𒈬𒁶 :
+            𒌓
+            𒋛
+            𒁄
             𒉌
             𒍣
 
-        error :
-            solar-year
-            candidate-year
+        𒇲 :
+            𒈬
+            𒈬𒁶
             𒋫
             𒋼
 
-        candidate :
-            cycle
-            leaps
-            error
+        𒊮 :
+            𒁄
+            𒋛
+            𒇲
 
-        𒋼 candidate
-            𒂊𒀀 error 𒊭 candidate
-            𒈨 𒌉 𒋫 error 𒊭 best
+        𒋼 𒊮
+            𒂊𒀀 𒇲 𒊭 𒊮
+            𒈨 𒌉 𒋫 𒇲 𒊭 𒊕
 
 𒅗𒁹
 
-    best
+    𒊕
 ```
 
 ### Scholar Mode (Academic Latin Transliteration)
@@ -324,15 +324,14 @@ result
 ```text
 𒂊𒁹
 
-    𒅆 𒁾 "reciprocals"
+    𒅆 𒁾 "reciprocals" 𒁶 𒅎
 
-    reciprocal-of-four :
-        4
-        pad 𒋫 reciprocals
+    𒈦 :
+        𒅎 4 𒋗
 
 𒅗𒁹
 
-    reciprocal-of-four
+    𒈦
 ```
 
 ### 2. Working Tablets & Inscription
@@ -953,57 +952,57 @@ You can also render directly to your terminal:
 ║                                                                ║
 ║  𒂊𒁹                                                          ║
 ║                                                                ║
-║      solar-year :                                              ║
-║          𒀀𒁹 "solar year in days"                              ║
+║      𒈬 :                                                      ║
+║          𒀀𒁹 "solar year in days"                             ║
 ║                                                                ║
-║      limit :                                                   ║
+║      𒍠 :                                                      ║
 ║          1000                                                  ║
 ║                                                                ║
-║      whole-days :                                              ║
-║          solar-year                                            ║
+║      𒌓 :                                                      ║
+║          𒈬                                                    ║
 ║          𒄥                                                    ║
 ║                                                                ║
-║      fraction :                                                ║
-║          solar-year                                            ║
-║          whole-days                                            ║
+║      𒁇 :                                                      ║
+║          𒈬                                                    ║
+║          𒌓                                                    ║
 ║          𒋫                                                    ║
 ║                                                                ║
-║      best :                                                    ║
-║          𒉡                                                     ║
+║      𒊕 :                                                      ║
+║          𒉡                                                    ║
 ║                                                                ║
-║      𒄀 cycle 𒋫 1 𒂗 limit:                                   ║
+║      𒄀 𒁄 𒋫 1 𒂗 𒍠:                                         ║
 ║                                                                ║
-║          leaps :                                               ║
-║              cycle                                             ║
-║              fraction                                          ║
+║          𒋛 :                                                  ║
+║              𒁄                                                ║
+║              𒁇                                                ║
 ║              𒊭                                                ║
 ║              𒊑                                                ║
 ║                                                                ║
-║          candidate-year :                                      ║
-║              whole-days                                        ║
-║              leaps                                             ║
-║              cycle                                             ║
+║          𒈬𒁶 :                                                ║
+║              𒌓                                                ║
+║              𒋛                                                ║
+║              𒁄                                                ║
 ║              𒉌                                                ║
 ║              𒍣                                                ║
 ║                                                                ║
-║          error :                                               ║
-║              solar-year                                        ║
-║              candidate-year                                    ║
+║          𒇲 :                                                  ║
+║              𒈬                                                ║
+║              𒈬𒁶                                              ║
 ║              𒋫                                                ║
 ║              𒋼                                                ║
 ║                                                                ║
-║          candidate :                                           ║
-║              cycle                                             ║
-║              leaps                                             ║
-║              error                                             ║
+║          𒊮 :                                                  ║
+║              𒁄                                                ║
+║              𒋛                                                ║
+║              𒇲                                                ║
 ║                                                                ║
-║          𒋼 candidate                                           ║
-║              𒂊𒀀 error 𒊭 candidate                            ║
-║              𒈨 𒌉 𒋫 error 𒊭 best                            ║
+║          𒋼 𒊮                                                 ║
+║              𒂊𒀀 𒇲 𒊭 𒊮                                     ║
+║              𒈨 𒌉 𒋫 𒇲 𒊭 𒊕                                 ║
 ║                                                                ║
 ║  𒅗𒁹                                                          ║
 ║                                                                ║
-║      best                                                      ║
+║      𒊕                                                        ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
 

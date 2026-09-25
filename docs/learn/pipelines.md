@@ -21,9 +21,9 @@ Using cuneiform verbs:
 
 ```dubsar
 𒂊𒁹
-    hyp := 3 meter 3 meter 𒊭 4 meter 4 meter 𒊭 𒍣 𒁀𒋛
+    𒁇 := 3 meter 3 meter 𒊭 4 meter 4 meter 𒊭 𒍣 𒁀𒋛
 𒅗𒁹
-    hyp
+    𒁇
 ```
 
 ---

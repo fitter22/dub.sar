@@ -21,11 +21,11 @@ In cuneiform script:
 
 ```dubsar
 𒂊𒁹
-    total : 0
-    𒄀 n 𒋫 1 𒌗 10:
-        total := total + n
+    𒊕 : 0
+    𒄀 𒁄 𒋫 1 𒂗 10:
+        𒊕 := 𒊕 + 𒁄
 𒅗𒁹
-    total
+    𒊕
 ```
 
 Loops in DUB.SAR are always statically bounded, guaranteeing termination and algorithmic determinism.

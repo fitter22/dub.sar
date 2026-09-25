@@ -3,15 +3,15 @@
 
 𒂊𒁹
 
-    𒅆 𒁾 "reciprocals"
+    𒅆 𒁾 "reciprocals" 𒁶 𒅎
 
-    recip_8 :
-        reciprocals 8 𒋗
+    𒈦 :
+        𒅎 8 𒋗
 
-    dividend : 30
-    quotient := dividend * recip_8
+    𒊕 : 30
+    𒁇 := 𒊕 * 𒈦
 
 𒅗𒁹
 
-    recip_8
-    quotient
+    𒈦
+    𒁇

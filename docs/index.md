@@ -49,14 +49,15 @@ Or write the identical tablet using authentic cuneiform signs:
 
 ```dubsar
 𒂊𒁹
-    width : 3 meter
-    length : 4 meter
-    w_sq := width width 𒊭
-    l_sq := length length 𒊭
-    hyp_sq := w_sq l_sq 𒍣
-    hyp := hyp_sq 𒁀𒋛
+    𒂼 : 3 meter
+    𒊕 : 4 meter
+    𒁇 :
+        𒂼 𒅁
+        𒊕 𒅁
+        𒍣
+        𒁀𒋛
 𒅗𒁹
-    hyp
+    𒁇
 ```
 
 ### Running the Tablet

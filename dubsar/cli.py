@@ -45,9 +45,9 @@ def build_parser() -> argparse.ArgumentParser:
     run_p.add_argument("file", type=str, help="Path to .dub source file")
     run_p.add_argument(
         "--backend",
-        choices=["vm", "ast"],
+        choices=["vm", "ast", "native"],
         default="vm",
-        help="Execution engine: stack VM (default) or AST interpreter",
+        help="Execution engine: stack VM (default), AST interpreter, or native binary",
     )
     run_p.add_argument("--input", type=str, default=None, help="Preset input value for the tablet")
     run_p.add_argument(
@@ -75,13 +75,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # compile
-    comp_p = subparsers.add_parser("compile", help="Compile a tablet to bytecode, WASM, or IR")
+    comp_p = subparsers.add_parser("compile", help="Compile a tablet to bytecode, WASM, IR, C, or native")
     comp_p.add_argument("file", type=str, help="Path to .dub source file")
     comp_p.add_argument(
         "--target",
-        choices=["bytecode", "wasm", "wat", "ir", "json"],
+        choices=["bytecode", "wasm", "wat", "ir", "json", "native", "c", "llvm", "ll", "shared", "dylib", "so"],
         default="bytecode",
-        help="Compilation target format",
+        help="Compilation target format (bytecode, wasm, wat, ir, json, native, c, llvm, shared)",
+    )
+    comp_p.add_argument(
+        "--opt-level",
+        choices=["-O0", "-O1", "-O2", "-O3", "-Os"],
+        default="-O3",
+        help="Optimization level for native compilation",
     )
     comp_p.add_argument(
         "--mode",
@@ -305,7 +311,19 @@ def main(argv: Optional[List[str]] = None) -> int:
             archive_db = args.archive if args.archive else str(file_path.parent / f"{file_path.stem}.tablets.db")
             archive_inst = SQLiteTabletArchive(archive_db)
 
-            if args.backend == "vm":
+            if args.backend == "native":
+                from dubsar.native.compiler import NativeCompiler
+                SemanticAnalyzer(source_file=str(file_path)).analyze(program)
+                native_comp = NativeCompiler()
+                code, out_lines, stderr = native_comp.run(program, input_preset=args.input)
+                for line in out_lines:
+                    print(line)
+                if code != 0:
+                    if stderr:
+                        print(stderr, file=sys.stderr)
+                    return code
+                return 0
+            elif args.backend == "vm":
                 from dubsar.vm import VirtualMachine
                 SemanticAnalyzer(source_file=str(file_path)).analyze(program)
                 compiler = Compiler()
@@ -328,6 +346,25 @@ def main(argv: Optional[List[str]] = None) -> int:
             tokens = Lexer(source, source_file=str(file_path)).tokenize()
             program = Parser(tokens, source_file=str(file_path)).parse()
             SemanticAnalyzer(source_file=str(file_path)).analyze(program)
+
+            if args.target in ("native", "c", "llvm", "ll", "shared", "dylib", "so"):
+                from dubsar.native.compiler import NativeCompiler
+                native_comp = NativeCompiler()
+                opt_level = getattr(args, "opt_level", "-O3")
+                out_dest = args.output
+                if not out_dest:
+                    if args.target == "c":
+                        out_dest = str(file_path.with_suffix(".c"))
+                    elif args.target in ("llvm", "ll"):
+                        out_dest = str(file_path.with_suffix(".ll"))
+                    elif args.target in ("shared", "dylib", "so"):
+                        ext = ".dylib" if sys.platform == "darwin" else ".so"
+                        out_dest = str(file_path.with_suffix(ext))
+                    else:
+                        out_dest = str(file_path.with_suffix(""))
+                res_path = native_comp.compile(program, output_path=out_dest, target=args.target, opt_level=opt_level)
+                print(f"Compiled output written to: {res_path}")
+                return 0
 
             if args.target in ("bytecode", "ir"):
                 compiler = Compiler()

@@ -7,6 +7,7 @@ Modern computer architectures rely on binary floating-point numbers (IEEE 754), 
 ## Rational Precision
 
 DUB.SAR treats all numbers as exact rational values:
+
 $$r = \frac{p}{q}, \quad p, q \in \mathbb{Z}, \quad q > 0$$
 
 All arithmetic operations compute exact sums, differences, products, and quotients:

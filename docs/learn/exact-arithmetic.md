@@ -11,7 +11,8 @@ Sexagesimal notation uses semicolons (`;`) to separate the integer portion from 
 - `1;30` denotes $1 + \frac{30}{60} = 1.5$.
 - `0;20` denotes $\frac{20}{60} = \frac{1}{3}$.
 - `1;24,51,10` denotes the famous Babylonian approximation of $\sqrt{2}$ from tablet YBC 7289:
-  $$1 + \frac{24}{60} + \frac{51}{3600} + \frac{10}{216000} \approx 1.41421296\dots$$
+
+    $$1 + \frac{24}{60} + \frac{51}{3600} + \frac{10}{216000} \approx 1.41421296\dots$$
 
 ---
 

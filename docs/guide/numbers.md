@@ -12,6 +12,7 @@ Digits within a sexagesimal place range from 0 to 59:
 - Semicolon `;` separates the integer part from fractional places ($60^{-1}, 60^{-2}, \dots$).
 
 Example:
+
 $$1,24;51,10 = 1 \cdot 60^1 + 24 \cdot 60^0 + 51 \cdot 60^{-1} + 10 \cdot 60^{-2} = 84 + \frac{51}{60} + \frac{10}{3600}$$
 
 ---

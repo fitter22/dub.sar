@@ -44,7 +44,11 @@ result
 | **Mass** | `mina`, `ma-na` | `𒈠𒈾` | $60\text{ shekels}$ (base mass scale) |
 | **Mass** | `talent`, `gun` | `𒄘` | $60\text{ mina} = 3600\text{ shekels}$ |
 | **Length** | `su-si`, `finger` | - | $1/30\text{ cubit}$ |
-| **Length** | `kus`, `kùš`, `cubit` | - | $1\text{ cubit}$ (base length scale) |
+| **Length** | `kus`, `kùš`, `cubit` | - | $1\text{ cubit}$ (base metrology unit) |
 | **Length** | `gi`, `reed` | `𒄀` | $6\text{ cubits}$ |
 | **Length** | `nindan` | - | $12\text{ cubits}$ |
-| **Length** | `meter`, `m` | - | $1\text{ standard length}$ |
+| **Length** | `meter`, `m` | - | Uncalibrated SI length unit (scale = 1) |
+
+> [!NOTE]
+> Historical Mesopotamian cubit lengths varied across periods and regions (such as the Classical Nippur cubit of $\approx 51.8\text{ cm}$). DUB.SAR preserves exact internal ratios within the historical sexagesimal metrology system (1 reed = 6 cubits, 1 nindan = 12 cubits), but deliberately avoids imposing an unverified conversion factor between historical cubits and modern SI meters.
+

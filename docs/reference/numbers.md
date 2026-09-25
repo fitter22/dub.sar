@@ -9,7 +9,7 @@ DUB.SAR parses, evaluates, and outputs numbers in multiple exact formats.
 1. **Decimal Integers**: Standard digits (`0`, `42`, `1000`).
 2. **Rational Fractions**: Exact integer ratios (`3/4`, `355/113`).
 3. **Sexagesimal Fractions**: Semicolon-delimited base-60 places (`0;30` = $1/2$, `0;20` = $1/3$, `0;7,30` = $1/8$, `1;24,51,10` $\approx \sqrt{2}$).
-4. **Cuneiform Numerals**: Authentic cuneiform numeric signs (`𒁹` = 1, `𒌋` = 10, `𒐕` = 60).
+4. **Cuneiform Numerals**: Authentic cuneiform numeric signs for digits 1–59 (`𒁹` = 1, `𒌋` = 10, `𒎙` = 20, `𒌍` = 30, `𒐏` = 40, `𒐐` = 50, and compounds like `𒐏𒈫` = 42).
 
 ---
 

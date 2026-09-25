@@ -35,13 +35,19 @@ Mesopotamian astronomical and calendar calculations treat months and years as di
 
 ### Length Units (Base Dimension: `length`)
 
-| Unit Identifier | Alternative Aliases | Cuneiform Sign | Scale (Cubits) |
+The internal base unit for length is the Mesopotamian cubit (`kus` / `kùš` / `cubit`).
+
+| Unit Identifier | Alternative Aliases | Cuneiform Sign | Scale (Mesopotamian Cubits) |
 | :--- | :--- | :---: | :--- |
 | `su-si` | `finger` | - | $1/30\text{ cubit}$ |
-| `kus` | `kùš`, `cubit` | - | $1\text{ cubit}$ |
+| `kus` | `kùš`, `cubit` | - | $1\text{ cubit}$ (base metrology unit) |
 | `gi` | `reed` | `𒄀` | $6\text{ cubits}$ |
 | `nindan` | - | - | $12\text{ cubits}$ |
-| `meter` | `m` | - | $1\text{ standard length}$ |
+| `meter` | `m` | - | Uncalibrated SI length unit (scale = 1) |
+
+> [!NOTE]
+> Historical Mesopotamian cubit lengths varied across periods and regions (such as the Classical Nippur cubit of $\approx 51.8\text{ cm}$). DUB.SAR preserves exact internal ratios within the historical sexagesimal metrology system (1 reed = 6 cubits, 1 nindan = 12 cubits), but deliberately avoids imposing an unverified conversion factor between historical cubits and modern SI meters.
+
 
 ---
 

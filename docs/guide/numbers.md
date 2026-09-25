@@ -16,7 +16,7 @@ In historical Mesopotamian mathematics and standard modern Assyriological conven
     $$1 + \frac{24}{60} + \frac{51}{3600} + \frac{10}{216000} = \frac{30547}{21600} \approx 1.41421296$$
 - **Comma `,` Separates Successive Fractional Places**:
   - Following a semicolon separator, commas delimit successive negative powers of 60 ($60^{-1}, 60^{-2}, \dots$): `0;7,30` represents $\frac{7}{60} + \frac{30}{3600} = \frac{1}{8}$.
-  - Whole numbers are expressed using standard decimal notation (`90`) or cuneiform numerals (`𒐕𒌍`).
+  - Whole numbers are expressed using standard decimal notation (`90`) or cuneiform numerals (`𒐏𒈫` = 42, `𒌍` = 30).
 
 ---
 

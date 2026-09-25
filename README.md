@@ -917,7 +917,7 @@ The repository includes complete, runnable examples of geometric and Fourier com
 DUB.SAR bridges genuine ancient scribal traditions with 21st-century compiler construction:
 
 ### 1. Historically Grounded
-- **Cuneiform Inscriptions**: Authentic Unicode cuneiform signs ($U+12000 \dots U+1247F$) and punctuation marks ($U+12480 \dots U+1254F$).
+- **Cuneiform Inscriptions**: Authentic Unicode cuneiform signs ($U+12000 \dots U+1247F$) and Early Dynastic cuneiform ($U+12480 \dots U+1254F$).
 - **Sumerian Mathematical Vocabulary**: Keywords (`𒂊𒁹` *e-diš*, `𒁾𒊬` *dub-sar*, `𒅗𒁹` *ka-diš*, `𒄀` *gi*, `𒋫` *ta*, `𒂗` *en*, `𒌗` *iti*, `𒋼` *te*, `𒂊𒀀` *e-a*, `𒌉` *tur*, `𒃲` *gal*, `𒊓` *sa*, `𒈨` *me*, `𒉡` *nu*, `𒄥` *gur*, `𒉏` *nim*, `𒊑` *ri*, `𒍣` *zi*, `𒊭` *ša*, `𒉌` *ni*, `𒀝` *ak*, `𒉆` *nam*, `𒁹𒀀` *diš-a*, `𒀀𒁹` *a-diš*) reflect genuine Old Babylonian mathematical phrasing and scribal conventions.
 - **Sexagesimal Positional System**: Positional base-60 representation for fractions and integers (`365;14,31,55`).
 - **Tablet Organization**: The tripartite division of Problem Statement, Computational Prescriptions, and Inscribed Results mirrors Old Babylonian tablets (such as BM 13901 and YBC 7289).

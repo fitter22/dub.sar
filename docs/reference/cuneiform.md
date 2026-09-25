@@ -3,7 +3,7 @@
 DUB.SAR uses Unicode cuneiform signs from the Unicode standard blocks:
 - **Cuneiform**: `U+12000` to `U+123FF`
 - **Cuneiform Numbers and Punctuation**: `U+12400` to `U+1247F`
-- **Cuneiform Signs Extension**: `U+12480` to `U+1254F`
+- **Early Dynastic Cuneiform**: `U+12480` to `U+1254F`
 
 ### Historical Inspiration vs Ancient Language Reconstruction
 

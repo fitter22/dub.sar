@@ -5,6 +5,7 @@ import unittest
 from dubsar.errors import DubSarDivisionByZero, DubSarSyntaxError
 from dubsar.numbers import (
     Rational,
+    format_cuneiform_digit,
     parse_cuneiform_digit,
     parse_number,
 )
@@ -75,15 +76,25 @@ class TestNumbers(unittest.TestCase):
         self.assertEqual(parse_cuneiform_digit("𒁹"), 1)
         self.assertEqual(parse_cuneiform_digit("𒈫"), 2)
         self.assertEqual(parse_cuneiform_digit("𒐈"), 3)
+        self.assertEqual(parse_cuneiform_digit("𒑆"), 9)
         self.assertEqual(parse_cuneiform_digit("𒌋"), 10)
         self.assertEqual(parse_cuneiform_digit("𒎙"), 20)
         self.assertEqual(parse_cuneiform_digit("𒌍"), 30)
 
-        # Compound cuneiform: 𒌍𒐊 = 35
+        # Compound cuneiform: 𒌍𒐊 = 35, 𒐏𒈫 = 42
         self.assertEqual(parse_cuneiform_digit("𒌍𒐊"), 35)
+        self.assertEqual(parse_cuneiform_digit("𒐏𒈫"), 42)
 
         # Cuneiform number parsing
         self.assertEqual(parse_number("𒐈"), 3)
+        self.assertEqual(parse_number("𒑆"), 9)
+        self.assertEqual(parse_number("𒎙"), 20)
+        self.assertEqual(parse_number("𒐏𒈫"), 42)
+
+        # Cuneiform formatting
+        self.assertEqual(format_cuneiform_digit(9), "𒑆")
+        self.assertEqual(format_cuneiform_digit(20), "𒎙")
+        self.assertEqual(format_cuneiform_digit(42), "𒐏𒈫")
 
     def test_nearest_rounding(self):
         # Section 14.1 nearest: exact half-way cases round away from zero

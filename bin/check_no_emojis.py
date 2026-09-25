@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """DUB.SAR Repository Invariant Check: Verify zero emojis in repository.
 
-Excludes git history, caches, and binary files.
-Distinguishes legitimate ancient cuneiform unicode characters from modern emojis.
+Excludes git history directories, caches, and binary files.
+Distinguishes legitimate ancient cuneiform Unicode characters from modern emojis.
+Optionally verifies recent git commit messages.
 """
 
 from __future__ import annotations
 
+import argparse
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
-# Match Unicode emoji blocks while preserving cuneiform (U+12000..U+1254F)
+# Match Unicode emoji blocks while strictly preserving cuneiform (U+12000..U+1254F)
 EMOJI_PATTERN = re.compile(
     "["
     "\u2600-\u26FF"          # Miscellaneous Symbols
@@ -32,6 +35,7 @@ IGNORED_EXTENSIONS = {".pyc", ".db", ".png", ".jpg", ".jpeg", ".ico", ".wasm", "
 
 
 def check_file(path: Path) -> list[tuple[int, str]]:
+    """Checks a single file for disallowed emojis, returning line numbers and matched characters."""
     findings = []
     try:
         content = path.read_text(encoding="utf-8")
@@ -44,10 +48,38 @@ def check_file(path: Path) -> list[tuple[int, str]]:
     return findings
 
 
+def check_git_commits(repo_root: Path, max_count: int = 50) -> list[str]:
+    """Scans recent git commit messages for disallowed emojis."""
+    findings = []
+    try:
+        proc = subprocess.run(
+            ["git", "log", f"-n{max_count}", "--format=%H %s%n%b"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0:
+            for line in proc.stdout.splitlines():
+                for match in EMOJI_PATTERN.finditer(line):
+                    char = match.group(0)
+                    code_point = f"U+{ord(char):04X}"
+                    findings.append(f"[ERROR] Disallowed emoji {code_point} in commit message: {line.strip()[:60]}")
+    except Exception:
+        pass
+    return findings
+
+
 def main() -> int:
-    repo_root = Path(__file__).resolve().parent.parent
+    parser = argparse.ArgumentParser(description="Verify zero emojis in repository and git history.")
+    parser.add_argument("--skip-commits", action="store_true", help="Skip scanning git commit history")
+    parser.add_argument("--path", type=str, default=None, help="Root path to scan (defaults to repository root)")
+    args = parser.parse_args()
+
+    repo_root = Path(args.path).resolve() if args.path else Path(__file__).resolve().parent.parent
     findings_count = 0
 
+    # 1. Scan files in repository
     for root, dirs, files in os.walk(repo_root):
         dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
         for f in files:
@@ -57,9 +89,19 @@ def main() -> int:
             matches = check_file(p)
             for line_no, char in matches:
                 findings_count += 1
-                rel_path = p.relative_to(repo_root)
+                try:
+                    rel_path = p.relative_to(repo_root)
+                except ValueError:
+                    rel_path = p
                 code_point = f"U+{ord(char):04X}"
                 print(f"[ERROR] Disallowed emoji {code_point} found in {rel_path}:{line_no}")
+
+    # 2. Scan git commit messages if requested
+    if not args.skip_commits:
+        commit_findings = check_git_commits(repo_root)
+        for cf in commit_findings:
+            findings_count += 1
+            print(cf)
 
     if findings_count > 0:
         print(f"FAILED: Found {findings_count} emoji violation(s).")

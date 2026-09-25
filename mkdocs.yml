@@ -1,0 +1,106 @@
+site_name: DUB.SAR
+site_description: Executable Mesopotamian Mathematical Tablet Language
+site_author: DUB.SAR Contributors
+site_url: https://fitter22.github.io/dub.sar/
+repo_url: https://github.com/fitter22/dub.sar
+repo_name: fitter22/dub.sar
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Light mode (Clay tablet amber)
+    - scheme: default
+      primary: amber
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode (Basalt inscription slate)
+    - scheme: slate
+      primary: amber
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - attr_list
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Learn:
+      - Overview: learn/index.md
+      - 1. First Tablet: learn/first-tablet.md
+      - 2. Quantities & Expressions: learn/quantities.md
+      - 3. Exact Sexagesimal Arithmetic: learn/exact-arithmetic.md
+      - 4. Units & Dimensional Safety: learn/units.md
+      - 5. Postfix Calculation Pipelines: learn/pipelines.md
+      - 6. Bounded Mathematical Search: learn/search.md
+      - 7. Determinations & Selection: learn/selection.md
+      - 8. Sequences & Structured Data: learn/sequences.md
+      - 9. Tablet Archive: learn/archive.md
+      - 10. Complete Example: learn/complete-example.md
+  - Language Guide:
+      - Overview: guide/index.md
+      - Tablet Structure: guide/tablet-structure.md
+      - Source Modes: guide/source-modes.md
+      - Quantities & Expressions: guide/quantities-and-expressions.md
+      - Calculations: guide/calculations.md
+      - Determinations: guide/determinations.md
+      - Domains & Selection: guide/domains-and-selection.md
+      - Sequences & Tables: guide/sequences-and-tables.md
+      - Units & Metrology: guide/units.md
+      - Numbers & Sexagesimal: guide/numbers.md
+      - Tablet Archive: guide/archive.md
+  - Reference:
+      - Overview: reference/index.md
+      - Keywords & Verbs: reference/language.md
+      - Cuneiform Signs: reference/cuneiform.md
+      - Numeric Notation: reference/numbers.md
+      - Units of Measurement: reference/units.md
+      - CLI Reference: reference/cli.md
+      - Diagnostics & Errors: reference/diagnostics.md
+  - Examples:
+      - Catalog & Walkthrough: examples/index.md
+  - Compiler:
+      - Overview: compiler/index.md
+      - Native Compiler: compiler/using-native.md
+      - Architecture & Pipeline: compiler/architecture.md
+      - Virtual Machine: compiler/vm.md
+      - WebAssembly: compiler/wasm.md
+  - Concepts:
+      - Overview: concepts/index.md
+      - Tablet Paradigm: concepts/tablet-paradigm.md
+      - Exact Arithmetic: concepts/exact-arithmetic.md
+      - Dimensional Mathematics: concepts/dimensional-mathematics.md
+      - Archive & Provenance: concepts/archive-and-provenance.md
+  - Specification:
+      - Overview & Normative Spec: specification/index.md

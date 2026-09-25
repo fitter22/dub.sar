@@ -32,11 +32,11 @@ In authentic cuneiform Tablet Mode:
 𒂊𒁹
     𒅆 𒁾 "reciprocals"
 
-    reciprocal-of-four :
+    𒁇 :
         4
-        pad 𒋫 reciprocals
+        𒉻 𒋫 reciprocals
 𒅗𒁹
-    reciprocal-of-four
+    𒁇
 ```
 
 ---
@@ -64,17 +64,17 @@ In cuneiform Tablet Mode:
 
 ```dubsar
 𒂊𒁹
-    𒆥 observations
+    𒆥 𒅎
 
-    𒃻 42 𒀀 observations 𒀀 10
+    𒃻 42 𒀀 𒅎 𒀀 10
 
-    𒁹𒀀 observations 𒁶 𒁾 "observations"
+    𒁹𒀀 𒅎 𒁶 𒁾 "observations"
 
-    recorded-entry :
+    𒁇 :
         10
-        pad 𒋫 observations
+        𒉻 𒋫 𒅎
 𒅗𒁹
-    recorded-entry
+    𒁇
 ```
 
 ### Inscription Semantics and Immutability

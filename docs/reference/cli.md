@@ -47,19 +47,18 @@ dubsar compile <file.dub> [options]
 | Option | Values | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `--target` | `bytecode`, `wasm`, `wat`, `ir`, `json`, `native`, `c`, `llvm` (or `ll`), `shared` (or `dylib`, `so`) | `bytecode` | Target artifact output format. |
-| `-o`, `--output` | `<file>` | `None` | Destination output file path (defaults to stdout if omitted). |
+| `-o`, `--output` | `<file>` | `None` | Destination output file path. When omitted, textual targets (`bytecode`, `ir`, `wasm`, `wat`, `json`) print to stdout, while native/C/LLVM/shared targets write to a default file derived from the source filename (`<name>.c`, `<name>.ll`, `<name>.dylib`/`<name>.so`, or executable binary). |
 | `--opt-level` | `-O0`, `-O1`, `-O2`, `-O3`, `-Os` | `-O3` | Optimization level passed to the native backend C compiler. |
 | `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Source language mode. |
 
 ### Compilation Targets
 
-- `bytecode`: Serialized DUB.SAR bytecode stream for the virtual machine.
-- `wasm` / `wat`: WebAssembly binary (`.wasm`) or WebAssembly Text format (`.wat`).
-- `ir`: DUB.SAR Intermediate Representation text.
+- `bytecode` / `ir`: Textual disassembly of compiled intermediate bytecode instructions for the virtual machine.
+- `wasm` / `wat`: WebAssembly Text format (`.wat`) emitted via `compile_to_wat()`.
 - `json`: JSON representation of tablet AST and metadata.
 - `c`: Standalone ANSI C99 source code with exact 64-bit rational runtime arithmetic.
 - `native`: AOT-compiled native machine binary linked against the C99 runtime.
-- `shared` / `dylib` / `so`: Dynamically linked shared library.
+- `shared` / `dylib` / `so`: Dynamically linked shared library (`.dylib` on macOS, `.so` on Linux).
 - `llvm` / `ll`: LLVM textual Intermediate Representation.
 
 ---
@@ -122,11 +121,23 @@ dubsar render <file.dub> [options]
 
 ## 8. `dubsar archive`
 
-Inspects and administers persistent clay tablet archives:
+Inspects, renders, and administers persistent clay tablet archives:
 
 ```bash
 dubsar archive list [--namespace=<ns>] [--archive=<db_path>]
 dubsar archive show <tablet_name> [--version=<ver>] [--archive=<db_path>]
 dubsar archive history <tablet_name> [--archive=<db_path>]
 dubsar archive export [-o <output.json>] [--archive=<db_path>]
+dubsar archive import <file.json> [--archive=<db_path>]
+dubsar archive render <tablet_name> [--version=<ver>] [--style=text|tablet|svg] [-o <output_file>] [--archive=<db_path>]
 ```
+
+### Subcommands
+
+- `list`: Lists tablets registered in the archive with namespace, current version, kind, and clay shape.
+- `show`: Displays full metadata and inscribed dictionary entries for a given tablet (optionally for a specific historical version).
+- `history`: Displays the provenance and revision audit trail for a tablet across all saved versions.
+- `export`: Exports the entire tablet archive to a JSON interchange file (or prints to stdout if `-o` is omitted).
+- `import`: Imports tablet versions and metadata from a JSON archive interchange file.
+- `render`: Renders an archived tablet version in monospace text format or as high-resolution SVG clay tablet artwork.
+

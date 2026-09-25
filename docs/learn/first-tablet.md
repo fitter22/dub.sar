@@ -50,7 +50,7 @@ Here is the structurally identical tablet inscribed in genuine Unicode cuneiform
 𒂊𒁹
     𒊕 : 40
     𒅎 : 2
-    𒁇 := 𒊕 + 𒅎
+    𒁇 := 𒊕 𒍣 𒅎
 𒅗𒁹
     𒁇
 ```

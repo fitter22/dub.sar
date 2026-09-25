@@ -13,6 +13,38 @@ from dubsar.parser import Parser
 from dubsar.semantic import SemanticAnalyzer
 from dubsar.vm import VirtualMachine
 
+EXPECTED_OUTPUTS: dict[tuple[str, int], list[str]] = {
+    ("docs/learn/first-tablet.md", 1): ["42"],
+    ("docs/learn/first-tablet.md", 2): ["42"],
+    ("docs/learn/first-tablet.md", 3): ["42"],
+    ("docs/learn/first-tablet.md", 4): ["42"],
+    ("docs/learn/quantities.md", 1): ["12", "0;45", "1;30", "0;20"],
+    ("docs/learn/quantities.md", 2): ["5 time"],
+    ("docs/learn/pipelines.md", 1): ["5 length"],
+    ("docs/learn/pipelines.md", 2): ["5 length"],
+    ("docs/learn/selection.md", 1): ["12 length^2"],
+    ("docs/learn/selection.md", 2): ["25"],
+    ("docs/learn/search.md", 1): ["55"],
+    ("docs/learn/search.md", 2): ["55"],
+    ("docs/learn/sequences.md", 1): ["3", "12", "18"],
+    ("docs/learn/sequences.md", 2): ["3", "12", "18"],
+    ("docs/learn/sequences.md", 3): ["20"],
+    ("docs/learn/sequences.md", 4): ["20"],
+    ("docs/learn/archive.md", 1): ["0;15"],
+    ("docs/learn/archive.md", 2): ["0;15"],
+    ("docs/learn/archive.md", 3): ["42"],
+    ("docs/learn/archive.md", 4): ["42"],
+    ("docs/learn/complete-example.md", 1): ["128", "31", "0;0,0,2,42"],
+    ("docs/learn/complete-example.md", 2): ["128", "31", "0;0,0,2,42"],
+    ("docs/guide/calculations.md", 1): ["35"],
+    ("docs/guide/determinations.md", 1): ["360 length^2"],
+    ("docs/guide/domains-and-selection.md", 1): ["5050"],
+    ("docs/guide/domains-and-selection.md", 2): ["7"],
+    ("docs/guide/source-modes.md", 1): ["1 day"],
+    ("docs/guide/source-modes.md", 2): ["1 day"],
+    ("docs/guide/units.md", 1): ["24 hour", "120 mina"],
+}
+
 
 class TestDocsExamples(unittest.TestCase):
     """Verifies that all standalone tablet examples in docs/ parse and execute cleanly."""
@@ -58,7 +90,6 @@ class TestDocsExamples(unittest.TestCase):
                     source_file=str(rel_path),
                 )
                 interp.run(ast)
-                self.assertIsNotNone(out_interp)
 
                 compiled = Compiler().compile(ast)
                 out_vm: list[str] = []
@@ -67,7 +98,20 @@ class TestDocsExamples(unittest.TestCase):
                     output_fn=out_vm.append,
                 )
                 vm.execute(compiled)
-                self.assertIsNotNone(out_vm)
+
+                self.assertEqual(
+                    out_interp,
+                    out_vm,
+                    f"Output divergence between Interpreter and VM in {rel_path} block #{idx}: {out_interp} vs {out_vm}",
+                )
+
+                key = (str(rel_path), idx)
+                if key in EXPECTED_OUTPUTS:
+                    self.assertEqual(
+                        out_interp,
+                        EXPECTED_OUTPUTS[key],
+                        f"Expected output mismatch in {rel_path} block #{idx}: got {out_interp}, expected {EXPECTED_OUTPUTS[key]}",
+                    )
 
 
 if __name__ == "__main__":

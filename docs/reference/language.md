@@ -1,6 +1,6 @@
 # Core Language Vocabulary
 
-This document catalogs the complete keyword, verb, operator, and scribal vocabulary for DUB.SAR across Scholar Mode, Tablet Mode (authentic cuneiform ideograms), and Transliteration Mode.
+This document catalogs core keywords, verbs, operators, and scribal vocabulary for DUB.SAR across Scholar Mode, Tablet Mode (authentic cuneiform ideograms), and Mixed Mode, alongside standard Assyriological transliteration equivalents.
 
 ---
 

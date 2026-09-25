@@ -351,9 +351,16 @@ class Interpreter:
             cand_val = self.current_env.get(stmt.candidate) if self.current_env.has(stmt.candidate) else DeterminationValue({}, is_empty=True)
             target_val = self.current_env.get(stmt.target) if self.current_env.has(stmt.target) else DeterminationValue({}, is_empty=True)
             cond_val = self._eval_expression(stmt.condition)
-            if bool(cond_val) or (isinstance(target_val, DeterminationValue) and target_val.is_empty):
+            is_target_empty = (
+                target_val is None
+                or isinstance(target_val, EmptySentinel)
+                or (isinstance(target_val, DeterminationValue) and target_val.is_empty)
+            )
+            if bool(cond_val) or is_target_empty:
                 if isinstance(cand_val, DeterminationValue):
                     self.current_env.update(stmt.target, cand_val.clone())
+                else:
+                    self.current_env.update(stmt.target, cand_val)
 
         elif isinstance(stmt, Assignment):
             val = self._eval_expression(stmt.value)

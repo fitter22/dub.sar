@@ -15,9 +15,9 @@ Implements Section 14 and Section 16:
 from __future__ import annotations
 
 import math
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, Optional, Union
 
-from dubsar.errors import DubSarNameError, DubSarUnitError
+from dubsar.errors import DubSarUnitError
 from dubsar.numbers import Rational
 from dubsar.units import (
     DIMENSIONLESS,

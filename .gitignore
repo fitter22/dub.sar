@@ -6,3 +6,8 @@ dist/
 build/
 .pytest_cache/
 *.db
+.env
+.env.*
+*.pem
+*.key
+*.secret

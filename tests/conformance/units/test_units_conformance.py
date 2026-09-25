@@ -1,8 +1,10 @@
 """DUB.SAR 1.0 — Units Conformance Tests per Section 72."""
 
 import unittest
-from dubsar.units import lookup_unit, Quantity, DubSarUnitError
+
 from dubsar.numbers import Rational
+from dubsar.units import DubSarUnitError, Quantity, lookup_unit
+
 
 class TestUnitsConformance(unittest.TestCase):
     def test_units_addition_compatible(self):

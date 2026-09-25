@@ -4,15 +4,11 @@ import unittest
 
 from dubsar.ast import (
     Assignment,
-    CallExpr,
-    Conditional,
     Declaration,
-    NumberLiteral,
     OutputStatement,
     Repetition,
     ReturnStatement,
 )
-from dubsar.errors import DubSarSyntaxError
 from dubsar.lexer import Lexer
 from dubsar.parser import Parser
 

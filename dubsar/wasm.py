@@ -12,10 +12,9 @@ Implements CR-001, CR-002, Section 24, and Section 32:
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 from dubsar.ast import Program
-from dubsar.numbers import Rational
 from dubsar.semantic_ir import (
     ApplyMathVerb,
     AssignVerb,

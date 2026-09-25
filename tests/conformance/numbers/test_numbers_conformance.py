@@ -1,7 +1,9 @@
 """DUB.SAR 1.0 — Numbers Conformance Tests per Section 72."""
 
 import unittest
-from dubsar.numbers import Rational, parse_sexagesimal, parse_number
+
+from dubsar.numbers import Rational, parse_number, parse_sexagesimal
+
 
 class TestNumbersConformance(unittest.TestCase):
     def test_sexagesimal_parsing(self):

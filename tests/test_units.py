@@ -2,14 +2,12 @@
 
 import unittest
 
-from dubsar.errors import DubSarDivisionByZero, DubSarUnitError
+from dubsar.errors import DubSarUnitError
 from dubsar.numbers import Rational
 from dubsar.units import (
     DIMENSIONLESS,
     Quantity,
-    Unit,
     lookup_unit,
-    to_quantity,
 )
 
 

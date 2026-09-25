@@ -1,0 +1,41 @@
+name: Lint and Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Code Quality and Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install linter
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Run Ruff Linter
+        run: |
+          ruff check .
+
+      - name: Verify C Native Runtime Compilation
+        run: |
+          gcc -Wall -Wextra -Werror -c dubsar/native/runtime/dubsar_runtime.c -o /dev/null
+
+      - name: Verify Zero Emojis Invariant
+        run: |
+          python3 bin/check_no_emojis.py
+
+      - name: Run Test Suite
+        run: |
+          python3 -m unittest discover -v -s tests -p "test_*.py"

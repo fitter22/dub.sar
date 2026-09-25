@@ -2,7 +2,6 @@
 
 import unittest
 
-from dubsar.errors import DubSarSyntaxError
 from dubsar.lexer import Lexer
 from dubsar.tokens import TokenType
 

@@ -11,7 +11,7 @@ Implements Sections 7, 9, 15, and 16:
 
 from __future__ import annotations
 
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Union
 
 from dubsar.errors import DubSarDivisionByZero, DubSarMathError, DubSarUnitError
 from dubsar.numbers import Rational, to_rational

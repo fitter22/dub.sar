@@ -11,17 +11,6 @@ from __future__ import annotations
 import re
 from typing import Dict, List, Tuple
 
-from dubsar.lexer import Lexer
-from dubsar.numbers import format_cuneiform_digit
-from dubsar.tokens import (
-    CUNEIFORM_KEYWORDS,
-    SCHOLAR_KEYWORDS,
-    TOKEN_TO_CUNEIFORM,
-    TOKEN_TO_SCHOLAR,
-    Token,
-    TokenType,
-)
-
 # Mapping table from cuneiform tokens to scholar text
 CUNEIFORM_TO_SCHOLAR_MAP: List[Tuple[str, str]] = [
     ("𒉡𒂊𒀀", "else"),

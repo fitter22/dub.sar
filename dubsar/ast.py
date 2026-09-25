@@ -9,7 +9,7 @@ Implements Section 5 and Section 6:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from dubsar.numbers import Rational
 
@@ -237,14 +237,6 @@ class RetainStatement(Statement):
 class DomainRepetition(Repetition):
     """Finite mathematical search domain: consider target from start through end: body."""
     pass
-
-
-@dataclass
-class Recipe(Statement):
-    """Mathematical procedure recipe: recipe name param1 param2: body."""
-    name: str = ""
-    parameters: List[str] = field(default_factory=list)
-    body: List[Statement] = field(default_factory=list)
 
 
 # ==============================================================================

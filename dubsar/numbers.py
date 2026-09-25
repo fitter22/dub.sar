@@ -12,9 +12,8 @@ Implements Section 8:
 from __future__ import annotations
 
 import math
-import re
 from fractions import Fraction
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 from dubsar.errors import DubSarDivisionByZero, DubSarMathError, DubSarSyntaxError
 
@@ -65,18 +64,18 @@ class Rational:
         """Formats into canonical DUB.SAR representation (sexagesimal if terminating, or fraction/integer)."""
         if self._den == 1:
             return str(self._num)
-        
+
         # Check if denominator is regular (prime factors only 2, 3, 5)
         # Such fractions terminate in base 60.
         temp = self._den
         for p in (2, 3, 5):
             while temp % p == 0:
                 temp //= p
-        
+
         if temp == 1:
             # Terminating sexagesimal!
             return self.format_sexagesimal()
-        
+
         # Non-regular rational: format as mixed fraction or p/q
         if abs(self._num) >= self._den:
             whole = self._num // self._den if self._num >= 0 else -(-self._num // self._den)
@@ -99,7 +98,6 @@ class Rational:
         rem = abs_num % self._den
 
         digits = []
-        seen_rem = set()
         count = 0
         while rem > 0 and count < max_places:
             rem *= 60

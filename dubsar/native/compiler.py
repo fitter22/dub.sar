@@ -6,7 +6,6 @@ textual LLVM IR, or C source code.
 
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 import tempfile
@@ -15,7 +14,7 @@ from typing import List, Optional, Tuple
 
 from dubsar.ast import Program
 from dubsar.errors import DubSarError
-from dubsar.native.codegen import NativeCodeGen, compile_to_c
+from dubsar.native.codegen import compile_to_c
 from dubsar.semantic_ir import SemanticProgram
 
 

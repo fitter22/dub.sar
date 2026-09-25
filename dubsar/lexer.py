@@ -12,8 +12,7 @@ Implements Sections 2, 3, and 4:
 
 from __future__ import annotations
 
-import re
-from typing import Iterator, List, Optional
+from typing import List, Optional
 
 from dubsar.errors import DubSarSyntaxError
 from dubsar.numbers import DUB_SAR_NUMERAL_TABLE, parse_number

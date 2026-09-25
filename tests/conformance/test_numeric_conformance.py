@@ -13,7 +13,7 @@ Validates:
 
 import unittest
 
-from dubsar.numbers import Rational, parse_number, to_rational
+from dubsar.numbers import Rational, parse_number
 
 
 class TestNumericConformance(unittest.TestCase):

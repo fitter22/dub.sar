@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import datetime
 import json
-import os
 import sqlite3
 import threading
 import uuid
@@ -19,25 +18,19 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from dubsar.archive.models import (
-    HistoricalTag,
     TabletKind,
     TabletMetadata,
-    TabletReference,
     TabletShape,
     TabletVersionInfo,
     compute_payload_checksum,
     deserialize_value,
-    serialize_value,
 )
 from dubsar.archive.seed import STANDARD_ARCHIVE_VERSION, build_standard_tablets
 from dubsar.archive.working import WorkingTablet
 from dubsar.errors import (
-    DubSarArchiveConflictError,
     DubSarArchiveCorruptError,
     DubSarArchiveError,
-    DubSarConsultationError,
     DubSarInscriptionError,
-    DubSarTabletExistsError,
     DubSarTabletNotFoundError,
     DubSarTabletVersionNotFoundError,
 )
@@ -103,7 +96,7 @@ class SQLiteTabletArchive(TabletArchive):
     def __init__(self, db_path: str = ":memory:", auto_seed: bool = True) -> None:
         self.db_path = db_path
         self._lock = threading.RLock()
-        
+
         # Ensure directory exists for file-backed DBs
         if db_path != ":memory:":
             p = Path(db_path).resolve()
@@ -196,7 +189,7 @@ class SQLiteTabletArchive(TabletArchive):
         if namespace is not None:
             cur.execute("SELECT * FROM tablets WHERE name = ? AND namespace = ?", (name, namespace))
             return cur.fetchone()
-        
+
         # Priority order: program/user namespace first, then standard
         cur.execute("SELECT * FROM tablets WHERE name = ? ORDER BY CASE WHEN namespace = 'standard' THEN 1 ELSE 0 END", (name,))
         return cur.fetchone()
@@ -226,7 +219,7 @@ class SQLiteTabletArchive(TabletArchive):
             meta_dict = json.loads(v_row["metadata_json"])
             payload = json.loads(v_row["payload_json"])
         except Exception as e:
-            raise DubSarArchiveCorruptError(f"Corrupt JSON data in tablet {t_row[name]}: {e}")
+            raise DubSarArchiveCorruptError(f"Corrupt JSON data in tablet {t_row['name']}: {e}")
 
         metadata = TabletMetadata.from_dict(meta_dict)
         entries: List[Tuple[Any, Any]] = []
@@ -467,7 +460,6 @@ class SQLiteTabletArchive(TabletArchive):
             t_name = t["name"]
             t_ns = t.get("namespace", "user")
             t_kind = TabletKind(t.get("kind", TabletKind.DATA.value))
-            t_shape = TabletShape(t.get("shape", TabletShape.TABLE.value))
 
             for v in t.get("versions", []):
                 meta = TabletMetadata.from_dict(v.get("metadata", {}))

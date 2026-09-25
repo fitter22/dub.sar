@@ -18,7 +18,7 @@ int64_t dubsar_gcd(int64_t a, int64_t b) {
         b = a % b;
         a = temp;
     }
-    return a;
+    return a == 0 ? 1 : a;
 }
 
 #if DUBSAR_HAS_INT128
@@ -30,7 +30,7 @@ static dubsar_int128_t dubsar_gcd_128(dubsar_int128_t a, dubsar_int128_t b) {
         b = a % b;
         a = temp;
     }
-    return a;
+    return a == 0 ? 1 : a;
 }
 #endif
 
@@ -63,6 +63,8 @@ dubsar_rat_t dubsar_rat_add(dubsar_rat_t a, dubsar_rat_t b) {
 #if DUBSAR_HAS_INT128
     dubsar_int128_t num = (dubsar_int128_t)a.num * b.den + (dubsar_int128_t)b.num * a.den;
     dubsar_int128_t den = (dubsar_int128_t)a.den * b.den;
+    if (den == 0) return (dubsar_rat_t){0, 1};
+    if (num == 0) return (dubsar_rat_t){0, 1};
     dubsar_int128_t g = dubsar_gcd_128(num, den);
     num /= g;
     den /= g;
@@ -84,6 +86,8 @@ dubsar_rat_t dubsar_rat_sub(dubsar_rat_t a, dubsar_rat_t b) {
 #if DUBSAR_HAS_INT128
     dubsar_int128_t num = (dubsar_int128_t)a.num * b.den - (dubsar_int128_t)b.num * a.den;
     dubsar_int128_t den = (dubsar_int128_t)a.den * b.den;
+    if (den == 0) return (dubsar_rat_t){0, 1};
+    if (num == 0) return (dubsar_rat_t){0, 1};
     dubsar_int128_t g = dubsar_gcd_128(num, den);
     num /= g;
     den /= g;
@@ -98,6 +102,8 @@ dubsar_rat_t dubsar_rat_mul(dubsar_rat_t a, dubsar_rat_t b) {
 #if DUBSAR_HAS_INT128
     dubsar_int128_t num = (dubsar_int128_t)a.num * b.num;
     dubsar_int128_t den = (dubsar_int128_t)a.den * b.den;
+    if (den == 0) return (dubsar_rat_t){0, 1};
+    if (num == 0) return (dubsar_rat_t){0, 1};
     dubsar_int128_t g = dubsar_gcd_128(num, den);
     num /= g;
     den /= g;
@@ -160,6 +166,7 @@ dubsar_rat_t dubsar_rat_abs(dubsar_rat_t a) {
 }
 
 int64_t dubsar_rat_floor(dubsar_rat_t a) {
+    if (a.den <= 0) return 0;
     int64_t q = a.num / a.den;
     int64_t r = a.num % a.den;
     if (a.num < 0 && r != 0) q--;
@@ -167,6 +174,7 @@ int64_t dubsar_rat_floor(dubsar_rat_t a) {
 }
 
 int64_t dubsar_rat_ceil(dubsar_rat_t a) {
+    if (a.den <= 0) return 0;
     int64_t q = a.num / a.den;
     int64_t r = a.num % a.den;
     if (a.num > 0 && r != 0) q++;
@@ -174,15 +182,27 @@ int64_t dubsar_rat_ceil(dubsar_rat_t a) {
 }
 
 int64_t dubsar_rat_nearest(dubsar_rat_t a) {
-    int64_t num = a.num;
-    int64_t den = a.den;
+    if (a.den <= 0) return 0;
+#if DUBSAR_HAS_INT128
+    dubsar_int128_t num = a.num;
+    dubsar_int128_t den = a.den;
     if (num >= 0) {
-        return (2 * num + den) / (2 * den);
+        return (int64_t)((2 * num + den) / (2 * den));
     } else {
-        int64_t abs_num = -num;
-        int64_t abs_res = (2 * abs_num + den) / (2 * den);
-        return -abs_res;
+        dubsar_int128_t abs_num = -num;
+        dubsar_int128_t abs_res = (2 * abs_num + den) / (2 * den);
+        return (int64_t)(-abs_res);
     }
+#else
+    int64_t q = a.num / a.den;
+    int64_t r = a.num % a.den;
+    if (r < 0) r = -r;
+    if (2 * r >= a.den) {
+        if (a.num >= 0) q++;
+        else q--;
+    }
+    return q;
+#endif
 }
 
 int dubsar_rat_cmp(dubsar_rat_t a, dubsar_rat_t b) {
@@ -534,7 +554,9 @@ dubsar_directed_t dubsar_directed_add(dubsar_directed_t a, dubsar_directed_t b) 
 
 dubsar_val_t dubsar_val_empty(void) {
     dubsar_val_t v;
+    memset(&v, 0, sizeof(v));
     v.kind = DUBSAR_VAL_EMPTY;
+    v.as.rat = (dubsar_rat_t){0, 1};
     return v;
 }
 
@@ -789,37 +811,37 @@ dubsar_val_t dubsar_val_sub(dubsar_val_t a, dubsar_val_t b) {
 
 dubsar_val_t dubsar_val_mul(dubsar_val_t a, dubsar_val_t b) {
     if (a.kind == DUBSAR_VAL_DIRECTED && (b.kind == DUBSAR_VAL_RAT || b.kind == DUBSAR_VAL_QUANT)) {
-        dubsar_rat_t factor = (b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.val : b.as.rat;
+        dubsar_rat_t factor = dubsar_val_to_rat(b);
         dubsar_directed_t d = a.as.directed;
         d.magnitude = dubsar_rat_mul(d.magnitude, factor);
         return dubsar_val_directed(d);
     }
     const char *unit = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.unit : ((b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.unit : NULL);
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
-    dubsar_rat_t rb = (b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.val : b.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
+    dubsar_rat_t rb = dubsar_val_to_rat(b);
     dubsar_rat_t res = dubsar_rat_mul(ra, rb);
     return unit ? dubsar_val_quant(res, unit) : dubsar_val_rat(res);
 }
 
 dubsar_val_t dubsar_val_div(dubsar_val_t a, dubsar_val_t b) {
     const char *unit = (a.kind == DUBSAR_VAL_QUANT && b.kind != DUBSAR_VAL_QUANT) ? a.as.quant.unit : NULL;
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
-    dubsar_rat_t rb = (b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.val : b.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
+    dubsar_rat_t rb = dubsar_val_to_rat(b);
     dubsar_rat_t res = dubsar_rat_div(ra, rb);
     return unit ? dubsar_val_quant(res, unit) : dubsar_val_rat(res);
 }
 
 dubsar_val_t dubsar_val_mod(dubsar_val_t a, dubsar_val_t b) {
     const char *unit = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.unit : NULL;
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
-    dubsar_rat_t rb = (b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.val : b.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
+    dubsar_rat_t rb = dubsar_val_to_rat(b);
     dubsar_rat_t res = dubsar_rat_mod(ra, rb);
     return unit ? dubsar_val_quant(res, unit) : dubsar_val_rat(res);
 }
 
 dubsar_val_t dubsar_val_pow(dubsar_val_t a, dubsar_val_t b) {
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
-    dubsar_rat_t rb = (b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.val : b.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
+    dubsar_rat_t rb = dubsar_val_to_rat(b);
     dubsar_rat_t res = dubsar_rat_pow(ra, rb.num);
     return dubsar_val_rat(res);
 }
@@ -828,18 +850,18 @@ dubsar_val_t dubsar_val_neg(dubsar_val_t a) {
     if (a.kind == DUBSAR_VAL_QUANT) {
         return dubsar_val_quant(dubsar_rat_neg(a.as.quant.val), a.as.quant.unit);
     }
-    return dubsar_val_rat(dubsar_rat_neg(a.as.rat));
+    return dubsar_val_rat(dubsar_rat_neg(dubsar_val_to_rat(a)));
 }
 
 dubsar_val_t dubsar_val_abs(dubsar_val_t a) {
     if (a.kind == DUBSAR_VAL_QUANT) {
         return dubsar_val_quant(dubsar_rat_abs(a.as.quant.val), a.as.quant.unit);
     }
-    return dubsar_val_rat(dubsar_rat_abs(a.as.rat));
+    return dubsar_val_rat(dubsar_rat_abs(dubsar_val_to_rat(a)));
 }
 
 dubsar_val_t dubsar_val_floor(dubsar_val_t a) {
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
     int64_t fl = dubsar_rat_floor(ra);
     dubsar_rat_t res = {fl, 1};
     if (a.kind == DUBSAR_VAL_QUANT) return dubsar_val_quant(res, a.as.quant.unit);
@@ -847,7 +869,7 @@ dubsar_val_t dubsar_val_floor(dubsar_val_t a) {
 }
 
 dubsar_val_t dubsar_val_ceil(dubsar_val_t a) {
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
     int64_t cl = dubsar_rat_ceil(ra);
     dubsar_rat_t res = {cl, 1};
     if (a.kind == DUBSAR_VAL_QUANT) return dubsar_val_quant(res, a.as.quant.unit);
@@ -855,7 +877,7 @@ dubsar_val_t dubsar_val_ceil(dubsar_val_t a) {
 }
 
 dubsar_val_t dubsar_val_nearest(dubsar_val_t a) {
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
     int64_t nr = dubsar_rat_nearest(ra);
     dubsar_rat_t res = {nr, 1};
     if (a.kind == DUBSAR_VAL_QUANT) return dubsar_val_quant(res, a.as.quant.unit);
@@ -880,8 +902,8 @@ dubsar_val_t dubsar_val_cmp_op(dubsar_val_t a, dubsar_val_t b, const char *op) {
         }
         return dubsar_val_bool(res);
     }
-    dubsar_rat_t ra = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.val : a.as.rat;
-    dubsar_rat_t rb = (b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.val : b.as.rat;
+    dubsar_rat_t ra = dubsar_val_to_rat(a);
+    dubsar_rat_t rb = dubsar_val_to_rat(b);
     int cmp = dubsar_rat_cmp(ra, rb);
     if (!strcmp(op, "<") || !strcmp(op, "lesser")) res = cmp < 0;
     else if (!strcmp(op, "<=")) res = cmp <= 0;

@@ -12,11 +12,11 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
-from dubsar.errors import DubSarImmutableTabletError
+from dubsar.errors import DubSarEntryNotFoundError, DubSarImmutableTabletError
 from dubsar.numbers import Rational
-from dubsar.units import Quantity, Unit, lookup_unit
+from dubsar.units import Quantity, lookup_unit
 from dubsar.values import DeterminationValue, EmptySentinel
 
 

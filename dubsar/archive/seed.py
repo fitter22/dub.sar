@@ -8,14 +8,13 @@ Implements Section 27-34, 47, 76 of the Tablet Archive Change Request:
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Tuple
+from typing import List
 
 from dubsar.archive.models import HistoricalTag, TabletKind, TabletMetadata, TabletShape
 from dubsar.archive.working import WorkingTablet
 from dubsar.geometry import RightTriangleValue, Turn, make_inclination
 from dubsar.numbers import Rational
 from dubsar.units import Quantity, lookup_unit
-
 
 STANDARD_ARCHIVE_VERSION = "Scribal Archive 1"
 

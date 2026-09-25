@@ -8,24 +8,8 @@ Implements Section 22:
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
-from dubsar.builtins import BUILTINS
-from dubsar.errors import (
-    DubSarDivisionByZero,
-    DubSarEntryNotFoundError,
-    DubSarImmutableTabletError,
-    DubSarInputError,
-    DubSarNameError,
-    DubSarRangeError,
-    DubSarReturnError,
-    DubSarUnitError,
-    DubSarInvalidTabletError,
-    DubSarInvalidEntryError,
-    DubSarTabletNotFoundError,
-    DubSarConsultationError,
-    DubSarTypeError,
-)
 from dubsar.archive.archive import SQLiteTabletArchive, TabletArchive
 from dubsar.archive.models import (
     TabletReference,
@@ -33,19 +17,29 @@ from dubsar.archive.models import (
     TabletVersionInfo,
 )
 from dubsar.archive.working import WorkingTablet
+from dubsar.builtins import BUILTINS
+from dubsar.errors import (
+    DubSarConsultationError,
+    DubSarEntryNotFoundError,
+    DubSarImmutableTabletError,
+    DubSarInputError,
+    DubSarInvalidTabletError,
+    DubSarNameError,
+    DubSarReturnError,
+    DubSarTabletNotFoundError,
+    DubSarTypeError,
+    DubSarUnitError,
+)
 from dubsar.interpreter import Environment
-from dubsar.ir import BytecodeChunk, CompiledTablet, Instruction, OpCode
+from dubsar.ir import BytecodeChunk, CompiledTablet, OpCode
 from dubsar.numbers import Rational, parse_number
 from dubsar.units import (
     DIMENSIONLESS,
     UNIT_TABLE,
     Quantity,
-    Unit,
     lookup_unit,
     to_quantity,
 )
-
-
 from dubsar.values import DeterminationValue, EmptySentinel
 
 

@@ -12,12 +12,15 @@ import re
 from typing import List, Optional
 
 from dubsar.ast import (
+    AppendEntry,
     ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
     CompareExpr,
     Conditional,
+    ConsultTablet,
+    CreateWorkingTablet,
     Declaration,
     Determination,
     DomainRepetition,
@@ -27,35 +30,25 @@ from dubsar.ast import (
     FieldAccess,
     Identifier,
     InputExpr,
+    InscribeTablet,
     IsExpr,
+    IterateEntries,
     NumberLiteral,
     OutputStatement,
     PostfixExpr,
-    Procedure,
     Program,
-    Recipe,
+    PutEntry,
     Repetition,
-    ResultSection,
     RetainStatement,
     ReturnStatement,
+    SeekEntry,
+    SequenceLength,
     Statement,
     StringLiteral,
+    TabletHistory,
+    TakeEntry,
     TupleExpr,
     UnaryOp,
-    ConsultTablet,
-    CreateWorkingTablet,
-    CopyTablet,
-    DeriveTablet,
-    InscribeTablet,
-    PutEntry,
-    AppendEntry,
-    ReplaceEntry,
-    RemoveEntry,
-    TakeEntry,
-    SeekEntry,
-    TabletHistory,
-    SequenceLength,
-    IterateEntries,
 )
 from dubsar.lexer import Lexer
 from dubsar.parser import Parser
@@ -247,7 +240,7 @@ class Formatter:
             if stmt.key_target:
                 tgt = f"{stmt.key_target}, {stmt.value_target}"
             else:
-                tgt = f"entries"
+                tgt = "entries"
             lines = [f"{pad}{kw} {tgt} {prep} {tab_str}:"]
             for s in stmt.body:
                 lines.append(self._format_statement(s, indent=indent + 4, is_tablet=is_tablet))

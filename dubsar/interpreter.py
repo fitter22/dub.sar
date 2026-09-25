@@ -10,82 +10,82 @@ Section 11 (Conditions), Section 12 (Repetitions), and Section 17 (I/O):
 
 from __future__ import annotations
 
-import sys
-from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from dubsar.archive.archive import SQLiteTabletArchive, TabletArchive
+from dubsar.archive.models import (
+    TabletReference,
+    TabletShape,
+    TabletVersionInfo,
+)
+from dubsar.archive.working import WorkingTablet
 from dubsar.ast import (
+    AppendEntry,
     ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
     CompareExpr,
     Conditional,
+    ConsultTablet,
+    CopyTablet,
+    CreateWorkingTablet,
     Declaration,
+    DeriveTablet,
     Determination,
-    DomainRepetition,
     EmptyLiteral,
     Expression,
     ExpressionStatement,
     FieldAccess,
     Identifier,
     InputExpr,
+    InscribeTablet,
     IsExpr,
+    IterateEntries,
     NumberLiteral,
     OutputStatement,
     PostfixExpr,
-    ProblemSection,
     Procedure,
     Program,
-    Recipe,
+    PutEntry,
+    RemoveEntry,
     Repetition,
-    ResultSection,
+    ReplaceEntry,
     RetainStatement,
     ReturnStatement,
+    SeekEntry,
+    SequenceLength,
     Statement,
     StringLiteral,
+    TabletHistory,
+    TakeEntry,
     TupleExpr,
     UnaryOp,
-    ConsultTablet,
-    CreateWorkingTablet,
-    CopyTablet,
-    DeriveTablet,
-    InscribeTablet,
-    PutEntry,
-    AppendEntry,
-    ReplaceEntry,
-    RemoveEntry,
-    TakeEntry,
-    SeekEntry,
-    TabletHistory,
-    SequenceLength,
-    IterateEntries,
 )
-from dubsar.archive.archive import SQLiteTabletArchive, TabletArchive
-from dubsar.archive.models import (
-    TabletKind,
-    TabletMetadata,
-    TabletReference,
-    TabletShape,
-    TabletVersionInfo,
-)
-from dubsar.archive.working import WorkingTablet
 from dubsar.builtins import BUILTINS
 from dubsar.errors import (
-    DubSarArchiveError,
     DubSarConsultationError,
     DubSarDivisionByZero,
     DubSarEntryNotFoundError,
     DubSarImmutableTabletError,
     DubSarInputError,
-    DubSarInscriptionError,
-    DubSarInvalidEntryError,
     DubSarInvalidTabletError,
     DubSarNameError,
     DubSarRangeError,
     DubSarReturnError,
+    DubSarSyntaxError,
     DubSarTabletNotFoundError,
-    DubSarTabletVersionNotFoundError,
+    DubSarTypeError,
     DubSarUnitError,
+)
+from dubsar.geometry import (
+    ApproximateQuantity,
+    DirectedQuantity,
+    Direction,
+    RightTriangleValue,
+    Turn,
+    recursive_fft,
+    reference_dft,
 )
 from dubsar.numbers import Rational, parse_number
 from dubsar.semantic import SemanticAnalyzer
@@ -93,20 +93,10 @@ from dubsar.units import (
     DIMENSIONLESS,
     UNIT_TABLE,
     Quantity,
-    Unit,
     lookup_unit,
     to_quantity,
 )
 from dubsar.values import DeterminationValue, EmptySentinel
-from dubsar.geometry import (
-    ApproximateQuantity,
-    Direction,
-    DirectedQuantity,
-    RightTriangleValue,
-    Turn,
-    reference_dft,
-    recursive_fft,
-)
 
 
 class ReturnSignal(Exception):
@@ -647,7 +637,7 @@ class Interpreter:
                     rat = parse_number(num_part)
                     u = lookup_unit(unit_part)
                     return Quantity(rat, u)
-                
+
                 # Single part: check if prompt specifies unit (e.g. "in days", "in 𒌓")
                 rat = parse_number(raw_input)
                 unit_to_use = DIMENSIONLESS
@@ -1022,6 +1012,13 @@ class Interpreter:
             evaled_args = [self._eval_expression(a) for a in call.arguments]
             return self._call_procedure(proc, evaled_args)
 
+        raise DubSarNameError(
+            f"Call to undefined procedure: '{call.callee}'",
+            line=call.line,
+            col=call.col,
+            source_file=self.source_file,
+        )
+
     def _call_procedure(self, proc: Procedure, evaled_args: List[Any]) -> Any:
         if len(evaled_args) != len(proc.parameters):
             raise DubSarReturnError(
@@ -1055,13 +1052,6 @@ class Interpreter:
             return ret_vals
         finally:
             self.current_env = old_env
-
-        raise DubSarNameError(
-            f"Call to undefined procedure: '{call.callee}'",
-            line=call.line,
-            col=call.col,
-            source_file=self.source_file,
-        )
 
     def _eval_binary(self, op: str, left: Any, right: Any, line: int, col: int) -> Any:
         # Comparison operators

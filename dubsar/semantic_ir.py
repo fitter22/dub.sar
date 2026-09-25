@@ -9,16 +9,21 @@ Implements CR-011 and CR-024:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 from dubsar.ast import (
+    AppendEntry,
     ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
     CompareExpr,
     Conditional,
+    ConsultTablet,
+    CopyTablet,
+    CreateWorkingTablet,
     Declaration,
+    DeriveTablet,
     Determination,
     DomainRepetition,
     EmptyLiteral,
@@ -27,38 +32,29 @@ from dubsar.ast import (
     FieldAccess,
     Identifier,
     InputExpr,
+    InscribeTablet,
     IsExpr,
+    IterateEntries,
     NumberLiteral,
     OutputStatement,
     PostfixExpr,
-    Procedure,
     Program,
-    Recipe,
+    PutEntry,
+    RemoveEntry,
     Repetition,
-    ResultSection,
+    ReplaceEntry,
     RetainStatement,
     ReturnStatement,
+    SeekEntry,
+    SequenceLength,
     Statement,
     StringLiteral,
+    TabletHistory,
+    TakeEntry,
     TupleExpr,
     UnaryOp,
-    ConsultTablet,
-    CreateWorkingTablet,
-    CopyTablet,
-    DeriveTablet,
-    InscribeTablet,
-    PutEntry,
-    AppendEntry,
-    ReplaceEntry,
-    RemoveEntry,
-    TakeEntry,
-    SeekEntry,
-    TabletHistory,
-    SequenceLength,
-    IterateEntries,
 )
 from dubsar.numbers import Rational
-
 
 # ==============================================================================
 # Semantic Verb Expressions

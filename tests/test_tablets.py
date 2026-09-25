@@ -12,6 +12,7 @@ Verifies:
 """
 
 import unittest
+
 from dubsar.archive.archive import SQLiteTabletArchive
 from dubsar.archive.models import TabletShape
 from dubsar.archive.working import WorkingTablet
@@ -25,7 +26,7 @@ from dubsar.lexer import Lexer
 from dubsar.numbers import Rational
 from dubsar.parser import Parser
 from dubsar.semantic import SemanticAnalyzer
-from dubsar.units import DIMENSIONLESS, Quantity, lookup_unit
+from dubsar.units import Quantity
 from dubsar.vm import VirtualMachine
 
 
@@ -81,7 +82,7 @@ class TestTabletLanguageExecution(unittest.TestCase):
         tokens = Lexer(source).tokenize()
         prog = Parser(tokens).parse()
         SemanticAnalyzer().analyze(prog)
-        
+
         # Interpreter
         interp = Interpreter(archive=archive)
         out_interp = interp.run(prog)
@@ -264,7 +265,7 @@ result:
 """
         tokens = Lexer(src).tokenize()
         prog = Parser(tokens).parse()
-        
+
         # Interpreter error
         interp = Interpreter()
         with self.assertRaises(DubSarImmutableTabletError):
@@ -286,7 +287,7 @@ result:
 """
         tokens = Lexer(src).tokenize()
         prog = Parser(tokens).parse()
-        
+
         # Interpreter error
         interp = Interpreter()
         with self.assertRaises(DubSarImmutableTabletError):
@@ -308,7 +309,7 @@ result:
 """
         tokens = Lexer(src).tokenize()
         prog = Parser(tokens).parse()
-        
+
         interp = Interpreter()
         with self.assertRaises(DubSarEntryNotFoundError):
             interp.run(prog)
@@ -335,7 +336,7 @@ result:
 """
         out = self._run_both(src, archive=arc)
         self.assertEqual(out, ["6"])
-        
+
         # Consult inscribed tablet from archive
         tab = arc.consult("fib")
         self.assertEqual(tab.length(), 6)

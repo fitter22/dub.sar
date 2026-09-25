@@ -1,9 +1,11 @@
 """DUB.SAR 1.0 — WASM Conformance Tests per Section 57, 58 & Section 72."""
 
 import unittest
+
 from dubsar.lexer import Lexer
 from dubsar.parser import Parser
 from dubsar.wasm import compile_to_wat
+
 
 class TestWasmConformance(unittest.TestCase):
     def test_wat_generation(self):

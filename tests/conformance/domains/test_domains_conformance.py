@@ -1,11 +1,13 @@
 """DUB.SAR 1.0 — Domains Conformance Tests per Section 72."""
 
 import unittest
-from dubsar.lexer import Lexer
-from dubsar.parser import Parser
+
 from dubsar.interpreter import Interpreter
 from dubsar.ir import Compiler
+from dubsar.lexer import Lexer
+from dubsar.parser import Parser
 from dubsar.vm import VirtualMachine
+
 
 class TestDomainsConformance(unittest.TestCase):
     def _run(self, source: str):

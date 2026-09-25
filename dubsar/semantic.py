@@ -14,13 +14,18 @@ from __future__ import annotations
 from typing import Dict, List, Optional, Set
 
 from dubsar.ast import (
+    AppendEntry,
+    ApplyRecipe,
     Assignment,
     BinaryOp,
     CallExpr,
-    ApplyRecipe,
     CompareExpr,
     Conditional,
+    ConsultTablet,
+    CopyTablet,
+    CreateWorkingTablet,
     Declaration,
+    DeriveTablet,
     Determination,
     DomainRepetition,
     EmptyLiteral,
@@ -29,38 +34,38 @@ from dubsar.ast import (
     FieldAccess,
     Identifier,
     InputExpr,
+    InscribeTablet,
     IsExpr,
+    IterateEntries,
     NumberLiteral,
     OutputStatement,
     PostfixExpr,
-    ProblemSection,
     Procedure,
     Program,
-    Recipe,
+    PutEntry,
+    RemoveEntry,
     Repetition,
-    ResultSection,
+    ReplaceEntry,
     RetainStatement,
     ReturnStatement,
+    SeekEntry,
+    SequenceLength,
     Statement,
     StringLiteral,
+    TabletHistory,
+    TakeEntry,
     TupleExpr,
     UnaryOp,
-    ConsultTablet,
-    CreateWorkingTablet,
-    AppendEntry,
-    CopyTablet,
-    DeriveTablet,
-    InscribeTablet,
-    PutEntry,
-    ReplaceEntry,
-    RemoveEntry,
-    TakeEntry,
-    SeekEntry,
-    TabletHistory,
-    SequenceLength,
-    IterateEntries,
 )
 from dubsar.builtins import BUILTINS
+from dubsar.errors import (
+    DubSarNameError,
+    DubSarRangeError,
+    DubSarReturnError,
+    DubSarSyntaxError,
+    DubSarUnitError,
+)
+from dubsar.units import DIMENSIONLESS, UNIT_TABLE, Unit, lookup_unit
 
 STANDARD_TABLETS: Set[str] = {
     "reciprocals",
@@ -79,15 +84,6 @@ STANDARD_TABLETS: Set[str] = {
     "turn-divisions",
     "ea-nasir-shipment",
 }
-from dubsar.errors import (
-    DubSarNameError,
-    DubSarRangeError,
-    DubSarReturnError,
-    DubSarSyntaxError,
-    DubSarTypeError,
-    DubSarUnitError,
-)
-from dubsar.units import DIMENSIONLESS, UNIT_TABLE, Unit, lookup_unit
 
 
 class Scope:

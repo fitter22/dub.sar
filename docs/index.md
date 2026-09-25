@@ -46,7 +46,7 @@ result
     hyp
 ```
 
-Or write the identical tablet using authentic cuneiform signs:
+The same computation can be expressed in authentic cuneiform Tablet Mode as a compact postfix mathematical prescription:
 
 ```dubsar
 𒂊𒁹

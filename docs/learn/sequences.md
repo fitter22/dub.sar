@@ -28,7 +28,14 @@ result
     val1
 ```
 
-In authentic cuneiform Tablet Mode, entries are retrieved using the `𒋗` (*šu*, take) or `pad 𒋫` operator:
+Output:
+```text
+3
+12
+18
+```
+
+In authentic cuneiform Tablet Mode, entries are retrieved using the `𒋗` (*šu*, take) operator and appended with `𒈭` (*dah*, append):
 
 ```dubsar
 𒂊𒁹
@@ -50,6 +57,13 @@ In authentic cuneiform Tablet Mode, entries are retrieved using the `𒋗` (*šu
     val1
 ```
 
+Output:
+```text
+3
+12
+18
+```
+
 ---
 
 ## Indexing and Retrieving Entries
@@ -66,6 +80,11 @@ result
     item
 ```
 
+Output:
+```text
+20
+```
+
 In cuneiform Tablet Mode:
 
 ```dubsar
@@ -79,3 +98,16 @@ In cuneiform Tablet Mode:
 𒅗𒁹
     item
 ```
+
+Output:
+```text
+20
+```
+
+---
+
+## Further Reading & Reference
+
+- **[Language Guide: Sequences & Tables](../guide/sequences-and-tables.md)**: Full coverage of the 3 tablet shapes (sequence, table, structured) and first-class tablet operations.
+- **[Language Reference: Core Vocabulary](../reference/language.md)**: Keywords `working`, `append`, `take`, `length of`, and `put`.
+- **[Examples Catalog: Tablet Data Model](../examples/index.md#tablet-data-model-sequences)**: Runnable examples of sequence generation and transformation.

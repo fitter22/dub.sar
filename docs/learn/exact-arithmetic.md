@@ -6,16 +6,66 @@ Mesopotamian mathematics relied on base-60 place-value notation. DUB.SAR impleme
 
 ## The Sexagesimal Semicolon
 
-Sexagesimal notation uses semicolons (`;`) to separate the integer portion from fractional sexagesimal places:
+Sexagesimal notation uses semicolons (`;`) to separate the integer portion from fractional sexagesimal places, with commas (`,`) separating successive sexagesimal places:
 
 - `1;30` denotes $1 + \frac{30}{60} = 1.5$.
 - `0;20` denotes $\frac{20}{60} = \frac{1}{3}$.
+- `0;15` denotes $\frac{15}{60} = \frac{1}{4}$.
 - `1;24,51,10` denotes the famous Babylonian approximation of $\sqrt{2}$ from tablet YBC 7289:
 
     $$1 + \frac{24}{60} + \frac{51}{3600} + \frac{10}{216000} \approx 1.41421296\dots$$
 
 ---
 
+## Runnable Sexagesimal Arithmetic
+
+In DUB.SAR, all calculations preserve exact rational values ($p/q$). Here is a runnable tablet demonstrating sexagesimal fraction addition and exact division via reciprocal multiplication:
+
+```dubsar
+problem
+    # 1. Sexagesimal fractions
+    half : 0;30        # 30/60 = 1/2
+    third : 0;20       # 20/60 = 1/3
+
+    # 2. Exact sum of fractions: 1/2 + 1/3 = 5/6 = 50/60
+    sum : half + third
+
+    # 3. Exact division by 4 via reciprocal multiplication (0;15)
+    dividend : 100
+    recip_four : 0;15
+    quarter : dividend * recip_four
+result
+    sum
+    quarter
+```
+
+Output:
+```text
+0;50
+25
+```
+
+---
+
 ## Regular Numbers & Reciprocals
 
-In Mesopotamian mathematics, numbers whose prime factors are limited to 2, 3, and 5 have finite sexagesimal reciprocal expansions. DUB.SAR can test whether a rational is regular and compute exact reciprocal values without repeating decimals.
+In Mesopotamian mathematics, numbers whose prime factors are limited to 2, 3, and 5 are known as **regular numbers** (*igi-bi*). Regular numbers have finite sexagesimal reciprocal expansions without repeating fractions:
+
+- $2 \to 0;30$
+- $3 \to 0;20$
+- $4 \to 0;15$
+- $5 \to 0;12$
+- $6 \to 0;10$
+- $8 \to 0;07,30$
+- $9 \to 0;06,40$
+- $10 \to 0;06$
+
+Because Mesopotamian mathematics lacked floating-point division, scribes performed division by multiplying by the pre-computed exact reciprocal from archival tables.
+
+---
+
+## Further Reading & Reference
+
+- **[Language Reference: Numbers & Sexagesimal Notation](../reference/numbers.md)**: Full syntax for positional sexagesimal representation.
+- **[Core Concepts: Exact Arithmetic](../concepts/exact-arithmetic.md)**: Mathematical theory of base-60 sexagesimal fractions and regular numbers.
+- **[Examples: Babylonian Square Root of 2](../examples/index.md#historical-mesopotamian-archaeology)**: Runnable calculation of $\sqrt{2}$ from tablet YBC 7289.

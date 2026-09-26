@@ -18,16 +18,36 @@ DUB.SAR provides both built-in standard units with defined conversion scales and
 
 ## Dimensional Verification
 
-Operations between quantities automatically check dimensional rules:
+Operations between quantities automatically enforce dimensional rules:
 
+<!-- test-id: learn-units-dimensional -->
 ```dubsar
 problem
     rod : 2 nindan
     depth : 1 kush3
-    # rod + depth converts to common length dimension
-    length_sum := rod + depth
+    # 1 nindan = 12 kush3 (cubits), so 1 kush3 = 1/12 = 0;5 nindan
+    length_sum : rod + depth
 result
     length_sum
 ```
 
-Multiplying two lengths yields an area quantity. Dividing distance by time yields speed. Adding length to time produces an immediate compile error.
+Output:
+```text
+2;5 nindan
+```
+
+Because 1 `nindan` equals 12 `kush3`, adding 1 `kush3` ($1/12 = 5/60 = 0;5\text{ nindan}$) to 2 `nindan` evaluates to the exact sexagesimal quantity `2;5 nindan`.
+
+Multiplying two lengths yields an area quantity. Dividing distance by time yields speed. Adding incompatible dimensions (such as adding length to time) produces an immediate compile error:
+
+```text
+Cannot perform '+' between incompatible units: 'meter' and 'second'
+```
+
+---
+
+## Further Reading & Reference
+
+- **[Language Guide: Units & Metrology](../guide/units.md)**: Deep dive into the metrological dimension hierarchy and conversion rules.
+- **[Language Reference: Units of Measurement](../reference/units.md)**: Complete catalog of standard lengths, times, masses, and custom dimensions.
+- **[Core Concepts: Dimensional Mathematics](../concepts/dimensional-mathematics.md)**: Theoretical foundations of algebraic dimensional type safety.

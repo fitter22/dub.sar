@@ -8,6 +8,7 @@ Mesopotamian scribes solved problems through systematic iterative searches over 
 
 Use `consider ... from ... through ...:` to iterate through a bounded mathematical range:
 
+<!-- test-id: learn-search-scholar -->
 ```dubsar
 problem
     total : 0
@@ -28,6 +29,7 @@ $$\sum_{n=1}^{10} n = \frac{10 \times 11}{2} = 55$$
 
 In authentic cuneiform Tablet Mode:
 
+<!-- test-id: learn-search-cuneiform -->
 ```dubsar
 𒂊𒁹
     𒊕 : 0

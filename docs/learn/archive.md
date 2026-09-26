@@ -15,6 +15,7 @@ DUB.SAR embeds standard mathematical reference tablets, including:
 
 To consult a persistent tablet and retrieve records:
 
+<!-- test-id: learn-archive-reciprocals-scholar -->
 ```dubsar
 problem
     consult tablet "reciprocals"
@@ -26,8 +27,11 @@ result
     reciprocal-of-four
 ```
 
-In authentic cuneiform Tablet Mode:
+### Mixed Mode (Cuneiform Keywords with Archive Identifier)
 
+In Mixed Mode, scribes can mount persistent reference tablets using cuneiform operators (`𒅆 𒁾`) while retaining the named table identifier (`reciprocals`):
+
+<!-- test-id: learn-archive-reciprocals-mixed -->
 ```dubsar
 𒂊𒁹
     𒅆 𒁾 "reciprocals"
@@ -39,7 +43,7 @@ In authentic cuneiform Tablet Mode:
     𒁇
 ```
 
-Both Scholar and Tablet modes produce the exact sexagesimal reciprocal of 4 ($1/4 = 15/60$):
+Both Scholar and Mixed modes produce the exact sexagesimal reciprocal of 4 ($1/4 = 15/60$):
 
 ```text
 0;15
@@ -56,6 +60,7 @@ In the pipeline above:
 
 Computational workflows often use temporary scratchpads before committing records permanently to clay. In DUB.SAR, scratchpads are declared as **working tablets**:
 
+<!-- test-id: learn-archive-working-scholar -->
 ```dubsar
 problem
     working observations
@@ -71,8 +76,9 @@ result
     recorded-entry
 ```
 
-In cuneiform Tablet Mode:
+In authentic cuneiform Tablet Mode (using cuneiform working tablet `𒅎` and identifier `𒁇`):
 
+<!-- test-id: learn-archive-working-cuneiform -->
 ```dubsar
 𒂊𒁹
     𒆥 𒅎

@@ -9,7 +9,7 @@ Welcome to the DUB.SAR tutorial series. This learning path introduces computatio
 Every chapter in this tutorial adheres to core principles:
 
 - **One Concept at a Time**: Each chapter introduces a single core idea, explains its historical and mathematical motivation, and demonstrates it with minimal cognitive load.
-- **Runnable and Testable**: All examples are taken directly from the test suite and repository examples, ensuring they compile and execute across all backends.
+- **Runnable and Testable**: All examples are taken directly from the test suite and repository examples, verified to parse and execute identically across both the reference AST interpreter and virtual machine.
 - **Explicit Expected Output**: Every program listing shows its exact printed output so you can immediately verify execution.
 - **Scholar & Tablet Duality**: Concepts are shown in Scholar Mode (Latin keywords, readable identifiers) alongside canonical cuneiform Tablet Mode.
 - **Bridge to Formal Reference**: Each chapter links directly to the normative language specification and detailed language guides for deeper study.
@@ -24,7 +24,7 @@ The tutorial covers the 12 core competencies of DUB.SAR across 10 progressive ch
 | :--- | :--- | :--- |
 | **1. [Your First Tablet](first-tablet.md)** | • What is a computational tablet?<br>• Installation & first program<br>• Scholar Mode & Tablet Mode | `IM.GID.DA` clay structure, `problem`/`result` sections, CLI commands, AST interpreter & VM |
 | **2. [Quantities & Expressions](quantities.md)** | • Quantities and expressions | Numbers, variables, arithmetic operators (`+`, `-`, `*`, `/`), dimensional cancellation |
-| **3. [Exact Sexagesimal Arithmetic](exact-arithmetic.md)** | • Exact sexagesimal arithmetic | Base-60 place value notation, arbitrary precision rationals ($p/q$), regular numbers, reciprocal tables |
+| **3. [Exact Sexagesimal Arithmetic](exact-arithmetic.md)** | • Exact sexagesimal arithmetic | Base-60 place value notation, exact rational model ($p/q$), backend representation limits, regular numbers, reciprocal tables |
 | **4. [Units & Dimensional Safety](units.md)** | • Units and dimensional safety | Metrological domains, compile-time unit checking, compound units (`length^2`), unit conversions |
 | **5. [Postfix Calculation Pipelines](pipelines.md)** | • Postfix calculation pipelines | Stack-oriented evaluation, mathematical verbs (`zi`, `ta`, `ša`, `ni`, `íb`, `ba-si`, `gur`, `nim`, `ri`) |
 | **6. [Bounded Mathematical Search](search.md)** | • Bounded mathematical search | Domains (`consider ... from ... through ...`), finite iteration, convergence loops, termination guarantees |

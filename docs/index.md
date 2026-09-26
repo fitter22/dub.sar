@@ -34,6 +34,7 @@ To compile to native machine binaries or shared libraries, ensure a C compiler (
 
 Create a file named `hypotenuse.dub`:
 
+<!-- test-id: home-first-tablet-scholar -->
 ```dubsar
 problem
     width : 3 meter
@@ -48,6 +49,7 @@ result
 
 The same computation can be expressed in authentic cuneiform Tablet Mode as a compact postfix mathematical prescription:
 
+<!-- test-id: home-first-tablet-cuneiform -->
 ```dubsar
 𒂊𒁹
     𒂼 : 3 meter

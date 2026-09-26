@@ -8,13 +8,15 @@ This chapter introduces the fundamental concepts of DUB.SAR, guides you through 
 
 In Mesopotamia, mathematical tablets (`IM.GID.DA`) were not passive notebooks; they were structured instruments of calculation. Scribes recorded known parameters, executed procedural algorithms (*epēšu*, "to do / calculate"), and inscribed permanent conclusions.
 
-DUB.SAR translates this physical paradigm directly into code. Every tablet consists of three formal sections:
+DUB.SAR translates this physical paradigm directly into code. In canonical scribal practice, a complete tablet is organized into three sections:
 
 1. **Problem Statement** (`problem` / `𒂊𒁹`): Establishes known physical parameters, initial quantities, and boundary conditions.
 2. **Computational Prescriptions** (`recipe` / `𒁾𒊬`, optional): Reusable procedures and auxiliary recipes.
 3. **Inscribed Result** (`result` / `𒅗𒁹`): The verified mathematical outputs baked permanently into clay.
 
-Unlike conventional imperative languages, DUB.SAR tablets have no unbounded loops, no null pointers, and no floating-point rounding errors. Execution is deterministic, dimensional, and exact.
+While the DUB.SAR parser permits minimal or single-section tablets (providing empty defaults if either problem or result is omitted), complete computational tablets canonically begin with `problem` / `𒂊𒁹` and conclude with `result` / `𒅗𒁹`. Neither section header takes a trailing colon.
+
+Unlike conventional imperative languages, DUB.SAR tablets have no unbounded loops, no null pointers, and no floating-point rounding errors. At the language level, execution is deterministic, dimensional, and exact (with arbitrary precision in the reference interpreter/VM and 64-bit rational bounds in native/WASM compilation).
 
 ---
 
@@ -53,14 +55,13 @@ DUB.SAR programs can be written in three interoperable source modes:
 
 All modes share the exact same computational semantics, execution runtime, and compilation pipeline.
 
-Every tablet begins with a **Problem Statement** section (`problem` / `𒂊𒁹`) and concludes with a **Result** section (`result` / `𒅗𒁹`). Neither section header takes a trailing colon.
-
 To see how DUB.SAR operates, consider computing the hypotenuse of a right triangle with base $3\text{ meter}$ and altitude $4\text{ meter}$ using the Pythagorean relation ($\sqrt{3^2 + 4^2} = 5\text{ meter}$):
 
 ### Scholar Mode
 
 In Scholar Mode, the computation makes each intermediate quantity explicit with named bindings:
 
+<!-- test-id: learn-first-tablet-scholar -->
 ```dubsar
 problem
     width : 3 meter
@@ -75,8 +76,9 @@ result
 
 ### Tablet Mode (Cuneiform)
 
-In authentic cuneiform Tablet Mode, the same computation is expressed as a compact postfix mathematical prescription:
+In authentic cuneiform Tablet Mode (using cuneiform identifiers and the standard length unit `meter`), the same computation is expressed as a compact postfix mathematical prescription:
 
+<!-- test-id: learn-first-tablet-cuneiform -->
 ```dubsar
 𒂊𒁹
     𒂼 : 3 meter
@@ -169,9 +171,14 @@ In DUB.SAR, these signs are used in the example as an authentic, historically gr
 The language specification **does not** bind `𒂼` as a keyword meaning "width", nor is `𒊕` a keyword meaning "height". They are standard user identifiers, exactly like `width`, `height`, `x`, or `y` in Scholar Mode.
 
 When writing your own tablets:
-- You are free to choose any valid cuneiform characters from the Unicode cuneiform blocks (`U+12000`–`U+1254F`) as variable names (e.g., `𒀀`, `𒁉`, `𒌨`, `𒋼`).
+- You can use cuneiform sequences accepted by the lexer that are not reserved keywords or cuneiform numerals as variable names (for example `𒀀` [*a*], `𒁉` [*bi*], `𒌨` [*ur*]).
 - You can also use ASCII identifiers (`width`, `height`) inside Tablet Mode or Mixed Mode.
-- Only the structural section markers (`𒂊𒁹`, `𒅗𒁹`, `𒁾𒊬`) and mathematical verbs (`𒍣`, `ta`, `ša`, `ni`, `𒅁`, `𒁀𒋛`) have fixed language-level semantics.
+- Reserved cuneiform signs cannot be used as variable identifiers:
+  - **Section Delimiters**: `𒂊𒁹` (*problem*), `𒅗𒁹` (*result*), `𒁾𒊬` (*recipe*).
+  - **Mathematical Verbs**: `𒍣` (*add*), `ta` / `𒋫` (*subtract*), `ša` / `𒊭` (*multiply*), `ni` / `𒉌` (*divide*), `𒅁` (*square*), `𒁀𒋛` (*square-root*), `𒄥` (*floor*), `𒉏` (*ceil*), `𒊑` (*nearest*).
+  - **Search & Selection**: `𒄀` (*consider*), `𒂗` (*through*), `𒋼` (*retain*), `nu` / `𒉡` (*empty*).
+  - **Tablet Archive**: `𒅆` (*consult*), `𒆥` (*working*), `𒁹𒀀` (*inscribe*), `𒈭` (*append*), `𒉻` / `𒋗` (*take*), `𒃻` (*put*).
+  - **Cuneiform Numerals**: sequences composed purely of cuneiform digits (such as `𒁹` [1], `𒈫` [2], `𒐈` [3]) are lexed as numeric literals.
 
 ---
 

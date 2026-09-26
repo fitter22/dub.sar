@@ -1,6 +1,6 @@
 # 3. Exact Sexagesimal Arithmetic
 
-Mesopotamian mathematics relied on base-60 place-value notation. DUB.SAR implements arbitrary-precision rational arithmetic to mirror authentic scribal calculations.
+Mesopotamian mathematics relied on base-60 place-value notation. DUB.SAR implements an exact rational arithmetic model to mirror authentic scribal calculations without floating-point drift.
 
 ---
 
@@ -17,10 +17,22 @@ Sexagesimal notation uses semicolons (`;`) to separate the integer portion from 
 
 ---
 
+## Exact Rational Model vs. Backend Limits
+
+At the language level, DUB.SAR models all numbers as exact rationals ($p/q$) with automatic Euclidean GCD reduction, completely avoiding IEEE floating-point approximation errors.
+
+However, the execution targets have different representation characteristics:
+
+- **Reference Interpreter & Stack VM**: Implemented in Python with arbitrary-precision integers, supporting unbounded numerator and denominator expansion.
+- **Native AOT Compiler (C99) & WebAssembly**: High-performance compiled targets store exact rationals in fixed-width signed 64-bit integer pairs (`int64_t num, den` / `i64`) using 128-bit intermediate arithmetic (`__int128_t`). While mathematically exact, calculations on these targets are bounded by 64-bit integer limits.
+
+---
+
 ## Runnable Sexagesimal Arithmetic
 
-In DUB.SAR, all calculations preserve exact rational values ($p/q$). Here is a runnable tablet demonstrating sexagesimal fraction addition and exact division via reciprocal multiplication:
+Here is a runnable tablet demonstrating sexagesimal fraction addition and exact division via reciprocal multiplication:
 
+<!-- test-id: learn-exact-arithmetic-runnable -->
 ```dubsar
 problem
     # 1. Sexagesimal fractions

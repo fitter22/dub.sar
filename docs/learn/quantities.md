@@ -8,6 +8,7 @@ DUB.SAR treats values as either dimensionless exact rationals or dimensioned qua
 
 Numbers can be specified in standard decimal notation, rational fractions, or sexagesimal base-60 notation:
 
+<!-- test-id: learn-quantities-literals -->
 ```dubsar
 problem
     a : 12
@@ -29,7 +30,7 @@ Output:
 0;20
 ```
 
-Notice that rational `3/4` is automatically presented in canonical sexagesimal notation as `0;45` ($45/60$). All calculations preserve exact arbitrary-precision rationals without floating-point truncation or drift.
+Notice that rational `3/4` is automatically presented in canonical sexagesimal notation as `0;45` ($45/60$). At the language level, DUB.SAR preserves exact rational values ($p/q$) without floating-point truncation or drift (with arbitrary precision in the reference interpreter/VM and 64-bit rational bounds in native/WASM compilation).
 
 ---
 
@@ -37,6 +38,7 @@ Notice that rational `3/4` is automatically presented in canonical sexagesimal n
 
 Attach physical units directly to numeric values to form dimensioned physical quantities:
 
+<!-- test-id: learn-quantities-metrological -->
 ```dubsar
 problem
     distance : 15 meter
@@ -53,8 +55,11 @@ Output:
 
 When dividing distance by speed, the length units cancel ($15\text{ m} / (3\text{ m/s}) = 5\text{ s}$), yielding an exact time quantity.
 
-In authentic cuneiform Tablet Mode:
+### Mixed Mode (Cuneiform Delimiters with Latin Identifiers)
 
+In Mixed Mode, scribes can combine cuneiform section markers and result variables with Latin parameter identifiers (`dist`, `vel`):
+
+<!-- test-id: learn-quantities-mixed -->
 ```dubsar
 𒂊𒁹
     dist : 15 meter

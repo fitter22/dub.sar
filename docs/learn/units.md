@@ -20,6 +20,7 @@ DUB.SAR provides both built-in standard units with defined conversion scales and
 
 Operations between quantities automatically enforce dimensional rules:
 
+<!-- test-id: learn-units-dimensional -->
 ```dubsar
 problem
     rod : 2 nindan

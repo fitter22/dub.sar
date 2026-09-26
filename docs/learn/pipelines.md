@@ -10,6 +10,7 @@ DUB.SAR captures this calculation style through postfix operation pipelines.
 
 Expressions can be written using postfix pipelines:
 
+<!-- test-id: learn-pipelines-scholar -->
 ```dubsar
 problem
     hyp : 3 meter 3 meter multiply 4 meter 4 meter multiply add square-root
@@ -19,6 +20,7 @@ result
 
 Using cuneiform verbs:
 
+<!-- test-id: learn-pipelines-cuneiform -->
 ```dubsar
 𒂊𒁹
     𒁇 : 3 meter 3 meter 𒊭 4 meter 4 meter 𒊭 𒍣 𒁀𒋛

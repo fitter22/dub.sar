@@ -8,6 +8,7 @@ Scribes maintained lists and inventory tablets. DUB.SAR supports mutable working
 
 Create a temporary working sequence with `working name of length 0` (or in Tablet Mode `𒆥 name of length 0`):
 
+<!-- test-id: learn-sequences-working-scholar -->
 ```dubsar
 problem
     working measurements of length 0
@@ -35,8 +36,11 @@ Output:
 18
 ```
 
-In authentic cuneiform Tablet Mode, entries are retrieved using the `𒋗` (*šu*, take) operator and appended with `𒈭` (*dah*, append):
+### Mixed Mode (Cuneiform Verbs with Latin Identifiers)
 
+In Mixed Mode, scribes can employ authentic cuneiform operational verbs (`𒈭` for append, `𒋗` for take) alongside descriptive Latin variable identifiers (`measurements`, `total_count`):
+
+<!-- test-id: learn-sequences-working-mixed -->
 ```dubsar
 𒂊𒁹
     𒆥 measurements of length 0
@@ -70,6 +74,7 @@ Output:
 
 Entries in sequences are 0-indexed. Scribes retrieve specific entries using inline or multiline `take entry`:
 
+<!-- test-id: learn-sequences-indexing-scholar -->
 ```dubsar
 problem
     working sig of length 0
@@ -85,8 +90,11 @@ Output:
 20
 ```
 
-In cuneiform Tablet Mode:
+### Mixed Mode
 
+In Mixed Mode, indexing uses the postfix `𒋗` (*šu*, take) verb:
+
+<!-- test-id: learn-sequences-indexing-mixed -->
 ```dubsar
 𒂊𒁹
     𒆥 sig of length 0

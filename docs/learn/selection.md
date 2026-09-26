@@ -8,6 +8,7 @@ Approximation and search algorithms generate multiple candidate evaluations. DUB
 
 A determination packages named variables into a coherent compound mathematical record:
 
+<!-- test-id: learn-selection-records -->
 ```dubsar
 problem
     width : 3 meter
@@ -31,6 +32,7 @@ Fields within a determination can be accessed using dot notation (`sample.area`)
 
 Within search loops, `retain candidate when ...` maintains the optimal candidate across iterations according to an explicit condition:
 
+<!-- test-id: learn-selection-retain -->
 ```dubsar
 problem
     best : empty

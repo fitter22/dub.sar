@@ -8,6 +8,7 @@ The problem searches for the optimal calendar intercalation cycle for a tropical
 
 ## Scholar Mode
 
+<!-- test-id: learn-complete-example-scholar -->
 ```dubsar
 problem
     solar-year : 365.2422
@@ -32,6 +33,7 @@ result
 
 ## Tablet Mode (Cuneiform)
 
+<!-- test-id: learn-complete-example-cuneiform -->
 ```dubsar
 𒂊𒁹
     𒈬 : 365.2422

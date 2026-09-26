@@ -38,10 +38,10 @@ Create a file named `hypotenuse.dub`:
 problem
     width : 3 meter
     height : 4 meter
-    w_sq := width width multiply
-    h_sq := height height multiply
-    hyp_sq := w_sq h_sq add
-    hyp := hyp_sq square-root
+    w_sq : width width multiply
+    h_sq : height height multiply
+    hyp_sq : w_sq h_sq add
+    hyp : hyp_sq square-root
 result
     hyp
 ```

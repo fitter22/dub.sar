@@ -107,6 +107,9 @@ nav:
       - Tablet Paradigm: concepts/tablet-paradigm.md
       - Exact Arithmetic: concepts/exact-arithmetic.md
       - Dimensional Mathematics: concepts/dimensional-mathematics.md
+      - Geometric & Fourier: concepts/geometric-and-fourier.md
       - Archive & Provenance: concepts/archive-and-provenance.md
+      - Historical Foundations: concepts/historical-foundations.md
+
   - Specification:
       - Overview & Normative Spec: specification/index.md

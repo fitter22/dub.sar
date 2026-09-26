@@ -116,7 +116,7 @@ DUB.SAR synthesizes ancient tablet sequences and directed rotations into modern 
 
 | Operation | Scholar Mode (Prefix / Postfix) | Canonical Cuneiform | Semantics |
 | :--- | :--- | :--- | :--- |
-| **Square** | `X square` | `X 𒉏` | Computes $X \cdot X$ |
+| **Square** | `X square` | `X 𒅁` | Computes $X \cdot X$ |
 | **Square Root** | `X square-root` | `X square-root` | Computes exact integer $\sqrt{X}$ (errors if non-square) |
 | **Right Triangle** | `w l d right-triangle` | `w l d right-triangle` | Constructs right triangle determination; solves missing side |
 | **Validate Triangle** | `w l d validate-triangle` | `w l d validate-triangle` | Validates if $w^2 + l^2 = d^2$ (returns 1 or 0) |

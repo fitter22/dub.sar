@@ -4,8 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 [![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Documentation](https://img.shields.io/badge/Docs-fitter22.github.io%2Fdub.sar-orange.svg)](https://fitter22.github.io/dub.sar/)
-[![Conformance Tests](https://img.shields.io/badge/Conformance-184%20Passed-success.svg)](tests/)
-[![Targets: C99 / VM / WASM](https://img.shields.io/badge/Targets-C99%20%7C%20VM%20%7C%20WASM-purple.svg)](https://fitter22.github.io/dub.sar/compiler/)
+[![Conformance Tests](https://img.shields.io/badge/Test%20Suite-Passing-success.svg)](tests/)
+[![Targets: C99 / VM / WAT](https://img.shields.io/badge/Targets-C99%20%7C%20VM%20%7C%20WAT-purple.svg)](https://fitter22.github.io/dub.sar/compiler/)
 
 > **What if ancient Babylonian scribes had designed a modern programming language?**
 
@@ -30,7 +30,7 @@ Tablets can be authored in three interchangeable notations:
 - **Tablet Mode**: Authentic Unicode cuneiform signs ($U+12000 \dots U+1254F$).
 - **Mixed Mode**: Interleaving cuneiform identifiers with Latin keywords.
 
-All modes compile into an identical Abstract Syntax Tree and can be automatically converted via `dubsar transliterate` and `dubsar cuneiform`.
+All modes share the same computational semantics, execution runtime, and compilation pipeline, with automated translation via `dubsar transliterate` and `dubsar cuneiform`.
 
 ---
 
@@ -114,7 +114,7 @@ dubsar render examples/geometry_triangle.dub --style=tablet -o triangle.svg
 ## Key Pillars
 
 - **Exact Sexagesimal Rational Arithmetic**: Numbers are preserved as exact rationals ($p/q$), eliminating floating-point drift. Native sexagesimal notation (`0;30 = 1/2`, `1;24,51,10 \approx \sqrt{2}`) reflects authentic Old Babylonian base-60 mathematics.
-- **Algebraic Dimensional Metrology**: Quantities carry physical units (length, mass, area, time, capacity) checked at compile time. Incompatible operations (such as adding meters to seconds) are caught before execution.
+- **Algebraic Dimensional Metrology**: Quantities carry physical units (such as length, mass, and time) checked statically at compile time. Incompatible operations (such as adding meters to seconds) are caught before execution, with explicit conversions supported across defined metrological dimensions.
 - **Bounded Determinism**: Eliminates unbounded loops (`while`) in favor of bounded mathematical domains and atomic selections, guaranteeing program termination.
 - **Persistent Tablet Archive (*é-dub-ba-a*)**: SQLite-backed embedded house of tablets featuring SHA-256 cryptographic content addressing, immutable version lineages, and 13 standard scholarly reference tablets.
 - **Geometric & Fourier Mathematics**: 8-layer progression extending scribal ratios, right triangles, and canal inclinations into Discrete and Radix-2 Fast Fourier Transforms without complex numbers.
@@ -129,11 +129,11 @@ dubsar render examples/geometry_triangle.dub --style=tablet -o triangle.svg
 | **Native C99 / LLVM AOT** | Complete | Ahead-of-time compilation to standalone binaries, LLVM IR, and shared libraries |
 | **Stack Bytecode VM** | Complete | Stack IR, constant table, activation frames, and determination operations |
 | **Reference AST Interpreter** | Complete | Full language support with arbitrary-precision exact rationals |
-| **WebAssembly (.wat / .wasm)** | Complete | Scalar-replaced determinations, bounded loops, 64-bit rational runtime |
+| **WebAssembly Backend (WAT)** | Complete | Textual WebAssembly (`.wat`) code generator with 64-bit rational runtime, assembleable to `.wasm` via standard tools |
 | **Trimodal Unicode Parser** | Complete | Lexer and recursive-descent parser for Tablet, Scholar, and Mixed modes |
 | **Persistent Archive Engine** | Complete | SQLite-backed *é-dub-ba-a* with immutable monotonic versioning and SHA-256 provenance |
 | **Clay Tablet SVG Renderer** | Complete | Vector artwork generator producing textured clay tablet illustrations |
-| **Conformance Test Suite** | Complete | 184 unit, integration, and mathematical conformance test cases |
+| **Conformance Test Suite** | Complete | Exhaustive unit, integration, and mathematical conformance test suite |
 
 ---
 

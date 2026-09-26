@@ -67,7 +67,7 @@ The DUB.SAR compilation pipeline bridges high-level Mesopotamian mathematical st
 | **Reference AST Interpreter** | **Complete** | Full language support, exact arbitrary-precision rationals |
 | **Stack Bytecode VM** | **Complete** | Stack IR, constant table, activation frames, determination ops |
 | **Semantic IR** | **Complete** | Mathematical verbs layer (`ESTABLISH`, `TAKE`, `POSTFIX`, `RETAIN`, etc.) |
-| **WebAssembly (.wat)** | **Complete** | Scalar-replaced determinations, bounded loops, 64-bit rational runtime |
+| **WebAssembly Text (.wat)** | **Complete** | Textual WebAssembly (`.wat`) codegen with scalar-replaced determinations, bounded loops, and 64-bit rational runtime; assembleable to `.wasm` via standard tools |
 
 ---
 

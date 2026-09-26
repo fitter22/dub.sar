@@ -7,12 +7,12 @@
 ## Key Pillars
 
 - **The Tablet Paradigm**: Programs are structured as computational tablets (`IM.GID.DA`) with clear scribal sections: a **Problem Statement** (`𒂊𒁹` / `problem`), reusable **Prescription Recipes** (`𒁾𒊬` / `recipe`), and an **Inscribed Result** (`𒅗𒁹` / `result`).
-- **Three-Mode Source Model**: Write tablets in **Scholar Mode** (clean Latin-script keywords), **Tablet Mode** (authentic Unicode cuneiform signs), or **Mixed Mode** (combining cuneiform identifiers with Latin keywords). All modes compile into identical abstract syntax trees.
+- **Three-Mode Source Model**: Write tablets in **Scholar Mode** (clean Latin-script keywords), **Tablet Mode** (authentic Unicode cuneiform signs), or **Mixed Mode** (combining cuneiform identifiers with Latin keywords). All modes share the same computational semantics, execution runtime, and compilation pipeline.
 - **Historically Inspired Modern Language**: Inspired by Mesopotamian mathematics, scribal accounting, and sexagesimal computation, DUB.SAR is an executable programming system, not an ancient language reconstruction.
 - **Exact Rational Arithmetic**: Fractions and sexagesimal places are preserved as exact rational numbers ($p/q$), eliminating floating-point drift. The Python reference engine provides arbitrary precision, while the native C99 runtime utilizes 64-bit rational structures with 128-bit intermediate arithmetic.
-- **First-Class Metrological Dimensionality**: Quantities carry physical units enforced at parse and compile time with automatic unit conversions across standard Babylonian and SI units.
+- **First-Class Metrological Dimensionality**: Quantities carry physical units enforced at parse and compile time with explicit unit conversions supported across defined metrological dimensions using standard conversion factors.
 - **Persistent Tablet Archive**: Working tablets can be inscribed into SQLite-backed archives with cryptographic SHA-256 content addressing, immutable version history, and lineage tracking.
-- **Multi-Target Compilation**: Run tablets on the default virtual machine (`vm`), reference AST interpreter (`ast`), or compile ahead-of-time to standalone C99 binaries, native executables, LLVM IR, shared libraries, and WebAssembly (`.wasm`).
+- **Multi-Target Compilation**: Run tablets on the default virtual machine (`vm`), reference AST interpreter (`ast`), or compile ahead-of-time to standalone C99 binaries, native executables, LLVM IR, shared libraries, and WebAssembly Text (`.wat`).
 
 ---
 

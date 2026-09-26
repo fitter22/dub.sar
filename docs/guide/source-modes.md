@@ -6,7 +6,7 @@ DUB.SAR features a three-mode source model designed to unite authentic visual sc
 - **Tablet Mode**: The genuine cuneiform program notation and visual representation of the language.
 - **Mixed Mode**: The seamless bridge between Scholar and Tablet notations.
 
-All three source modes compile into the exact same Abstract Syntax Tree (AST), execute identically across both the reference AST interpreter and bytecode VM, and preserve equivalent semantics.
+All three source modes share the same underlying mathematical semantics, compile through a unified pipeline, and execute identically across the reference AST interpreter, bytecode VM, and native backends.
 
 > [!NOTE]
 > **Historical Inspiration vs Ancient Language Reconstruction**

@@ -46,7 +46,7 @@ DUB.SAR includes a variety of executable sample tablets illustrating historical 
 - **Even Intercalation Distribution** (`examples/even_distribution.dub`, `examples/even_distribution_scholar.dub`):
   Distributes leap days uniformly across calendar cycles using exact Bresenham accumulator arithmetic.
 - **Unit Conversions & Dimensional Safety** (`examples/unit_conversion.dub`, `examples/unit_conversion_scholar.dub`):
-  Demonstrates compile-time dimensional checking and conversions between Babylonian and SI units.
+  Demonstrates compile-time dimensional checking and conversions across supported metrological units with defined conversion factors.
 - **Persistent Tablet Archives & Lineage** (`examples/tablet_archive.dub`, `examples/tablet_archive_scholar.dub`):
   Illustrates multi-tablet archival persistence, working tablet scratchpads, and versioned lineage derivation.
 - **Language Conformance Suite** (`examples/conformance.dub`, `examples/conformance_scholar.dub`):

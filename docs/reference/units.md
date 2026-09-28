@@ -6,7 +6,7 @@ Comprehensive catalog of supported physical, astronomical, and metrological unit
 
 ## 1. Standard Units Table
 
-DUB.SAR embeds standard conversion scale factors for units in the physical dimensions of `time`, `mass`, `length`, `month`, and `year`.
+DUB.SAR embeds standard conversion scale factors for units in the physical dimensions of `time`, `mass`, and `length`, as well as discrete abstract calendar dimensions.
 
 ### Time Units (Base Dimension: `time`)
 
@@ -19,12 +19,15 @@ DUB.SAR embeds standard conversion scale factors for units in the physical dimen
 
 ### Calendar Dimensions
 
-Mesopotamian astronomical and calendar calculations treat months and years as discrete cycle dimensions:
+Mesopotamian astronomical and calendar calculations treat months and years as discrete, independent cycle dimensions:
 
-| Unit Identifier | Alternative Aliases | Cuneiform Sign | Dimension | Scale / Definition |
+| Unit Identifier | Alternative Aliases | Cuneiform Sign | Base Dimension | Scale |
 | :--- | :--- | :---: | :--- | :--- |
-| `month` | `iti` | `𒌗` | `month` | $1\text{ month}$ (standard schematic month = $30\text{ days}$) |
-| `year` | `mu` | `𒈬` | `year` | $1\text{ year}$ (standard administrative year = $360\text{ days}$) |
+| `month` | `iti` | `𒌗` | `month` | $1$ (abstract calendar cycle) |
+| `year` | `mu` | `𒈬` | `year` | $1$ (abstract astronomical cycle) |
+
+> [!NOTE]
+> In DUB.SAR, `month` and `year` are distinct abstract dimensions (`{"month": 1}` and `{"year": 1}`), each with scale 1. They are not units within the `time` dimension and do not convert to `day`, `second`, or to each other.
 
 ### Mass & Weight Units (Base Dimension: `mass`)
 
@@ -62,21 +65,24 @@ Any unit name not present in the standard table above (e.g., `shekel`, `silver`,
 
 ## 3. Unit Conversion Syntax
 
-DUB.SAR supports explicit conversion through two syntax forms:
+DUB.SAR supports explicit conversion through two canonical syntax forms:
 
-1. **Built-in Function Call**:
+1. **Built-in Function Call (indented under quantity establishment)**:
    ```syntax
-   target := convert(quantity, "target_unit")
+   target :
+       convert(quantity, "target_unit")
    ```
 2. **Postfix Calculation Pipeline**:
    ```syntax
-   quantity
-   target_unit
-   apply convert
+   target :
+       quantity
+       target_unit
+       apply convert
    ```
    In authentic cuneiform Tablet Mode:
    ```syntax
-   quantity target_unit 𒀝 convert
+   target :
+       quantity target_unit 𒀝 convert
    ```
 
 ### Minimal Example
@@ -85,10 +91,12 @@ DUB.SAR supports explicit conversion through two syntax forms:
 ```dubsar
 problem
     duration : 1 day
-    in_hours := convert(duration, "hour")
+    in_hours :
+        convert(duration, "hour")
 
     weight : 2 talent
-    in_minas := convert(weight, "mina")
+    in_minas :
+        convert(weight, "mina")
 result
     in_hours
     in_minas

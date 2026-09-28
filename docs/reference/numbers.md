@@ -6,14 +6,13 @@ DUB.SAR parses, evaluates, and outputs numbers in multiple exact formats, rooted
 
 ## 1. Supported Number Formats
 
-DUB.SAR supports five numerical formats in source code:
+DUB.SAR supports four numerical literal formats in source code:
 
 | Format | Syntax Example | Mathematical Value | Description |
 | :--- | :--- | :--- | :--- |
 | **Decimal Integer** | `42`, `1000` | $42$, $1000$ | Standard base-10 digits. |
 | **Rational Fraction** | `3/4`, `355/113` | $3/4$, $355/113$ | Exact integer ratio $p/q$. |
-| **Sexagesimal Fraction** | `0;30`, `1;24,51,10` | $1/2$, $\approx \sqrt{2}$ | Positional base-60 with semicolon and comma separators. |
-| **Regular Sexagesimal Integer** | `1,20`, `2,0` | $80$, $120$ | Multi-place sexagesimal whole numbers ($1 \times 60 + 20 = 80$). |
+| **Sexagesimal Literal** | `0;30`, `1;24,51,10`, `80;0` | $1/2$, $\approx \sqrt{2}$, $80$ | Positional base-60 with radix semicolon (`;` or `𒑱`) and comma-delimited places. |
 | **Cuneiform Numerals** | `𒁹`, `𒌋`, `𒐏𒈫` | $1$, $10$, $42$ | Authentic Unicode cuneiform numeral glyphs (values 1–59). |
 
 ---
@@ -22,8 +21,9 @@ DUB.SAR supports five numerical formats in source code:
 
 In Mesopotamian mathematics, numbers are expressed in base 60. DUB.SAR adopts the standard Assyriological transcription convention:
 
-- The **semicolon** (`;`) marks the sexagesimal radix point separating the integer part from the fractional part.
-- The **comma** (`,`) separates consecutive base-60 sexagesimal places, each taking a value from 0 to 59.
+- The **semicolon** (`;` or cuneiform `𒑱`) is mandatory for all sexagesimal literals, marking the sexagesimal radix point separating the integer part from fractional places.
+- The **comma** (`,`) separates consecutive base-60 sexagesimal places following the semicolon, with each place taking a value from 0 to 59.
+- Comma-only whole-number sequences without a semicolon are not recognized as sexagesimal literals; an explicit radix semicolon is always required (e.g. `80;0` rather than `1,20`).
 
 ### Place-Value Weighting
 
@@ -62,7 +62,7 @@ Calculations are evaluated using exact rational arithmetic ($p/q$), completely e
 
 - **Reference Interpreter & VM**: Arbitrary-precision exact integer numerators and denominators normalized via Euclidean GCD.
 - **Native AOT Compiler (C99 Runtime)**: Exact 64-bit rational storage (`int64_t num, den`) using 128-bit intermediate products (`__int128_t`) with canonical Euclidean GCD normalization.
-- **Format Modes**: The CLI `--format` option controls output presentation:
+- **Format Modes**: The CLI `--format` option controls output presentation on the VM and AST interpreter:
     - `canonical` (default): Terminating regular numbers print in sexagesimal notation; integers print in decimal; irregular ratios print as fractions.
     - `sexagesimal`: Enforces sexagesimal formatting across results.
     - `decimal`: Prints exact decimal or fraction representations.

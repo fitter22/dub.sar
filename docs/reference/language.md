@@ -551,7 +551,7 @@ In cuneiform Tablet Mode:
 - **Length** (`length`): `cubit` (base unit), `finger` ($1/30\text{ cubit}$), `reed` ($6\text{ cubits}$), `nindan` ($12\text{ cubits}$), `meter`.
 - **Time** (`time`): `second` (base unit), `minute` ($60\text{ s}$), `hour` ($3600\text{ s}$), `day` ($86400\text{ s}$).
 - **Mass** (`mass`): `mina` (base unit), `talent` ($60\text{ minas}$).
-- **Calendar**: `month` ($30\text{ days}$), `year` ($360\text{ days}$).
+- **Calendar Dimensions**: `month` and `year` represent independent abstract calendar and astronomical cycles; each has its own distinct base dimension and scale 1, and neither converts to days or to each other.
 - **Dynamic Units**: Any unrecognized unit (e.g. `copper`, `shekel`, `grain`) dynamically forms an independent base dimension.
 
 ### Semantics

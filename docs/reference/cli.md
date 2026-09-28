@@ -18,11 +18,11 @@ dubsar run <file.dub> [options]
 
 - Parses and semantically checks the source tablet before execution.
 - Evaluates the tablet using one of three execution backends:
-    - `vm`: Stack-oriented bytecode virtual machine (default, recommended).
-    - `ast`: Recursive AST tree-walking interpreter (reference implementation).
-    - `native`: Ahead-of-time compiled native machine binary linked against the C99 rational runtime.
-- Automatically connects to an adjacent SQLite tablet archive database (`<stem>.tablets.db`) unless an explicit database path is provided via `--archive`.
-- Formats numeric results according to `--format` (`canonical`, `sexagesimal`, or `decimal`).
+    - `vm`: Stack-oriented bytecode virtual machine (default, recommended). Fully supports all language features, persistent SQLite archives (`--archive`), format modes (`--format`), and interactive presets (`--input`).
+    - `ast`: Recursive AST tree-walking interpreter (reference implementation). Fully supports all language features, persistent SQLite archives (`--archive`), format modes (`--format`), and interactive presets (`--input`).
+    - `native`: Ahead-of-time compiled native machine binary linked against the C99 rational runtime. Supports arithmetic, control flow, functions, loops, and preset input (`--input`). *Backend-specific note*: The native runner executes compiled C99 binaries directly; it does not connect to the persistent SQLite archive (`--archive` is ignored) and outputs raw integer/rational values without applying the `--format` presentation styles.
+- For the `vm` and `ast` backends, automatically connects to an adjacent SQLite tablet archive database (`<stem>.tablets.db`) unless an explicit database path is provided via `--archive`.
+- For the `vm` and `ast` backends, formats numeric results according to `--format` (`canonical`, `sexagesimal`, or `decimal`).
 
 ### Exit Codes
 
@@ -36,11 +36,11 @@ dubsar run <file.dub> [options]
 
 | Option | Values | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `--backend` | `vm`, `ast`, `native` | `vm` | Execution engine backend. |
+| `--backend` | `vm`, `ast`, `native` | `vm` | Execution engine backend. VM and AST support all features; native runs compiled C99 binaries without archive persistence or format modes. |
 | `--input` | `<string>` | `None` | Preset numeric or string input value to supply to interactive `ask` / `𒀀𒁹` expressions. |
-| `--format` | `canonical`, `sexagesimal`, `decimal` | `canonical` | Number presentation style for inscribed results. |
-| `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Enforces or auto-detects source language mode. |
-| `--archive` | `<path>` | `None` | Path to persistent SQLite tablet archive database (`.db`). Defaults to `<stem>.tablets.db`. |
+| `--format` | `canonical`, `sexagesimal`, `decimal` | `canonical` | Number presentation style for inscribed results on VM and AST backends (not applied in native mode). |
+| `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Informational mode flag. Currently non-enforcing (source mode is auto-detected from keywords and tokens). |
+| `--archive` | `<path>` | `None` | Path to persistent SQLite tablet archive database (`.db`) for VM and AST backends. Defaults to `<stem>.tablets.db`. Ignored by the native backend. |
 
 ### Practical Examples
 
@@ -96,7 +96,8 @@ dubsar check <file.dub> [options]
 
 - Verifies tablet structure, problem blocks, calculation pipelines, and result assertions.
 - Enforces static type safety, dimensional consistency of metrological units, and scope rules.
-- Validates persistent archive references against available schemas.
+- Checks syntax of archive statements (`consult tablet`, `inscribe ... as tablet`) and registers tablet references in the symbol table without requiring a runtime database connection (archive existence and schemas are verified at runtime upon connection).
+- Auto-detects and reports source mode (Tablet, Scholar, or Mixed).
 - Produces no side effects and does not modify archive databases or files.
 
 ### Exit Codes
@@ -110,7 +111,7 @@ dubsar check <file.dub> [options]
 
 | Option | Values | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Enforces specific source mode during parsing and validation. |
+| `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Informational mode flag. Accepted for CLI compatibility; check auto-detects source mode and reports it. |
 
 ### Practical Examples
 
@@ -124,12 +125,6 @@ Output on success:
 
 ```text
 [OK] Tablet 'tablet.dub' parsed and verified successfully (Mode: scholar).
-```
-
-Enforce authentic cuneiform Tablet Mode during validation:
-
-```bash
-dubsar check tablet.dub --mode=tablet
 ```
 
 ### Links
@@ -177,7 +172,7 @@ dubsar compile <file.dub> [options]
 | `--target` | `bytecode`, `wasm`, `wat`, `ir`, `json`, `native`, `c`, `llvm`, `ll`, `shared`, `dylib`, `so` | `bytecode` | Target compilation artifact format. |
 | `-o`, `--output` | `<file>` | `None` | Output destination file path. |
 | `--opt-level` | `-O0`, `-O1`, `-O2`, `-O3`, `-Os` | `-O3` | Optimization level passed to the native backend C compiler. |
-| `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Enforces source language mode. |
+| `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Informational mode flag (source mode is auto-detected). |
 
 ### Practical Examples
 
@@ -231,8 +226,9 @@ dubsar format <file.dub> [options]
 
 ### Semantics
 
-- Normalizes indentation, line spacing, and operator padding across problem, recipe, and result sections.
-- Supports canonical target style transformation: convert between Latin Scholar Mode and authentic cuneiform Tablet Mode formatting.
+- Parses tablet source code into an AST and re-emits formatted code with canonical indentation, line spacing, and operator layout across problem, recipe, and result sections.
+- Supports canonical keyword styling via `--mode`: formats section markers and keywords using either Latin Scholar Mode or cuneiform signs.
+- Preserves variable identifiers and numeric literals as written (does not transform identifiers or convert numbers into cuneiform glyphs).
 - Can emit to stdout, save to a new file, or update the file in-place.
 
 ### Exit Codes
@@ -246,7 +242,7 @@ dubsar format <file.dub> [options]
 
 | Option | Values | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `--mode` | `auto`, `tablet`, `scholar` | `auto` | Canonical target style: Tablet cuneiform, Scholar Latin, or auto-detected. |
+| `--mode` | `auto`, `tablet`, `scholar` | `auto` | Target keyword formatting style: cuneiform signs (`tablet`), Latin keywords (`scholar`), or auto-detected (`auto`). Preserves variable identifiers and numbers as written. |
 | `-i`, `--inplace` | flag | `false` | Overwrites the input source file in-place with formatted output. |
 | `-o`, `--output` | `<file>` | `None` | Destination output file path. Defaults to printing to stdout. |
 
@@ -270,7 +266,7 @@ Canonicalize and save formatted output to a separate file:
 dubsar format tablet.dub -o formatted_tablet.dub
 ```
 
-Convert layout to Scholar Mode style during formatting:
+Format keywords into Scholar Mode style:
 
 ```bash
 dubsar format tablet.dub --mode=scholar -o tablet_scholar.dub
@@ -285,7 +281,7 @@ dubsar format tablet.dub --mode=scholar -o tablet_scholar.dub
 
 ## 5. `dubsar transliterate`
 
-Converts authentic cuneiform Tablet Mode source into canonical Latin Scholar Mode text.
+Converts authentic cuneiform Tablet Mode keywords and tokens into canonical Latin Scholar Mode text.
 
 ### Syntax
 
@@ -295,9 +291,9 @@ dubsar transliterate <file.dub> [options]
 
 ### Semantics
 
-- Replaces Unicode cuneiform ideograms and syllabograms (`𒂊𒁹`, `𒅗𒁹`, `𒍣`, `𒋫`, `𒊭`, `𒉌`, etc.) with their canonical Latin equivalents (`problem`, `result`, `add`, `subtract`, `multiply`, `divide`, etc.).
-- Converts cuneiform numeric signs (`𒁹`, `𒌋`, `𒌍`, etc.) into decimal or sexagesimal numbers.
-- Preserves string literals exactly without transliterating their internal characters.
+- Replaces Unicode cuneiform keywords, operators, section headers, and syntactic tokens (`𒂊𒁹`, `𒅗𒁹`, `𒍣`, `𒋫`, `𒊭`, `𒉌`, etc.) with their canonical Latin equivalents (`problem`, `result`, `add`, `subtract`, `multiply`, `divide`, etc.).
+- Preserves variable identifiers, numeric literals, and string literals as written without alteration.
+- Does not convert cuneiform numeric signs or transform identifier names.
 
 ### Exit Codes
 
@@ -336,7 +332,7 @@ dubsar transliterate tablet_cuneiform.dub -o tablet_scholar.dub
 
 ## 6. `dubsar cuneiform`
 
-Converts Latin Scholar Mode source code into authentic Mesopotamian cuneiform Tablet Mode inscriptions.
+Converts Latin Scholar Mode keywords and section markers into authentic Unicode cuneiform signs.
 
 ### Syntax
 
@@ -346,9 +342,9 @@ dubsar cuneiform <file.dub> [options]
 
 ### Semantics
 
-- Maps Scholar Mode keywords (`problem`, `result`, `recipe`, `working`, `add`, `multiply`, etc.) to their canonical Unicode cuneiform signs (`𒂊𒁹`, `𒅗𒁹`, `𒁾𒊬`, `𒆥`, `𒍣`, `𒊭`, etc.).
-- Converts integer numbers 1 through 59 into authentic cuneiform numeral glyphs (`𒁹`, `𒈫`, `𒌋`, `𒌍`, `𒐏`, `𒐐`, etc.).
-- Preserves string literals and modern identifiers without corruption.
+- Maps Scholar Mode keywords, section headers (`problem` -> `𒂊𒁹`, `result` -> `𒅗𒁹`), and mathematical operators (`add` -> `𒍣`, `multiply` -> `𒊭`, etc.) into authentic Unicode cuneiform signs.
+- Preserves user-defined variable identifiers, numeric literals, and string data as written.
+- Does not perform automatic identifier translation into cuneiform or convert numbers into cuneiform numeral glyphs. (To produce pure cuneiform Tablet Mode with cuneiform identifiers, author tablets directly in Tablet Mode).
 
 ### Exit Codes
 
@@ -365,7 +361,7 @@ dubsar cuneiform <file.dub> [options]
 
 ### Practical Examples
 
-Convert Scholar Mode code to cuneiform on stdout:
+Convert Scholar Mode keywords to cuneiform on stdout:
 
 ```bash
 dubsar cuneiform tablet_scholar.dub
@@ -538,7 +534,7 @@ History of 'survey_2026':
 
 #### `export`
 
-Exports the entire archive or selected records to a JSON interchange format.
+Exports the entire tablet archive to a JSON interchange format.
 
 ```bash
 dubsar archive export [-o <output.json>] [--archive=<db_path>]

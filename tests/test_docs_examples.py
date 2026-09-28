@@ -41,6 +41,25 @@ EXPECTED_OUTPUTS: dict[str | tuple[str, int], list[str]] = {
     "learn-complete-example-scholar": ["128", "31", "0;0,0,2,42"],
     "learn-complete-example-cuneiform": ["128", "31", "0;0,0,2,42"],
 
+    # Reference manual test IDs
+    "ref-language-structure": ["36 length^2"],
+    "ref-language-sections": ["30"],
+    "ref-language-establishment": ["13 length"],
+    "ref-language-operators": ["3;20", "2"],
+    "ref-language-verbs": ["35"],
+    "ref-language-determinations": ["360 length^2"],
+    "ref-language-domains": ["5050"],
+    "ref-language-selection": ["7"],
+    "ref-language-sequences": ["3", "20"],
+    "ref-language-archive": ["0;12"],
+    "ref-language-units": ["24 hour"],
+    "ref-language-numbers": ["1"],
+    "ref-language-modes-scholar": ["16 length^2"],
+    "ref-language-modes-tablet": ["16 length^2"],
+    "ref-language-modes-mixed": ["16 length^2"],
+    "ref-units-conversion": ["24 hour", "120 mina"],
+    "ref-numbers-formats": ["1;15"],
+
     # Guide fallbacks keyed by (filename, block_idx)
     ("docs/guide/calculations.md", 1): ["35"],
     ("docs/guide/determinations.md", 1): ["360 length^2"],

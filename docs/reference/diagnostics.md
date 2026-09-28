@@ -28,8 +28,8 @@ When an error occurs, DUB.SAR renders a boxed diagnostic showing both the cuneif
   Location: tablet.dub:2:16
 ══════════════════════════════════════════════════════════════════════
 
-  [Tablet/Cuneiform]       x := 1 𒌓 + 2 𒈬
-  [Scholar/Latin]          x := 1 day + 2 year
+  [Tablet/Cuneiform]       x : 1 𒌓 + 2 𒈬
+  [Scholar/Latin]          x : 1 day + 2 year
                                       ^
 
   Explanation:

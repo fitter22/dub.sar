@@ -1,5 +1,19 @@
-# DUB.SAR 1.0 — Discrete Fourier Transform (Scholar Mode)
-# Layer H: Equal divisions of a turn, reference DFT, and Radix-2 recursive FFT.
+# DUB.SAR 1.0 Example: Discrete Fourier Transform
+# Difficulty: Mastery
+# Concept: Discrete Fourier Transform & Radix-2 FFT
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Computes Discrete Fourier Transforms on sequence tablets, verifying
+#   energy conservation and inverse reconstruction.
+#
+# Expected Output:
+#   2
+#   4
+#   4
+#   1
+#   1
+#   1
 
 problem
     # 1. Consult the Powers of Two table to verify sequence length is a harmonic power of 2

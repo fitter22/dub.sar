@@ -1,0 +1,23 @@
+# DUB.SAR 1.0 Example: First Tablet
+# Difficulty: Beginner
+# Concept: Tablet Structure & Quantity Establishment
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Demonstrates minimal canonical tablet structure: declaring a problem section,
+#   establishing physical quantities with units, computing field area via postfix
+#   multiplication, and inscribing the resulting quantity.
+#
+# Expected Output:
+#   1200 length^2
+
+problem:
+    width : 30 cubit
+    height : 40 cubit
+    area :
+        width
+        height
+        multiply
+
+result:
+    area

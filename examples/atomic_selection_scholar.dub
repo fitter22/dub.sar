@@ -1,0 +1,26 @@
+# DUB.SAR 1.0 Example: Atomic Selection
+# Difficulty: Intermediate
+# Concept: Atomic Selection & Sentinel Retention
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Demonstrates atomic candidate retention using 'retain ... when ...' with
+#   an 'empty' sentinel accumulator, finding the largest integer whose square
+#   does not exceed 50.
+#
+# Expected Output:
+#   Largest integer whose square <= 50:
+#   7
+
+problem
+    best : empty
+
+    consider x from 1 through 10:
+        sq :
+            x
+            square
+        retain x when sq <= 50
+
+result
+    output "Largest integer whose square <= 50:"
+    output best

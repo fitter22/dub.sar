@@ -1,0 +1,23 @@
+𒑰 DUB.SAR 1.0 Example: First Tablet
+𒑰 Difficulty: Beginner
+𒑰 Concept: Tablet Structure & Quantity Establishment
+𒑰 Mode: Tablet (Canonical Cuneiform)
+𒑰
+𒑰 Purpose:
+𒑰   Demonstrates minimal canonical tablet structure: declaring a problem section,
+𒑰   establishing physical quantities with units, computing field area via postfix
+𒑰   multiplication, and inscribing the resulting quantity.
+𒑰
+𒑰 Expected Output:
+𒑰   1200 length^2
+
+𒂊𒁹
+    𒂼 : 30 cubit
+    𒊕 : 40 cubit
+    𒁇 :
+        𒂼
+        𒊕
+        𒊭
+
+𒅗𒁹
+    𒁇

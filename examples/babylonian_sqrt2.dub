@@ -1,5 +1,17 @@
-𒑰 DUB.SAR 1.0 — Tablet YBC 7289: The Diagonal of the Square
-𒑰 Calculates the Babylonian approximation of sqrt(2): 1;24,51,10
+𒑰 DUB.SAR 1.0 Example: Babylonian Square Root of 2 (YBC 7289)
+𒑰 Difficulty: Exemplar
+𒑰 Concept: Historical Archaeology & YBC 7289
+𒑰 Mode: Tablet (Canonical Cuneiform)
+𒑰
+𒑰 Purpose:
+𒑰   Computes the Babylonian approximation of sqrt(2) (1;24,51,10) using iterative
+𒑰   Heron-Babylonian reciprocal calculations from tablet YBC 7289.
+𒑰
+𒑰 Expected Output:
+𒑰   Babylonian sqrt(2) approximation:
+𒑰   1 + 195025/470832
+𒑰   Square with side 30 has diagonal:
+𒑰   42 + 33461/78472
 
 𒂊𒁹
 

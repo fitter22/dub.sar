@@ -1,5 +1,20 @@
-# DUB.SAR 1.0 — Geometric Inclination and Direction (Scholar Mode)
-# Layers C, D, E, G: Proportional slopes, directions, turn rotations, and directed quantities.
+# DUB.SAR 1.0 Example: Geometric Inclination and Direction
+# Difficulty: Advanced
+# Concept: Directions, Turns & Rotations
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Computes canal and ramp inclinations (rise/run) and feeds (run/rise),
+#   constructs directed quantities, and executes turn rotations.
+#
+# Expected Output:
+#   0;20
+#   3
+#   0;30
+#   2
+#   direction(quarter-turn)
+#   direction(0;22,30-turn)
+#   10 meter along direction(quarter-turn)
 
 problem
     # 1. Consult Old Babylonian ramp inclinations from the Tablet Archive (BM 85194)

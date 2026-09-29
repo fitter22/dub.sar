@@ -1,5 +1,15 @@
-# DUB.SAR 1.0 — Reciprocal Table Lookup (Scholar Mode)
-# Demonstrates consulting the standard reciprocal tablet and exact division.
+# DUB.SAR 1.0 Example: Reciprocal Table Lookup
+# Difficulty: Mastery
+# Concept: Archival Reference Tables & Reciprocals
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Consults the standard immutable reference tablet 'reciprocals'
+#   from the tablet archive and executes exact sexagesimal division.
+#
+# Expected Output:
+#   0;7,30
+#   3;45
 
 problem
     consult tablet "reciprocals"
@@ -7,7 +17,10 @@ problem
     recip_8 : take entry 8 from reciprocals
 
     dividend : 30
-    quotient := dividend * recip_8
+    quotient :
+        dividend
+        recip_8
+        multiply
 
 result
     recip_8

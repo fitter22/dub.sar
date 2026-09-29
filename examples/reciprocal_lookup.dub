@@ -1,17 +1,28 @@
-𒑰 DUB.SAR 1.0 — Reciprocal Table Lookup (Canonical Cuneiform)
-𒑰 Demonstrates consulting the standard reciprocal tablet and exact division.
+𒑰 DUB.SAR 1.0 Example: Reciprocal Table Lookup
+𒑰 Difficulty: Mastery
+𒑰 Concept: Archival Reference Tables & Reciprocals
+𒑰 Mode: Tablet (Canonical Cuneiform)
+𒑰
+𒑰 Purpose:
+𒑰   Consults the standard immutable reference tablet 'reciprocals'
+𒑰   from the tablet archive and executes exact sexagesimal division.
+𒑰
+𒑰 Expected Output:
+𒑰   0;7,30
+𒑰   3;45
 
 𒂊𒁹
-
     𒅆 𒁾 "reciprocals" 𒁶 𒅎
 
     𒈦 :
         𒅎 8 𒋗
 
     𒊕 : 30
-    𒁇 := 𒊕 * 𒈦
+    𒁇 :
+        𒊕
+        𒈦
+        𒊭
 
 𒅗𒁹
-
     𒈦
     𒁇

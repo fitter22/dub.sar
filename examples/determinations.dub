@@ -1,0 +1,34 @@
+𒑰 DUB.SAR 1.0 Example: Mathematical Determinations
+𒑰 Difficulty: Intermediate
+𒑰 Concept: Determinations & Compound Records
+𒑰 Mode: Tablet (Canonical Cuneiform)
+𒑰
+𒑰 Purpose:
+𒑰   Demonstrates structured mathematical determination records, grouping
+𒑰   multiple measurement quantities into a single compound record and accessing
+𒑰   its fields.
+𒑰
+𒑰 Expected Output:
+𒑰   Parcel area:
+𒑰   360 length^2
+𒑰   Parcel width:
+𒑰   15 kus
+𒑰   Parcel depth:
+𒑰   24 kus
+
+𒂊𒁹
+    width : 15 cubit
+    depth : 24 cubit
+    parcel : width, depth
+    area :
+        parcel.width
+        parcel.depth
+        𒊭
+
+𒅗𒁹
+    𒁹𒀀 "Parcel area:"
+    𒁹𒀀 area
+    𒁹𒀀 "Parcel width:"
+    𒁹𒀀 parcel.width
+    𒁹𒀀 "Parcel depth:"
+    𒁹𒀀 parcel.depth

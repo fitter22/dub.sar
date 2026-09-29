@@ -1,0 +1,56 @@
+# DUB.SAR 1.0 Example: Postfix Calculation Pipelines
+# Difficulty: Intermediate
+# Concept: Stack Pipelines & Postfix Mathematical Verbs
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Demonstrates operand stack manipulation and built-in postfix mathematical verbs
+#   including square, half (multiplication by 0;30), floor, ceil, and nearest rounding.
+#
+# Expected Output:
+#   Square of 7:
+#   49
+#   Half of 49:
+#   24;30
+#   Floor of 24;30:
+#   24
+#   Ceiling of 24;30:
+#   25
+#   Nearest to 24;30:
+#   25
+
+problem
+    val : 7
+
+    sq :
+        val
+        square
+
+    h :
+        sq
+        0;30
+        multiply
+
+    fl :
+        h
+        floor
+
+    cl :
+        h
+        ceil
+
+    nr :
+        h
+        nearest
+
+result
+    output "Square of 7:"
+    output sq
+    output "Half of 49:"
+    output h
+    output "Floor of 24;30:"
+    output fl
+    output "Ceiling of 24;30:"
+    output cl
+    output "Nearest to 24;30:"
+    output nr

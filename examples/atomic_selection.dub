@@ -1,0 +1,26 @@
+𒑰 DUB.SAR 1.0 Example: Atomic Selection
+𒑰 Difficulty: Intermediate
+𒑰 Concept: Atomic Selection & Sentinel Retention
+𒑰 Mode: Tablet (Canonical Cuneiform)
+𒑰
+𒑰 Purpose:
+𒑰   Demonstrates atomic candidate retention using 'retain ... when ...' with
+𒑰   an 'empty' sentinel accumulator, finding the largest integer whose square
+𒑰   does not exceed 50.
+𒑰
+𒑰 Expected Output:
+𒑰   Largest integer whose square <= 50:
+𒑰   7
+
+𒂊𒁹
+    best : 𒉡
+
+    𒄀 x ta 1 𒂗 10:
+        sq :
+            x
+            𒅁
+        𒋼 x 𒂊𒀀 sq <= 50
+
+𒅗𒁹
+    𒁹𒀀 "Largest integer whose square <= 50:"
+    𒁹𒀀 best

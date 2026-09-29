@@ -1,0 +1,34 @@
+# DUB.SAR 1.0 Example: Mathematical Determinations
+# Difficulty: Intermediate
+# Concept: Determinations & Compound Records
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Demonstrates structured mathematical determination records, grouping
+#   multiple measurement quantities into a single compound record and accessing
+#   its fields.
+#
+# Expected Output:
+#   Parcel area:
+#   360 length^2
+#   Parcel width:
+#   15 kus
+#   Parcel depth:
+#   24 kus
+
+problem
+    width : 15 cubit
+    depth : 24 cubit
+    parcel : width, depth
+    area :
+        parcel.width
+        parcel.depth
+        multiply
+
+result
+    output "Parcel area:"
+    output area
+    output "Parcel width:"
+    output parcel.width
+    output "Parcel depth:"
+    output parcel.depth

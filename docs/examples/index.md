@@ -5,7 +5,7 @@ Welcome to the DUB.SAR Examples Catalog. This catalog organizes 21 curated compu
 Every example is provided in two paired implementations:
 
 - **Scholar Mode** (`examples/<name>_scholar.dub`): Formatted with clean Latin-script keywords, descriptive variable bindings, and modern identifier conventions for readability.
-- **Tablet Mode** (`examples/<name>.dub`): Written in authentic Unicode cuneiform signs, cuneiform identifiers, and compact postfix prescriptions mirroring historical scribal practice.
+- **Tablet / Mixed Mode** (`examples/<name>.dub`): Written with authentic cuneiform syntax, postfix prescriptions, and mathematical verbs. Fully authentic **Tablet Mode** (`babylonian_sqrt2.dub`, `even_distribution.dub`, `planetary_leap.dub`, `reciprocal_lookup.dub`) pairs cuneiform keywords with authentic cuneiform identifiers, while **Mixed Mode** pairs cuneiform keywords and verbs with readable Latin identifiers, allowing learners to focus on operators and pipelines.
 
 All examples are fully executable and verified for exact semantic parity across both the reference AST interpreter and the stack-based virtual machine via automated test coverage in `tests/test_examples.py`.
 
@@ -27,35 +27,35 @@ flowchart LR
 2. **Level 2: Intermediate — Control Flow & Pipelines**: Stack-oriented postfix pipelines, mathematical verbs, finite bounded iteration, atomic selection, and structured determination tuples.
 3. **Level 3: Advanced — Data Structures & Geometry**: Dynamic sequence tablets, iterative series transformations, right-triangle geometry, inclination slopes, and directed turn vectors.
 4. **Level 4: Mastery — Archives & Advanced Math**: Embedded reciprocal reference tables, multi-tablet archival persistence, immutable sequences, and discrete Fourier spectral analysis.
-5. **Level 5: Exemplars — Historical Tablets & Systems**: Authentic archaeological calculations (YBC 7289, Plimpton 322, UET V 72), astronomical calendar intercalation, versioned audit tablets, and full conformance testing.
+5. **Level 5: Exemplars — Historical Tablets & Systems**: Authentic archaeological calculations (YBC 7289, Plimpton 322, UET V 72), astronomical calendar intercalation, versioned audit tablets, and core conformance smoke tests.
 
 ---
 
 ## Master Catalog Table
 
-| Level | Example Name | Primary Concept | Scholar Tablet | Cuneiform Tablet | Expected Result |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Beginner** | [First Tablet](#first-tablet-dimensions) | Problem/Result, Dimensions | [`first_tablet_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/first_tablet_scholar.dub) | [`first_tablet.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/first_tablet.dub) | `1200 length^2` |
-| **1. Beginner** | [Exact Arithmetic](#exact-sexagesimal-arithmetic) | Sexagesimal Radix Arithmetic | [`arithmetic_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/arithmetic_scholar.dub) | [`arithmetic.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/arithmetic.dub) | `0;50`, `0;45`, `0;10`, `3` |
-| **1. Beginner** | [Unit Conversions](#unit-conversions-dimensional-safety) | Metrology & Unit Safety | [`unit_conversion_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/unit_conversion_scholar.dub) | [`unit_conversion.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/unit_conversion.dub) | `2 hour`, `1;30 day`, `2160 minute` |
-| **2. Intermediate** | [Postfix Pipelines](#postfix-pipelines-mathematical-verbs) | Verbs (`zi`, `ba-si`, `gur`, `nim`, `ri`) | [`postfix_pipelines_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/postfix_pipelines_scholar.dub) | [`postfix_pipelines.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/postfix_pipelines.dub) | `49`, `24;30`, `24`, `25`, `25` |
-| **2. Intermediate** | [Bounded Search](#bounded-mathematical-search) | Domains (`consider ... through`) | [`bounded_search_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/bounded_search_scholar.dub) | [`bounded_search.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/bounded_search.dub) | `55` |
-| **2. Intermediate** | [Atomic Selection](#atomic-selection-sentinel-retention) | `retain ... whenever`, Sentinel `empty` | [`atomic_selection_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection_scholar.dub) | [`atomic_selection.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection.dub) | `7` |
-| **2. Intermediate** | [Determinations](#determinations-structured-records) | Tuples, Field Extractions | [`determinations_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/determinations_scholar.dub) | [`determinations.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/determinations.dub) | `360 length^2`, `15 kus`, `24 kus` |
-| **3. Advanced** | [Sequence Generation](#sequence-generation) | Dynamic Sequences, First/Last | [`sequence_generation_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_generation_scholar.dub) | [`sequence_generation.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_generation.dub) | `6`, `1`, `8` |
-| **3. Advanced** | [Sequence Transformation](#sequence-transformation) | Series Mapping & Bounded Iteration | [`sequence_transformation_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_transformation_scholar.dub) | [`sequence_transformation.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_transformation.dub) | `120`, `4`, `96` |
-| **3. Advanced** | [Right Triangles](#right-triangles-plimpton-322) | Pythagorean Triples, Slopes | [`geometry_triangle_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometry_triangle_scholar.dub) | [`geometry_triangle.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometry_triangle.dub) | `1`, `13`, `2;24`, `0;25`, `30`, `1` |
-| **3. Advanced** | [Geometric Inclinations](#geometric-inclinations-feeds-turns) | Slopes, Feeds, Directed Turns | [`geometric_inclination_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometric_inclination_scholar.dub) | [`geometric_inclination.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometric_inclination.dub) | `0;20`, `3`, `direction(...)` |
-| **4. Mastery** | [Reciprocal Lookup](#reciprocal-table-lookup) | Reference Tablet Division | [`reciprocal_lookup_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/reciprocal_lookup_scholar.dub) | [`reciprocal_lookup.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/reciprocal_lookup.dub) | `0;7,30`, `3;45` |
-| **4. Mastery** | [Tablet Archive Persistence](#tablet-archive-persistence-lineage) | Multi-tablet Storage, Working Copy | [`tablet_archive_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/tablet_archive_scholar.dub) | [`tablet_archive.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/tablet_archive.dub) | `0;15` |
-| **4. Mastery** | [Persistent Sequences](#persistent-inscribed-sequences) | Inscribing Structured Sequences | [`persistent_sequence_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/persistent_sequence_scholar.dub) | [`persistent_sequence.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/persistent_sequence.dub) | `5`, `1`, `16` |
-| **4. Mastery** | [Fourier Transforms](#discrete-fourier-transform-dft-fft) | DFT/FFT Spectral Analysis | [`fourier_dft_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/fourier_dft_scholar.dub) | [`fourier_dft.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/fourier_dft.dub) | `2`, `4`, `4`, `1`, `1`, `1` |
-| **5. Exemplar** | [Babylonian Sqrt(2)](#babylonian-square-root-of-2-ybc-7289) | YBC 7289 Diagonal Approximation | [`babylonian_sqrt2_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/babylonian_sqrt2_scholar.dub) | [`babylonian_sqrt2.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/babylonian_sqrt2.dub) | `1 + 195025/470832`, `42 + 33461/78472` |
-| **5. Exemplar** | [Planetary Leap Cycles](#planetary-leap-year-cycle-search) | Astronomical Period Search | [`planetary_leap_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/planetary_leap_scholar.dub) | [`planetary_leap.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/planetary_leap.dub) | `673`, `163 day`, `1/29073600 day` |
-| **5. Exemplar** | [Even Intercalation](#even-distribution-of-leap-years) | Bresenham Leap Year Distribution | [`even_distribution_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/even_distribution_scholar.dub) | [`even_distribution.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/even_distribution.dub) | `0`, `0`, `0`, `1` |
-| **5. Exemplar** | [Ea-Nasir Dispute v1](#ea-nasir-copper-trade-dispute-uet-v-72) | UET V 72 Audit & Archive | [`ea_nasir_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir_scholar.dub) | [`ea_nasir.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir.dub) | `Ea-nasir`, `10 talent`, `0;15` |
-| **5. Exemplar** | [Ea-Nasir Revision v2](#ea-nasir-assessment-revision-v1-v2) | Working Derivation & Versioning | [`ea_nasir_revision_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir_revision_scholar.dub) | [`ea_nasir_revision.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir_revision.dub) | `ea-nasir-assessment` |
-| **5. Exemplar** | [Full Conformance](#full-language-conformance-suite) | Specification Test Verification | [`conformance_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/conformance_scholar.dub) | [`conformance.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/conformance.dub) | Multi-part mathematical verification |
+| Level | Example Name | Primary Concept | Scholar Tablet | Tablet / Mixed Tablet | Mode | Expected Result |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. Beginner** | [First Tablet](#first-tablet-dimensions) | Problem/Result, Dimensions | [`first_tablet_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/first_tablet_scholar.dub) | [`first_tablet.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/first_tablet.dub) | Mixed | `1200 length^2` |
+| **1. Beginner** | [Exact Arithmetic](#exact-sexagesimal-arithmetic) | Sexagesimal Radix Arithmetic | [`arithmetic_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/arithmetic_scholar.dub) | [`arithmetic.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/arithmetic.dub) | Mixed | `0;50`, `0;45`, `0;10`, `3` |
+| **1. Beginner** | [Unit Conversions](#unit-conversions-dimensional-safety) | Metrology & Unit Safety | [`unit_conversion_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/unit_conversion_scholar.dub) | [`unit_conversion.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/unit_conversion.dub) | Mixed | `2 hour`, `1;30 day`, `2160 minute` |
+| **2. Intermediate** | [Postfix Pipelines](#postfix-pipelines-mathematical-verbs) | Verbs (`zi`, `ba-si`, `gur`, `nim`, `ri`) | [`postfix_pipelines_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/postfix_pipelines_scholar.dub) | [`postfix_pipelines.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/postfix_pipelines.dub) | Mixed | `49`, `24;30`, `24`, `25`, `25` |
+| **2. Intermediate** | [Bounded Search](#bounded-mathematical-search) | Domains (`consider ... through`) | [`bounded_search_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/bounded_search_scholar.dub) | [`bounded_search.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/bounded_search.dub) | Mixed | `55` |
+| **2. Intermediate** | [Atomic Selection](#atomic-selection-sentinel-retention) | `retain ... whenever`, Sentinel `empty` | [`atomic_selection_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection_scholar.dub) | [`atomic_selection.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection.dub) | Mixed | `7` |
+| **2. Intermediate** | [Determinations](#determinations-structured-records) | Tuples, Field Extractions | [`determinations_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/determinations_scholar.dub) | [`determinations.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/determinations.dub) | Mixed | `360 length^2`, `15 kus`, `24 kus` |
+| **3. Advanced** | [Sequence Generation](#sequence-generation) | Dynamic Sequences, First/Last | [`sequence_generation_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_generation_scholar.dub) | [`sequence_generation.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_generation.dub) | Mixed | `6`, `1`, `8` |
+| **3. Advanced** | [Sequence Transformation](#sequence-transformation) | Series Mapping & Bounded Iteration | [`sequence_transformation_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_transformation_scholar.dub) | [`sequence_transformation.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_transformation.dub) | Mixed | `120`, `4`, `96` |
+| **3. Advanced** | [Right Triangles](#right-triangles-plimpton-322) | Pythagorean Triples, Slopes | [`geometry_triangle_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometry_triangle_scholar.dub) | [`geometry_triangle.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometry_triangle.dub) | Mixed | `1`, `13`, `2;24`, `0;25`, `30`, `1` |
+| **3. Advanced** | [Geometric Inclinations](#geometric-inclinations-feeds-turns) | Slopes, Feeds, Directed Turns | [`geometric_inclination_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometric_inclination_scholar.dub) | [`geometric_inclination.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/geometric_inclination.dub) | Mixed | `0;20`, `3`, `direction(...)` |
+| **4. Mastery** | [Reciprocal Lookup](#reciprocal-table-lookup) | Reference Tablet Division | [`reciprocal_lookup_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/reciprocal_lookup_scholar.dub) | [`reciprocal_lookup.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/reciprocal_lookup.dub) | Tablet | `0;7,30`, `3;45` |
+| **4. Mastery** | [Tablet Archive Persistence](#tablet-archive-persistence-lineage) | Multi-tablet Storage, Working Copy | [`tablet_archive_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/tablet_archive_scholar.dub) | [`tablet_archive.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/tablet_archive.dub) | Mixed | `0;15` |
+| **4. Mastery** | [Persistent Sequences](#persistent-inscribed-sequences) | Inscribing Structured Sequences | [`persistent_sequence_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/persistent_sequence_scholar.dub) | [`persistent_sequence.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/persistent_sequence.dub) | Mixed | `5`, `1`, `16` |
+| **4. Mastery** | [Fourier Transforms](#discrete-fourier-transform-dft-fft) | DFT/FFT Spectral Analysis | [`fourier_dft_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/fourier_dft_scholar.dub) | [`fourier_dft.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/fourier_dft.dub) | Mixed | `2`, `4`, `4`, `1`, `1`, `1` |
+| **5. Exemplar** | [Babylonian Sqrt(2)](#babylonian-square-root-of-2-ybc-7289) | YBC 7289 Diagonal Approximation | [`babylonian_sqrt2_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/babylonian_sqrt2_scholar.dub) | [`babylonian_sqrt2.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/babylonian_sqrt2.dub) | Tablet | `1 + 195025/470832`, `42 + 33461/78472` |
+| **5. Exemplar** | [Planetary Leap Cycles](#planetary-leap-year-cycle-search) | Astronomical Period Search | [`planetary_leap_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/planetary_leap_scholar.dub) | [`planetary_leap.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/planetary_leap.dub) | Tablet | `673`, `163 day`, `1/29073600 day` |
+| **5. Exemplar** | [Even Intercalation](#even-distribution-of-leap-years) | Bresenham Leap Year Distribution | [`even_distribution_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/even_distribution_scholar.dub) | [`even_distribution.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/even_distribution.dub) | Tablet | `0`, `0`, `0`, `1` |
+| **5. Exemplar** | [Ea-Nasir Dispute v1](#ea-nasir-copper-trade-dispute-uet-v-72) | UET V 72 Audit & Archive | [`ea_nasir_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir_scholar.dub) | [`ea_nasir.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir.dub) | Mixed | `Ea-nasir`, `10 talent`, `0;15` |
+| **5. Exemplar** | [Ea-Nasir Revision v2](#ea-nasir-assessment-revision-v1-v2) | Working Derivation & Versioning | [`ea_nasir_revision_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir_revision_scholar.dub) | [`ea_nasir_revision.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/ea_nasir_revision.dub) | Mixed | `ea-nasir-assessment` |
+| **5. Exemplar** | [Core Conformance](#core-conformance-smoke-test) | Core Language Smoke Test | [`conformance_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/conformance_scholar.dub) | [`conformance.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/conformance.dub) | Mixed | Multi-part mathematical verification |
 
 ---
 
@@ -274,7 +274,7 @@ python3 -m dubsar run examples/sequence_generation_scholar.dub
 - **Concept**: Iterating over observations, map/reduce transformations, and sequence statistics.
 - **Tutorial Guide**: [Chapter 8: Sequences & Structured Data](../learn/sequences.md)
 
-Loads an observation series of grain disbursements, calculates the cumulative total, counts entries, and determines the maximum allocation using bounded iteration.
+Loads an observation series of disbursements (12, 24, 36, 48), iterates through entries using bounded loops to compute the cumulative total (120), transforms each entry by doubling, and inspects the resulting transformed sequence length (4) and final entry (96).
 
 ```bash
 python3 -m dubsar run examples/sequence_transformation_scholar.dub
@@ -384,10 +384,10 @@ python3 -m dubsar run examples/tablet_archive_scholar.dub
 ### Persistent Inscribed Sequences
 
 - **Files**: [`examples/persistent_sequence_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/persistent_sequence_scholar.dub) / [`examples/persistent_sequence.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/persistent_sequence.dub)
-- **Concept**: Inscribing dynamic sequence tablets into the immutable archive and validating versioned lineage.
+- **Concept**: Inscribing dynamic sequence tablets into the immutable archive.
 - **Tutorial Guide**: [Chapter 9: The Tablet Archive](../learn/archive.md)
 
-Constructs a geometric sequence of powers of 2 ($1, 2, 4, 8, 16$), commits the complete sequence tablet to the archive under name `powers-of-two`, and queries the archived tablet.
+Constructs a geometric sequence of powers of 2 ($1, 2, 4, 8, 16$), commits the complete sequence tablet to the archive under name `powers`, consults the archived tablet, and queries sequence length ($5$), initial element ($1$), and final element ($16$).
 
 ```bash
 python3 -m dubsar run examples/persistent_sequence_scholar.dub
@@ -408,7 +408,7 @@ python3 -m dubsar run examples/persistent_sequence_scholar.dub
 - **Concept**: Spectral analysis on directed sequences, reference $O(N^2)$ DFT, and Cooley-Tukey Radix-2 FFT ($O(N \log N)$).
 - **Tutorial Guide**: [Concepts: Geometric & Fourier](../concepts/geometric-and-fourier.md)
 
-Transforms a 4-point real sequence $[1, 2, 3, 4]$ into the frequency domain, verifies Parseval energy conservation, and inverts back to the time domain with exact rational arithmetic:
+Transforms a 4-point discrete impulse sequence $[1, 0, 0, 0]$ into the frequency domain, verifies harmonic bin magnitudes, Parseval energy conservation, and inverts back to the original time domain with exact rational arithmetic:
 
 ```bash
 python3 -m dubsar run examples/fourier_dft_scholar.dub
@@ -542,17 +542,19 @@ ea-nasir-assessment
 
 ---
 
-### Full Language Conformance Suite
+### Core Conformance Smoke Test
 
 - **Files**: [`examples/conformance_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/conformance_scholar.dub) / [`examples/conformance.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/conformance.dub)
-- **Concept**: End-to-end verification of numbers, arithmetic, unit safety, exact equality, and bounded loops.
+- **Concept**: Core language smoke test exercising numbers, arithmetic, unit safety, and bounded loops.
 
-A self-verifying test tablet testing:
+A smoke-test example exercising a representative subset of core language features:
 - Number formats: integers, base-60 fractions, astronomical constants
 - Arithmetic: addition, subtraction, multiplication, division
 - Dimensional safety: unit arithmetic consistency
 - Exact equality: rational equivalence checks
 - Finite domains: bounded loop accumulation
+
+The emitted values are verified for exactness and Interpreter/VM parity in `tests/test_examples.py`.
 
 ```bash
 python3 -m dubsar run examples/conformance_scholar.dub

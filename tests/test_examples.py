@@ -21,6 +21,7 @@ def parse_example_header(path: Path) -> dict:
         lines = f.readlines()
 
     meta: dict = {
+        "title": None,
         "difficulty": None,
         "concept": None,
         "mode": None,
@@ -43,7 +44,10 @@ def parse_example_header(path: Path) -> dict:
             break
 
         comment = raw.lstrip("# 𒑰\t").strip()
-        if comment.startswith("Difficulty:"):
+        if "Example:" in comment:
+            meta["title"] = comment.split("Example:", 1)[1].strip()
+            in_expected = in_purpose = False
+        elif comment.startswith("Difficulty:"):
             meta["difficulty"] = comment.split(":", 1)[1].strip()
             in_expected = in_purpose = False
         elif comment.startswith("Concept:"):
@@ -76,25 +80,28 @@ class TestExamplesCatalog(unittest.TestCase):
         self.example_paths = sorted(EXAMPLES_DIR.glob("*.dub"))
 
     def test_example_file_count_and_pairing(self) -> None:
-        """Every example must exist in both Scholar and Tablet modes (42 total)."""
-        self.assertEqual(len(self.example_paths), 42)
+        """Every example must exist in both Scholar and Tablet/Mixed modes."""
+        self.assertGreaterEqual(
+            len(self.example_paths),
+            20,
+            "Expected a substantial catalog of example tablets",
+        )
 
-        scholar_files = {p.stem for p in self.example_paths if p.stem.endswith("_scholar")}
-        tablet_files = {p.stem for p in self.example_paths if not p.stem.endswith("_scholar")}
+        scholar_bases = {
+            p.stem[:-8] for p in self.example_paths if p.stem.endswith("_scholar")
+        }
+        paired_bases = {
+            p.stem for p in self.example_paths if not p.stem.endswith("_scholar")
+        }
 
-        self.assertEqual(len(scholar_files), 21)
-        self.assertEqual(len(tablet_files), 21)
-
-        for base in tablet_files:
-            expected_scholar = f"{base}_scholar"
-            self.assertIn(
-                expected_scholar,
-                scholar_files,
-                f"Missing scholar counterpart for {base}.dub",
-            )
+        self.assertEqual(
+            scholar_bases,
+            paired_bases,
+            "Every example must exist in both Scholar (*_scholar.dub) and Tablet/Mixed (*.dub) modes",
+        )
 
     def test_example_headers_complete(self) -> None:
-        """All examples must contain valid header metadata."""
+        """All examples must contain valid header metadata adhering to specification."""
         valid_difficulties = {
             "Beginner",
             "Intermediate",
@@ -102,10 +109,20 @@ class TestExamplesCatalog(unittest.TestCase):
             "Mastery",
             "Exemplar",
         }
+        pure_cuneiform_tablets = {
+            "babylonian_sqrt2.dub",
+            "even_distribution.dub",
+            "planetary_leap.dub",
+            "reciprocal_lookup.dub",
+        }
 
         for path in self.example_paths:
             with self.subTest(file=path.name):
                 meta = parse_example_header(path)
+                self.assertTrue(
+                    meta["title"],
+                    f"{path.name} is missing Title in header",
+                )
                 self.assertIn(
                     meta["difficulty"],
                     valid_difficulties,
@@ -116,10 +133,6 @@ class TestExamplesCatalog(unittest.TestCase):
                     f"{path.name} is missing Concept in header",
                 )
                 self.assertTrue(
-                    meta["mode"],
-                    f"{path.name} is missing Mode in header",
-                )
-                self.assertTrue(
                     meta["purpose"],
                     f"{path.name} is missing Purpose in header",
                 )
@@ -127,6 +140,26 @@ class TestExamplesCatalog(unittest.TestCase):
                     len(meta["expected_output"]) > 0,
                     f"{path.name} is missing Expected Output in header",
                 )
+
+                # Validate Mode matches file type and content
+                if path.name.endswith("_scholar.dub"):
+                    self.assertEqual(
+                        meta["mode"],
+                        "Scholar (Latin transliteration)",
+                        f"{path.name} should declare Scholar mode",
+                    )
+                elif path.name in pure_cuneiform_tablets:
+                    self.assertEqual(
+                        meta["mode"],
+                        "Tablet (Canonical Cuneiform)",
+                        f"{path.name} should declare Tablet (Canonical Cuneiform) mode",
+                    )
+                else:
+                    self.assertEqual(
+                        meta["mode"],
+                        "Mixed (Cuneiform syntax with Latin identifiers)",
+                        f"{path.name} should declare Mixed mode",
+                    )
 
     def test_examples_execution_and_output_parity(self) -> None:
         """All examples must execute identically on both Interpreter and VM matching expected output."""

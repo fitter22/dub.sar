@@ -5,7 +5,7 @@
 #
 # Purpose:
 #   Inscribes a working sequence tablet into the persistent SQLite archive
-#   and verifies immutable version retrieval and entry indexing.
+#   under name 'powers', consults it, and inspects length and terminal entries.
 #
 # Expected Output:
 #   5

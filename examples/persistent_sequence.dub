@@ -1,11 +1,11 @@
 𒑰 DUB.SAR 1.0 Example: Persistent Tablet Sequences
 𒑰 Difficulty: Mastery
 𒑰 Concept: Persistent Sequence Inscription
-𒑰 Mode: Tablet (Canonical Cuneiform)
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
 𒑰
 𒑰 Purpose:
 𒑰   Inscribes a working sequence tablet into the persistent SQLite archive
-𒑰   and verifies immutable version retrieval and entry indexing.
+𒑰   under name 'powers', consults it, and inspects length and terminal entries.
 𒑰
 𒑰 Expected Output:
 𒑰   5

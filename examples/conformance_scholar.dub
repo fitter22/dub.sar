@@ -1,11 +1,11 @@
-# DUB.SAR 1.0 Example: Full Conformance Test Suite
+# DUB.SAR 1.0 Example: Core Conformance Smoke Test
 # Difficulty: Exemplar
-# Concept: Language & Specification Verification
+# Concept: Core Language Smoke Test & Parity Verification
 # Mode: Scholar (Latin transliteration)
 #
 # Purpose:
-#   Directly verifies comprehensive mathematical and runtime conformance:
-#   numbers, sexagesimal arithmetic, unit safety, exact equality, and bounded loops.
+#   Exercises a representative smoke-test subset of core language features:
+#   numbers, sexagesimal arithmetic, unit safety, exact equality, and bounded repetition.
 #
 # Expected Output:
 #   sum 1;30 + 0;30 (expected 2):

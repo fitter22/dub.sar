@@ -1,0 +1,54 @@
+𒑰 DUB.SAR 1.0 Example: Exact Sexagesimal Arithmetic
+𒑰 Difficulty: Beginner
+𒑰 Concept: Exact Sexagesimal Arithmetic & Fractions
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
+𒑰
+𒑰 Purpose:
+𒑰   Demonstrates exact rational arithmetic using positional sexagesimal fractions
+𒑰   and rational numbers, eliminating floating-point rounding drift.
+𒑰
+𒑰 Expected Output:
+𒑰   Sum (0;30 + 0;20):
+𒑰   0;50
+𒑰   Difference (1 - 0;15):
+𒑰   0;45
+𒑰   Product (0;30 * 0;20):
+𒑰   0;10
+𒑰   Division (1 / 0;20):
+𒑰   3
+
+𒂊𒁹
+    half : 0;30
+    third : 0;20
+    quarter : 0;15
+    one : 1
+
+    sum_val :
+        half
+        third
+        𒍣
+
+    diff_val :
+        one
+        quarter
+        𒋫
+
+    prod_val :
+        half
+        third
+        𒊭
+
+    div_val :
+        one
+        third
+        𒉌
+
+𒅗𒁹
+    𒁹𒀀 "Sum (0;30 + 0;20):"
+    𒁹𒀀 sum_val
+    𒁹𒀀 "Difference (1 - 0;15):"
+    𒁹𒀀 diff_val
+    𒁹𒀀 "Product (0;30 * 0;20):"
+    𒁹𒀀 prod_val
+    𒁹𒀀 "Division (1 / 0;20):"
+    𒁹𒀀 div_val

@@ -1,5 +1,19 @@
-𒑰 DUB.SAR 1.0 — Discrete Fourier Transform (Canonical Cuneiform)
-𒑰 Layer H: Equal divisions of a turn, reference DFT, and Radix-2 recursive FFT.
+𒑰 DUB.SAR 1.0 Example: Discrete Fourier Transform
+𒑰 Difficulty: Mastery
+𒑰 Concept: Discrete Fourier Transform & Radix-2 FFT
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
+𒑰
+𒑰 Purpose:
+𒑰   Computes Discrete Fourier Transforms on sequence tablets, verifying
+𒑰   energy conservation and inverse reconstruction.
+𒑰
+𒑰 Expected Output:
+𒑰   2
+𒑰   4
+𒑰   4
+𒑰   1
+𒑰   1
+𒑰   1
 
 𒂊𒁹
 

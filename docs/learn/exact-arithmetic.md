@@ -80,4 +80,4 @@ Because Mesopotamian mathematics lacked floating-point division, scribes perform
 
 - **[Language Reference: Numbers & Sexagesimal Notation](../reference/numbers.md)**: Full syntax for positional sexagesimal representation.
 - **[Core Concepts: Exact Arithmetic](../concepts/exact-arithmetic.md)**: Mathematical theory of base-60 sexagesimal fractions and regular numbers.
-- **[Examples: Babylonian Square Root of 2](../examples/index.md#historical-mesopotamian-archaeology)**: Runnable calculation of $\sqrt{2}$ from tablet YBC 7289.
+- **[Examples: Babylonian Square Root of 2](../examples/index.md#babylonian-square-root-of-2-ybc-7289)**: Runnable calculation of $\sqrt{2}$ from tablet YBC 7289.

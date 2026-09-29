@@ -1,5 +1,16 @@
-𒑰 DUB.SAR 1.0 — Sequence Transformation (Canonical Cuneiform)
-𒑰 Demonstrates iterating entries of a tablet and constructing a transformed sequence.
+𒑰 DUB.SAR 1.0 Example: Sequence Transformation
+𒑰 Difficulty: Advanced
+𒑰 Concept: Sequence Iteration & Series Transformation
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
+𒑰
+𒑰 Purpose:
+𒑰   Demonstrates iterating across sequence entries with bounded loops to compute
+𒑰   cumulative sums and transformed series.
+𒑰
+𒑰 Expected Output:
+𒑰   120
+𒑰   4
+𒑰   96
 
 𒂊𒁹
 

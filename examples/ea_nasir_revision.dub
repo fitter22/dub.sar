@@ -1,5 +1,14 @@
-𒑰 DUB.SAR 1.0 — Ea-nāṣir Revision: Ruling on Deficiency (Tablet Mode)
-𒑰 Demonstrates derivation, working tablet modification, and versioning (v1 -> v2).
+𒑰 DUB.SAR 1.0 Example: Ea-nasir Copper Assessment Revision (v1 -> v2)
+𒑰 Difficulty: Exemplar
+𒑰 Concept: Tablet Archive Derivation & Versioning
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
+𒑰
+𒑰 Purpose:
+𒑰   Derives a working draft from an existing archived tablet (ea-nasir-assessment v1),
+𒑰   mutates fields in working memory, and inscribes version 2 back to the archive.
+𒑰
+𒑰 Expected Output:
+𒑰   ea-nasir-assessment
 
 𒂊𒁹
 

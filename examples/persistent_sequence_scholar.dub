@@ -1,5 +1,16 @@
-# DUB.SAR 1.0 — Persistent Tablet Sequences (Scholar Mode)
-# Demonstrates inscribing a working sequence and consulting persistent entries.
+# DUB.SAR 1.0 Example: Persistent Tablet Sequences
+# Difficulty: Mastery
+# Concept: Persistent Sequence Inscription
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Inscribes a working sequence tablet into the persistent SQLite archive
+#   under name 'powers', consults it, and inspects length and terminal entries.
+#
+# Expected Output:
+#   5
+#   1
+#   16
 
 problem
     working powers of length 0

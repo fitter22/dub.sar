@@ -1,5 +1,21 @@
-# DUB.SAR 1.0 — Unit Conversions and Dimensional Safety
-# Mathematical unit conversion and dimensional safety
+# DUB.SAR 1.0 Example: Unit Conversions and Dimensional Safety
+# Difficulty: Beginner
+# Concept: Units & Dimensional Metrology
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Demonstrates physical unit conversions and compile-time dimensional safety
+#   across standard metrological dimensions (time, length, mass).
+#
+# Expected Output:
+#   7200 seconds converted to hours (expected 2 hour):
+#   2 hour
+#   36 hours converted to days (expected 1;30 day):
+#   1;30 day
+#   1;30 day converted to minutes (expected 2160 minute):
+#   2160 minute
+#   36 hour + 12 hour:
+#   48 hour
 
 problem
 

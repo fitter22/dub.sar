@@ -1,5 +1,16 @@
-# DUB.SAR 1.0 — Sequence Generation (Scholar Mode)
-# Demonstrates working sequence tablets, appending, and length queries.
+# DUB.SAR 1.0 Example: Sequence Generation
+# Difficulty: Advanced
+# Concept: Working Sequences & Allocation
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Demonstrates working sequence tablet allocation, appending entries,
+#   and querying length, first, and last values.
+#
+# Expected Output:
+#   6
+#   1
+#   8
 
 problem
     working fib of length 0

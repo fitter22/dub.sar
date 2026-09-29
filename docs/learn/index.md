@@ -36,6 +36,8 @@ The tutorial covers the 12 core competencies of DUB.SAR across 10 progressive ch
 ---
 
 ## Next Steps
-
+ 
 Begin your journey with **[Chapter 1: Your First Tablet](first-tablet.md)** to install the CLI and run your first calculation.
+
+Looking for ready-to-run examples? Browse the **[Examples Catalog](../examples/index.md)** featuring 21 paired tablets across 5 difficulty levels.
 

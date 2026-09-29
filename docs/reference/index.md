@@ -21,4 +21,5 @@ The DUB.SAR Reference manuals provide complete, concise, and searchable technica
 
 - **Beginner Tutorials**: For step-by-step introductory tutorials, see [Learn DUB.SAR](../learn/index.md).
 - **Language Guide**: For thematic topic guides and idioms, see the [Language Guide](../guide/index.md).
+- **Examples Catalog**: For executable sample tablets across 5 difficulty levels, see the [Examples Catalog](../examples/index.md).
 - **Formal Specification**: For the normative language standard, see the [DUB.SAR 1.0 Specification](../specification/index.md).

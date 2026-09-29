@@ -1,6 +1,20 @@
-# DUB.SAR 1.0 — Ea-nāṣir Copper Assessment (Scholar Mode)
-# Thematic Inspiration: Historical Ea-nāṣir copper complaint tablet (UET V 72).
-# Fictionalized computational example for demonstrating the Tablet Archive.
+# DUB.SAR 1.0 Example: Ea-nasir Copper Trade Dispute (UET V 72)
+# Difficulty: Exemplar
+# Concept: Archival Assessment & Copper Purity Audit
+# Mode: Scholar (Latin transliteration)
+#
+# Purpose:
+#   Formalizes the famous Old Babylonian Ur copper trade dispute (tablet UET V 72)
+#   as an archival computational assessment, calculating grade deficits and inscribing
+#   version 1 of the official merchant audit tablet into the archive.
+#
+# Expected Output:
+#   Ea-nāṣir
+#   10 talent
+#   10 talent
+#   1
+#   0;45
+#   0;15
 
 problem
 

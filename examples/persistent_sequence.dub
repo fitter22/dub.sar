@@ -1,5 +1,16 @@
-𒑰 DUB.SAR 1.0 — Persistent Tablet Sequences (Canonical Cuneiform)
-𒑰 Demonstrates inscribing a working sequence and consulting persistent entries.
+𒑰 DUB.SAR 1.0 Example: Persistent Tablet Sequences
+𒑰 Difficulty: Mastery
+𒑰 Concept: Persistent Sequence Inscription
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
+𒑰
+𒑰 Purpose:
+𒑰   Inscribes a working sequence tablet into the persistent SQLite archive
+𒑰   under name 'powers', consults it, and inspects length and terminal entries.
+𒑰
+𒑰 Expected Output:
+𒑰   5
+𒑰   1
+𒑰   16
 
 𒂊𒁹
 

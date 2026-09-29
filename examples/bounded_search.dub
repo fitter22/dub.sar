@@ -1,0 +1,26 @@
+𒑰 DUB.SAR 1.0 Example: Bounded Mathematical Domain Search
+𒑰 Difficulty: Intermediate
+𒑰 Concept: Bounded Domains & Search Loops
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
+𒑰
+𒑰 Purpose:
+𒑰   Demonstrates strictly bounded mathematical domain iteration using the
+𒑰   'consider ... from ... through ...' loop construct, accumulating the sum
+𒑰   of integers from 1 through 10.
+𒑰
+𒑰 Expected Output:
+𒑰   Sum of 1 through 10:
+𒑰   55
+
+𒂊𒁹
+    total : 0
+
+    𒄀 i ta 1 𒂗 10:
+        total :
+            total
+            i
+            𒍣
+
+𒅗𒁹
+    𒁹𒀀 "Sum of 1 through 10:"
+    𒁹𒀀 total

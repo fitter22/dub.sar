@@ -1,5 +1,19 @@
-𒑰 DUB.SAR 1.0 — Right Triangle Determination (Canonical Cuneiform)
-𒑰 Layer C: Exact right triangles, missing side determination, and Pythagorean validation.
+𒑰 DUB.SAR 1.0 Example: Right Triangle Geometry
+𒑰 Difficulty: Advanced
+𒑰 Concept: Pythagorean Triangles & Geometric Slopes
+𒑰 Mode: Mixed (Cuneiform syntax with Latin identifiers)
+𒑰
+𒑰 Purpose:
+𒑰   Constructs exact right triangles, verifies Pythagorean consistency,
+𒑰   and determines slope and feed ratios.
+𒑰
+𒑰 Expected Output:
+𒑰   1
+𒑰   13
+𒑰   2;24
+𒑰   0;25
+𒑰   30
+𒑰   1
 
 𒂊𒁹
 

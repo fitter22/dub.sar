@@ -118,4 +118,4 @@ Output:
 
 - **[Language Guide: Sequences & Tables](../guide/sequences-and-tables.md)**: Full coverage of the 3 tablet shapes (sequence, table, structured) and first-class tablet operations.
 - **[Language Reference: Core Vocabulary](../reference/language.md)**: Keywords `working`, `append`, `take`, `length of`, and `put`.
-- **[Examples Catalog: Tablet Data Model](../examples/index.md#tablet-data-model-sequences)**: Runnable examples of sequence generation and transformation.
+- **[Examples Catalog: Sequences & Geometry](../examples/index.md#level-3-advanced-data-structures-geometry)**: Runnable examples of sequence generation and transformation.

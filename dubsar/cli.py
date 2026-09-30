@@ -84,7 +84,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     comp_p.add_argument(
         "--opt-level",
-        choices=["-O0", "-O1", "-O2", "-O3", "-Os"],
+        choices=["-O0", "-O1", "-O2", "-O3", "-Os", "-Oz"],
         default="-O3",
         help="Optimization level for native compilation",
     )

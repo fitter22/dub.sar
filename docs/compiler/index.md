@@ -6,7 +6,7 @@ DUB.SAR features an extensible multi-tier compiler pipeline translating mathemat
 
 ## Compiler Topics
 
-- **[Using the Native Compiler](using-native.md)**: Ahead-of-time compilation to C99, native machine binaries, shared libraries, and LLVM IR.
-- **[Architecture & Pipeline](architecture.md)**: Frontend lexical analysis, AST lowering, Semantic IR, and codegen.
-- **[Virtual Machine](vm.md)**: Bytecode design, stack instructions, environment frames, and VM interpreter.
-- **[WebAssembly](wasm.md)**: Compiling tablets to standard `.wasm` modules with zero external dependencies.
+- **[Using the Native Compiler](using-native.md)**: Ahead-of-time (AOT) compilation to standalone machine binaries, clean C99 source code, shared dynamic libraries, and textual LLVM IR with hardware-accelerated 128-bit exact rational arithmetic.
+- **[Architecture & Pipeline](architecture.md)**: Frontend lexical analysis, normative AST parsing, semantic dimensional checking, Semantic IR mathematical verbs, C runtime architecture, and backend comparison matrix.
+- **[Virtual Machine](vm.md)**: Stack-oriented bytecode design, instructions, environment frames, and the default VM execution engine.
+- **[WebAssembly](wasm.md)**: Compiling tablets to standard `.wasm` modules and textual WebAssembly (`.wat`) with zero external dependencies.

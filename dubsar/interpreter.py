@@ -66,6 +66,7 @@ from dubsar.builtins import BUILTINS
 from dubsar.errors import (
     DubSarConsultationError,
     DubSarDivisionByZero,
+    DubSarError,
     DubSarEntryNotFoundError,
     DubSarImmutableTabletError,
     DubSarInputError,
@@ -830,7 +831,7 @@ class Interpreter:
                         stack.append(v.square())
                     elif op == "square-root":
                         v = to_quantity(stack.pop())
-                        stack.append(v.square_root(allow_approx=True))
+                        stack.append(v.square_root(allow_approx=False))
                     elif op == "right-triangle":
                         b = stack.pop()
                         a = stack.pop()
@@ -1003,7 +1004,7 @@ class Interpreter:
             evaled_args = [self._eval_expression(a) for a in call.arguments]
             try:
                 return func(*evaled_args)
-            except (DubSarUnitError, DubSarDivisionByZero):
+            except DubSarError:
                 raise
             except Exception as e:
                 raise DubSarUnitError(

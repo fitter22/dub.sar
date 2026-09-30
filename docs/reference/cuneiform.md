@@ -31,13 +31,13 @@ These signs possess authentic historical attestation in Mesopotamian mathematica
 | `𒃻` | `U+120FB` | gar | To place / deposit an entry | `put` |
 | `𒈭` | `U+1222D` | dah | To add onto / append | `append` |
 | `𒉻` | `U+1227B` | pad | To break off a portion / retrieve entry | `take entry` / `pad` |
-| `𒈦` | `U+12226` | maš | Half constant ($1/2 = 0;30$) | `half` / `0;30` |
+| `𒈦` | `U+12226` | maš | Available as an identifier. It is not the numeric literal `0;30`; write the half as `0;30`. Catalog tablets use it as a quantity name. | `𒈦` |
 | `𒌓` | `U+12313` | ud | Day unit ($1\text{ ud} = 24\text{ hr}$) | `day` / `ud` |
-| `𒌗` | `U+12317` | iti | Month unit ($1\text{ iti} = 30\text{ ud}$) | `month` / `iti` |
-| `𒈬` | `U+1222C` | mu | Year unit ($1\text{ mu} = 360\text{ ud}$) | `year` / `mu` |
+| `𒌗` | `U+12317` | iti | Month unit. Abstract calendar dimension, not 30 days. After a number it is the unit; inside `consider` it is `through`. | `month` / `iti` |
+| `𒈬` | `U+1222C` | mu | Year unit. Abstract astronomical dimension, not 360 days. | `year` / `mu` |
 | `𒄘` | `U+12118` | gun | Talent weight unit ($1\text{ gun} = 60\text{ ma-na}$) | `talent` / `gun` |
 | `𒈠𒈾` | `U+12220 U+1223E` | ma-na | Mina weight unit ($1\text{ ma-na} = 60\text{ gin}$) | `mina` / `ma-na` |
-| `𒄀` | `U+12100` | gi | Reed measure ($1\text{ gi} = 6\text{ cubits}$) / repetition | `gi` / `reed` / `consider` |
+| `𒄀` | `U+12100` | gi | Reed of 6 cubits when it follows a number. `consider` at the start of a statement. | `gi` / `reed` / `consider` |
 
 ---
 

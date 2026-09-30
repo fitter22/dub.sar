@@ -106,11 +106,11 @@ Every new DUB.SAR archive automatically initializes with 13 standard scholarly r
 - `powers`: Powers of fundamental bases ($2$ and $60$).
 - `basic-metrology`: Attested conversion factors for length, area, and capacity.
 - `basic-geometry`: Attested geometric coefficients.
-- `ea-nasir-shipment`: Structured shipment record of copper ingots from Dilmun inspired by tablet UET V 72, recording promised/delivered weights, quality standards, and transaction metadata.
+- `ea-nasir-shipment` (modern): Fictionalized shipment record inspired by UET 5 72. It is not a transcription of that tablet.
 - `right-triangles`: Verified integer right triangles (Pythagorean triples) such as $(3, 4, 5)$, $(5, 12, 13)$, $(8, 15, 17)$, $(7, 24, 25)$, $(20, 21, 29)$, $(12, 35, 37)$, $(9, 40, 41)$, $(28, 45, 53)$, $(11, 60, 61)$, $(16, 63, 65)$, $(33, 56, 65)$, $(48, 55, 73)$, $(13, 84, 85)$, $(36, 77, 85)$, $(39, 80, 89)$, and $(65, 72, 97)$, connecting directly to Plimpton 322 scribal traditions.
 - `inclinations`: Standard scribal slopes, ratios, inclinations (rise/run), and feeds (run/rise) for embankments, ramps, and canal construction.
-- `powers-of-two`: Exact integer powers $2^0$ through $2^{12}$ alongside exact reciprocal fractions, validating sequence lengths for Radix-2 FFT algorithms.
-- `turn-divisions`: Sexagesimal subdivisions of a full cycle ($1/1, 1/2, 1/3, 1/4, 1/5, 1/6, 1/8, 1/10, 1/12, 1/60, 1/360$), bridging historical Babylonian circular divisions (post-450 BCE zodiac) and modern harmonic analysis.
+- `powers-of-two` (reconstructed): Exact integer powers $2^0$ through $2^{16}$, also keyed as `len-1` through `len-65536`.
+- `turn-divisions` (modern): `whole-turn`, `half-turn`, `quarter-turn`, `eighth-turn`, and `sixteenth-turn` only.
 
 Every scholarly entry retains exact rational representations—no IEEE floating-point approximation or decimal truncation occurs.
 

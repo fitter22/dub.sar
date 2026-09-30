@@ -14,9 +14,9 @@ DUB.SAR translates this physical paradigm directly into code. In canonical scrib
 2. **Computational Prescriptions** (`recipe` / `𒁾𒊬`, optional): Reusable procedures and auxiliary recipes.
 3. **Inscribed Result** (`result` / `𒅗𒁹`): The verified mathematical outputs baked permanently into clay.
 
-While the DUB.SAR parser permits minimal or single-section tablets (providing empty defaults if either problem or result is omitted), complete computational tablets canonically begin with `problem` / `𒂊𒁹` and conclude with `result` / `𒅗𒁹`. Neither section header takes a trailing colon.
+While the DUB.SAR parser permits minimal or single-section tablets (providing empty defaults if either problem or result is omitted), complete computational tablets canonically begin with `problem` / `𒂊𒁹` and conclude with `result` / `𒅗𒁹`. A trailing colon after either header is optional and ignored.
 
-Unlike conventional imperative languages, DUB.SAR tablets have no unbounded loops, no null pointers, and no floating-point rounding errors. At the language level, execution is deterministic, dimensional, and exact (with arbitrary precision in the reference interpreter/VM and 64-bit rational bounds in native/WASM compilation).
+Unlike conventional imperative languages, DUB.SAR tablets have no unbounded loops, no null pointers, and no floating-point rounding errors. At the language level, execution is deterministic, dimensional, and exact. The reference interpreter and stack VM use arbitrary-precision rationals. The native backend stores rationals in 128-bit integers. The WebAssembly backend stores them in 64-bit integers.
 
 ---
 
@@ -76,7 +76,7 @@ result
 
 ### Tablet Mode (Cuneiform)
 
-In authentic cuneiform Tablet Mode (using cuneiform identifiers and the standard length unit `meter`), the same computation is expressed as a compact postfix mathematical prescription:
+In authentic cuneiform Tablet Mode (using cuneiform identifiers and the uncalibrated `meter` unit), the same computation is expressed as a compact postfix mathematical prescription:
 
 <!-- test-id: learn-first-tablet-cuneiform -->
 ```dubsar
@@ -95,7 +95,7 @@ In authentic cuneiform Tablet Mode (using cuneiform identifiers and the standard
 Both programs execute the same calculation and produce the exact dimensional output:
 
 ```text
-5 length
+5 meter
 ```
 
 ---
@@ -152,7 +152,7 @@ When inspecting the Tablet Mode example, it is essential to distinguish between 
 | `𒍣` (*zi*) | Addition operator | Mathematical Verb | Fixed built-in verb (`add` / `+`) |
 | `𒅁` (*íb*) | Square operator | Mathematical Verb | Fixed built-in verb (`square`) |
 | `𒁀𒋛` (*ba-si*) | Square-root operator | Mathematical Verb | Fixed built-in verb (`square-root` / `sqrt`) |
-| `meter` | Physical unit | Metrological Unit | Standard length unit |
+| `meter` | Physical unit | Metrological Unit | Uncalibrated SI length, not interchangeable with the cubit |
 | `𒂼` (*dagal*) | Horizontal leg variable | **User Identifier** | Arbitrary variable chosen by programmer |
 | `𒊕` (*sag*) | Vertical leg variable | **User Identifier** | Arbitrary variable chosen by programmer |
 | `𒁇` (*bar*) | Hypotenuse variable | **User Identifier** | Arbitrary variable chosen by programmer |
@@ -186,7 +186,7 @@ When writing your own tablets:
 
 To create a new tablet from scratch:
 
-1. **Open the Problem Section**: Begin the tablet with `𒂊𒁹` on its own line (no trailing colon).
+1. **Open the Problem Section**: Begin the tablet with `𒂊𒁹` on its own line. A trailing colon is optional and ignored.
 2. **Establish Known Quantities**: Indent lines by 4 spaces and declare known values using the colon `:` operator:
    ```dubsar
    𒊕 : 12 cubit

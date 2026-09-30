@@ -261,6 +261,15 @@ int dubsar_rat_is_square(dubsar_rat_t a, dubsar_rat_t *out) {
     return 0;
 }
 
+dubsar_rat_t dubsar_rat_sqrt_exact(dubsar_rat_t a) {
+    dubsar_rat_t out;
+    if (!dubsar_rat_is_square(a, &out)) {
+        fprintf(stderr, "DUB.SAR Error: Quantity is not an exact rational square; use approximate\n");
+        exit(1);
+    }
+    return out;
+}
+
 dubsar_rat_t dubsar_rat_sqrt_babylonian(dubsar_rat_t a, int iterations) {
     if (a.num < 0) {
         fprintf(stderr, "DUB.SAR Error: Negative quantity has no real square root\n");

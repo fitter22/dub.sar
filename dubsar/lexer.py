@@ -402,7 +402,7 @@ class Lexer:
                 i += 1
             ident_str = text[:i]
 
-            # Check if keyword (e.g. 𒈬, 𒌓, 𒌗)
+            # Check if keyword (e.g. 𒌗 is through, except after a number)
             if ident_str in CUNEIFORM_KEYWORDS:
                 tok_type = CUNEIFORM_KEYWORDS[ident_str]
                 return Token(tok_type, ident_str, line_num, col), i

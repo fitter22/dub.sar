@@ -40,9 +40,9 @@ Every mathematical calculation in DUB.SAR operates on arbitrary-precision exact 
 Mesopotamian mathematics calculated with squares, square roots, and right triangles centuries before Pythagoras:
 
 - **Exact Squares & Roots**: `square` and `square-root` compute exact integer squares and roots.
-- **Right Triangle Determination**: `right-triangle` constructs a structured determination with fields `width`, `length`, `diagonal`, and boolean `is_valid` ($w^2 + l^2 = d^2$).
-- **Missing Side Solver**: Given any two sides, `right-triangle` solves for the exact missing third side (or errors if non-integer).
-- **Pythagorean Validation**: `validate-triangle` verifies whether three sides form a true integer right triangle.
+- **Right Triangle Determination**: `right-triangle` constructs a structured determination with fields `short-side`, `long-side`, `diagonal`, `inclination`, `feed`, and `area`.
+- **Missing Side Solver**: Given any two sides, `right-triangle` solves for the exact missing third side when that side is a rational square.
+- **Pythagorean Validation**: `validate-triangle` verifies whether the three sides satisfy the Pythagorean relation exactly.
 
 ```dubsar
 problem
@@ -64,10 +64,10 @@ result
 ### Layer C: Inclination, Feed, and Proportional Geometry `[attested]`
 Ancient canal, ramp, and ziggurat construction relied on proportional slopes rather than modern angles:
 
-- **Inclination (*mūlû*)**: $\text{rise} / \text{run}$ — vertical rise per unit horizontal run.
-- **Feed (*mūrqītu* / *šikittum*)**: $\text{run} / \text{rise}$ — horizontal setback per unit vertical rise.
-- The `inclination` operator consumes `run` and `rise` to produce a determination with fields `rise`, `run`, `inclination`, and `feed`.
-- The `feed` operator computes the reciprocal ratio directly.
+- **Inclination (*kussû*)**: $\text{rise} / \text{run}$ — vertical rise per unit horizontal run.
+- **Feed (*mūṣû*)**: $\text{run} / \text{rise}$ — horizontal setback per unit vertical rise.
+- Postfix `1 2 inclination` means rise 1 and run 2. It produces a determination whose fields include `inclination` and `feed`.
+- Postfix `1 2 feed` is the ratio `2`, which is run/rise.
 
 ### Layer D: Direction Abstraction `[reconstructed]`
 Direction in DUB.SAR represents an invariant ray orientation:
@@ -96,9 +96,8 @@ A directed quantity binds a physical magnitude to an invariant direction:
 When irrationals arise (such as the diagonal of a unit square, $\sqrt{2}$ on tablet YBC 7289):
 
 - DUB.SAR never silently converts to IEEE float.
-- Explicit approximation via `X approximate` executes bounded Babylonian Heron iterations:
-  $$x_{n+1} = \frac{1}{2}\left(x_n + \frac{S}{x_n}\right)$$
-- Yields a determination with fields `value` (rational estimate), `iterations`, and `error_bound`.
+- Explicit approximation via `X approximate` produces an `ApproximateQuantity`, printed with a leading `~`.
+- `square-root` on a non-square raises `DubSarMathError`. It does not approximate.
 
 ### Layer H: Fourier Mathematics on Tablets (DFT & FFT) `[modern]`
 DUB.SAR synthesizes ancient tablet sequences and directed rotations into modern harmonic analysis:
@@ -117,11 +116,11 @@ DUB.SAR synthesizes ancient tablet sequences and directed rotations into modern 
 | Operation | Scholar Mode (Prefix / Postfix) | Canonical Cuneiform | Semantics |
 | :--- | :--- | :--- | :--- |
 | **Square** | `X square` | `X 𒅁` | Computes $X \cdot X$ |
-| **Square Root** | `X square-root` | `X square-root` | Computes exact integer $\sqrt{X}$ (errors if non-square) |
-| **Right Triangle** | `w l d right-triangle` | `w l d right-triangle` | Constructs right triangle determination; solves missing side |
-| **Validate Triangle** | `w l d validate-triangle` | `w l d validate-triangle` | Validates if $w^2 + l^2 = d^2$ (returns 1 or 0) |
-| **Inclination** | `run rise inclination` | `run rise inclination` | Constructs determination with `rise`, `run`, `inclination`, `feed` |
-| **Feed** | `run rise feed` | `run rise feed` | Computes horizontal feed ratio ($\text{run} / \text{rise}$) |
+| **Square Root** | `X square-root` | `X 𒁀𒋛` | Exact rational root. Errors when `X` is not a rational square |
+| **Right Triangle** | `w l right-triangle` | `w l right-triangle` | Determination with `short-side`, `long-side`, `diagonal`, `inclination`, `feed`, `area` |
+| **Validate Triangle** | `tri validate-triangle` | `tri validate-triangle` | `1` when $w^2 + l^2 = d^2$ |
+| **Inclination** | `rise run inclination` | `rise run inclination` | Determination. `1 2 inclination` is rise 1, run 2 |
+| **Feed** | `rise run feed` | `rise run feed` | Ratio $\text{run} / \text{rise}$ |
 | **Direction** | `dx dy direction` | `dx dy direction` | Constructs direction from orthogonal run/rise components |
 | **Turn** | `p q turn` | `p q turn` | Constructs turn fraction $p/q \pmod 1$ |
 | **Directed Quantity** | `mag dir directed` | `mag dir directed` | Binds scalar magnitude to directional ray |

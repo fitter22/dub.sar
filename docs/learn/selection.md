@@ -21,7 +21,7 @@ result
 
 Output:
 ```text
-12 length^2
+12 meter^2
 ```
 
 Fields within a determination can be accessed using dot notation (`sample.area`) or postfix English phrasing (`area of sample`).

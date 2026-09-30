@@ -177,6 +177,11 @@ UNIT_TABLE: Dict[str, Unit] = {
     "ma-na": Unit({"mass": 1}, scale=60, name="mina"),
     "𒈠𒈾": Unit({"mass": 1}, scale=60, name="𒈠𒈾"),
 
+    # Mass base: shekel / gin (1). mina = 60 shekel, talent = 3600 shekel.
+    "shekel": Unit({"mass": 1}, scale=1, name="shekel"),
+    "gin": Unit({"mass": 1}, scale=1, name="shekel"),
+    "gin2": Unit({"mass": 1}, scale=1, name="shekel"),
+
     # Length units (base dimension: length, base unit: kus / cubit)
     "kus": Unit({"length": 1}, scale=1, name="kus"),
     "kùš": Unit({"length": 1}, scale=1, name="kus"),
@@ -188,8 +193,9 @@ UNIT_TABLE: Dict[str, Unit] = {
     "gi": Unit({"length": 1}, scale=6, name="gi"),
     "reed": Unit({"length": 1}, scale=6, name="gi"),
     "nindan": Unit({"length": 1}, scale=12, name="nindan"),
-    "meter": Unit({"length": 1}, scale=1, name="meter"),
-    "m": Unit({"length": 1}, scale=1, name="meter"),
+    # Uncalibrated SI length. A separate dimension so it cannot add to cubits.
+    "meter": Unit({"meter": 1}, scale=1, name="meter"),
+    "m": Unit({"meter": 1}, scale=1, name="meter"),
 }
 
 UNIT_TO_CUNEIFORM: Dict[str, str] = {
@@ -450,7 +456,7 @@ class Quantity:
         return Quantity(Rational(self._value.ceil(), 1), self._unit)
 
     def nearest(self) -> Quantity:
-        """Returns the nearest integer, retaining the quantity's unit."""
+        """Nearest integer in the same unit. Half-way cases round away from zero."""
         return Quantity(Rational(self._value.nearest(), 1), self._unit)
 
 

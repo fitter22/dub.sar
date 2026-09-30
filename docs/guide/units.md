@@ -9,7 +9,7 @@ DUB.SAR features compile-time dimensional analysis, strict unit homogeneity, and
 DUB.SAR distinguishes between two categories of units:
 
 1. **Standard Implemented Units**: Built-in units belonging to predefined physical dimensions (`time`, `mass`, `length`, `month`, `year`) with known scale factors that support conversion via `convert(qty, target_unit)`.
-2. **Custom / Dynamic Dimensions**: Any unrecognized unit identifier (such as `silver`, `copper`, `shekel`, `liter`, or `step`) is automatically instantiated as an independent base dimension. Dynamic dimensions enforce strict dimensional consistency ($A + B$ requires identical units) and compose algebraically under multiplication and division, but cannot convert across different dimension names.
+2. **Custom / Dynamic Dimensions**: Any unrecognized unit identifier (such as `silver`, `copper`, `liter`, or `step`) is automatically instantiated as an independent base dimension. Dynamic dimensions enforce strict dimensional consistency ($A + B$ requires identical units) and compose algebraically under multiplication and division, but cannot convert across different dimension names. `shekel` is the standard mass base unit.
 
 ---
 
@@ -41,7 +41,8 @@ result
 | **Time** | `day`, `ud` | `𒌓` | $24\text{ hour} = 86400\text{ second}$ |
 | **Calendar** | `month`, `iti` | `𒌗` | $1\text{ month}$ (independent calendar dimension) |
 | **Calendar** | `year`, `mu` | `𒈬` | $1\text{ year}$ (independent astronomical dimension) |
-| **Mass** | `mina`, `ma-na` | `𒈠𒈾` | $60\text{ shekels}$ (base mass scale) |
+| **Mass** | `shekel`, `gin` | - | $1\text{ shekel}$ (base mass unit) |
+| **Mass** | `mina`, `ma-na` | `𒈠𒈾` | $60\text{ shekel}$ |
 | **Mass** | `talent`, `gun` | `𒄘` | $60\text{ mina} = 3600\text{ shekels}$ |
 | **Length** | `su-si`, `finger` | - | $1/30\text{ cubit}$ |
 | **Length** | `kus`, `kùš`, `cubit` | - | $1\text{ cubit}$ (base metrology unit) |

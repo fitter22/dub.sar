@@ -793,8 +793,23 @@ class Parser:
         sub_parser = Parser(line_tokens, source_file=self.source_file)
         val_expr = sub_parser._parse_expression()
         unit_str = None
-        if sub_parser._check(TokenType.IDENTIFIER) and not sub_parser._is_op_token(sub_parser.current):
-            unit_str = sub_parser._advance().value
+        value_already_has_unit = isinstance(val_expr, NumberLiteral) and bool(val_expr.unit)
+        if not value_already_has_unit and not sub_parser._check(TokenType.EOF):
+            if sub_parser._check(TokenType.IDENTIFIER) and not sub_parser._is_op_token(sub_parser.current):
+                unit_str = str(sub_parser._advance().value)
+            else:
+                spelled = sub_parser._quantity_unit_spelling(sub_parser.current)
+                if spelled is not None:
+                    sub_parser._advance()
+                    unit_str = spelled
+        if not sub_parser._check(TokenType.EOF):
+            extra = sub_parser.current
+            raise DubSarSyntaxError(
+                f"Unexpected token after establishment: {extra.type.name} ({extra.raw!r})",
+                line=extra.line,
+                col=extra.col,
+                source_file=self.source_file,
+            )
 
         return Declaration(
             name=name_tok.value,
@@ -803,6 +818,21 @@ class Parser:
             line=name_tok.line,
             col=name_tok.col,
         )
+
+    def _quantity_unit_spelling(self, tok: Token) -> Optional[str]:
+        """Keyword spellings that are units only when they follow a number.
+
+        ``iti`` / ``𒌗`` are ``through`` inside ``consider`` and a month after a number.
+        ``gi`` / ``𒄀`` are ``consider`` at the start of a statement and a reed after a number.
+        """
+        if self.in_repetition_range:
+            return None
+        raw = tok.raw
+        if tok.type == TokenType.THROUGH and raw in ("iti", "𒌗"):
+            return raw
+        if tok.type == TokenType.CONSIDER and raw in ("gi", "𒄀"):
+            return "gi"
+        return None
 
     def _is_op_token(self, tok: Token) -> bool:
         if tok.type in (
@@ -872,7 +902,9 @@ class Parser:
             return "right-triangle"
         if r in ("validate-triangle", "validate_triangle"):
             return "validate-triangle"
-        if tok.type == TokenType.INCLINATION or r in ("inclination", "feed", "mūṣû", "musu", "kussû", "kussu"):
+        if r in ("feed", "mūṣû", "musu"):
+            return "feed"
+        if tok.type == TokenType.INCLINATION or r in ("inclination", "kussû", "kussu"):
             return "inclination"
         if tok.type == TokenType.DIRECTION or r == "direction":
             return "direction"
@@ -949,14 +981,16 @@ class Parser:
             elif t.type == TokenType.NUMBER:
                 val = t.value
                 unit = None
-                if (
-                    i + 1 < n
-                    and flat[i + 1].line == t.line
-                    and flat[i + 1].type in (TokenType.IDENTIFIER, TokenType.THROUGH)
-                    and not self._is_op_token(flat[i + 1])
-                ):
-                    unit = flat[i + 1].value
-                    i += 1
+                if i + 1 < n and flat[i + 1].line == t.line:
+                    nxt = flat[i + 1]
+                    if nxt.type == TokenType.IDENTIFIER and not self._is_op_token(nxt):
+                        unit = str(nxt.value)
+                        i += 1
+                    else:
+                        spelled = self._quantity_unit_spelling(nxt)
+                        if spelled is not None:
+                            unit = spelled
+                            i += 1
                 steps.append(NumberLiteral(value=val, unit=unit, line=t.line, col=t.col))
                 i += 1
             elif t.type == TokenType.IDENTIFIER:
@@ -979,7 +1013,12 @@ class Parser:
                 steps.append(EmptyLiteral(value="empty", line=t.line, col=t.col))
                 i += 1
             else:
-                i += 1
+                raise DubSarSyntaxError(
+                    f"Unexpected token in calculation: {t.type.name} ({t.raw!r})",
+                    line=t.line,
+                    col=t.col,
+                    source_file=self.source_file,
+                )
         return steps
 
     def _parse_assignment(self) -> Assignment:
@@ -1471,17 +1510,15 @@ class Parser:
         if self._check(TokenType.NUMBER):
             num_tok = self._advance()
             unit_str = None
-            if self._check(TokenType.IDENTIFIER) and not self._is_op_token(self.current) and self.current.line == num_tok.line:
-                unit_tok = self._advance()
-                unit_str = unit_tok.value
-            elif (
-                not self.in_repetition_range
-                and self._check(TokenType.THROUGH)
-                and self.current.value == "𒌗"
-                and self.current.line == num_tok.line
-            ):
-                self._advance()
-                unit_str = "𒌗"
+            if self.current.line == num_tok.line:
+                if self._check(TokenType.IDENTIFIER) and not self._is_op_token(self.current):
+                    unit_tok = self._advance()
+                    unit_str = str(unit_tok.value)
+                else:
+                    spelled = self._quantity_unit_spelling(self.current)
+                    if spelled is not None:
+                        self._advance()
+                        unit_str = spelled
 
             num_lit = NumberLiteral(
                 value=num_tok.value,
@@ -1631,6 +1668,8 @@ class Parser:
             TokenType.CEIL,
             TokenType.NEAREST,
             TokenType.ABSOLUTE,
+            TokenType.SQUARE,
+            TokenType.SQUARE_ROOT,
         ):
             ident_tok = self._advance()
 
@@ -1691,7 +1730,14 @@ class Parser:
                     col=ident_tok.col,
                 )
 
-            if ident_tok.type in (TokenType.FLOOR, TokenType.CEIL, TokenType.NEAREST, TokenType.ABSOLUTE):
+            if ident_tok.type in (
+                TokenType.FLOOR,
+                TokenType.CEIL,
+                TokenType.NEAREST,
+                TokenType.ABSOLUTE,
+                TokenType.SQUARE,
+                TokenType.SQUARE_ROOT,
+            ):
                 raise DubSarSyntaxError(
                     f"Unexpected token in expression: {ident_tok.type.name} ({ident_tok.raw!r})",
                     line=ident_tok.line,

@@ -134,7 +134,7 @@ class OpCode(Enum):
     ITER_NEXT = auto()      # Advance iteration: arg=(key_var, val_var, exit_addr)
     ITER_END = auto()       # End iteration
     SQUARE = auto()         # Pop a; push a.square()
-    SQUARE_ROOT = auto()    # Pop a; push a.square_root(allow_approx=True)
+    SQUARE_ROOT = auto()    # Pop a; push exact a.square_root() or raise DubSarMathError
     RIGHT_TRIANGLE = auto() # Pop b, a; push RightTriangleValue.determine(short_side=a, long_side=b)
     VALIDATE_TRIANGLE = auto() # Pop tri; push tri.is_valid()
     INCLINATION = auto()    # Pop run, rise; push rise / run (or feed)

@@ -40,7 +40,7 @@ flowchart LR
 | **1. Beginner** | [Unit Conversions](#unit-conversions-dimensional-safety) | Metrology & Unit Safety | [`unit_conversion_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/unit_conversion_scholar.dub) | [`unit_conversion.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/unit_conversion.dub) | Mixed | `2 hour`, `1;30 day`, `2160 minute` |
 | **2. Intermediate** | [Postfix Pipelines](#postfix-pipelines-mathematical-verbs) | Verbs (`zi`, `ba-si`, `gur`, `nim`, `ri`) | [`postfix_pipelines_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/postfix_pipelines_scholar.dub) | [`postfix_pipelines.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/postfix_pipelines.dub) | Mixed | `49`, `24;30`, `24`, `25`, `25` |
 | **2. Intermediate** | [Bounded Search](#bounded-mathematical-search) | Domains (`consider ... through`) | [`bounded_search_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/bounded_search_scholar.dub) | [`bounded_search.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/bounded_search.dub) | Mixed | `55` |
-| **2. Intermediate** | [Atomic Selection](#atomic-selection-sentinel-retention) | `retain ... whenever`, Sentinel `empty` | [`atomic_selection_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection_scholar.dub) | [`atomic_selection.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection.dub) | Mixed | `7` |
+| **2. Intermediate** | [Atomic Selection](#atomic-selection-sentinel-retention) | `retain ... when`, Sentinel `empty` | [`atomic_selection_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection_scholar.dub) | [`atomic_selection.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection.dub) | Mixed | `Largest integer whose square <= 50:`, `7` |
 | **2. Intermediate** | [Determinations](#determinations-structured-records) | Tuples, Field Extractions | [`determinations_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/determinations_scholar.dub) | [`determinations.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/determinations.dub) | Mixed | `360 length^2`, `15 kus`, `24 kus` |
 | **3. Advanced** | [Sequence Generation](#sequence-generation) | Dynamic Sequences, First/Last | [`sequence_generation_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_generation_scholar.dub) | [`sequence_generation.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_generation.dub) | Mixed | `6`, `1`, `8` |
 | **3. Advanced** | [Sequence Transformation](#sequence-transformation) | Series Mapping & Bounded Iteration | [`sequence_transformation_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_transformation_scholar.dub) | [`sequence_transformation.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/sequence_transformation.dub) | Mixed | `120`, `4`, `96` |
@@ -202,7 +202,7 @@ Sum of 1 through 10:
 ### Atomic Selection & Sentinel Retention
 
 - **Files**: [`examples/atomic_selection_scholar.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection_scholar.dub) / [`examples/atomic_selection.dub`](https://github.com/fitter22/dub.sar/blob/main/examples/atomic_selection.dub)
-- **Concept**: Atomic `retain` with criteria (`whenever`), sentinel `empty` (`nu`), and bound filtering.
+- **Concept**: Atomic `retain` with criteria (`when`), sentinel `empty` (`nu`), and bound filtering.
 - **Tutorial Guide**: [Chapter 7: Determinations & Selection](../learn/selection.md)
 
 Finds the largest integer $n \in [1, 10]$ whose square does not exceed $50$, updating the retained candidate only when the condition is satisfied:
@@ -531,7 +531,7 @@ Ea-nāṣir
 Loads the existing `ea-nasir-assessment` tablet, creates a working draft, records a final `rejected` verdict, and inscribes version 2:
 
 ```bash
-# Must be executed in an archive containing version 1:
+# Run examples/ea_nasir_scholar.dub first. It inscribes ea-nasir-assessment v1.
 python3 -m dubsar run examples/ea_nasir_revision_scholar.dub
 ```
 

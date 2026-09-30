@@ -71,6 +71,7 @@ int dubsar_rat_ge(dubsar_rat_t a, dubsar_rat_t b);
 int dubsar_rat_is_regular(dubsar_rat_t a);
 dubsar_rat_t dubsar_rat_square(dubsar_rat_t a);
 int dubsar_rat_is_square(dubsar_rat_t a, dubsar_rat_t *out);
+dubsar_rat_t dubsar_rat_sqrt_exact(dubsar_rat_t a);
 dubsar_rat_t dubsar_rat_sqrt_babylonian(dubsar_rat_t a, int iterations);
 
 /* Formatting */

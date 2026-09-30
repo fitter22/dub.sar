@@ -420,7 +420,7 @@ class NativeCodeGen:
                 elif op == "square":
                     lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_rat(dubsar_rat_square({stack_var}[{sp_var} - 1].as.rat));")
                 elif op == "square-root":
-                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_rat(dubsar_rat_sqrt_babylonian({stack_var}[{sp_var} - 1].as.rat, 4));")
+                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_rat(dubsar_rat_sqrt_exact({stack_var}[{sp_var} - 1].as.rat));")
                 elif op == "right-triangle":
                     lines.append(f"{pad}{sp_var} -= 2;")
                     lines.append(f"{pad}{stack_var}[{sp_var}] = dubsar_val_triangle(dubsar_triangle_determine(")

@@ -6,23 +6,25 @@ The DUB.SAR compilation pipeline bridges ancient Mesopotamian mathematical conve
 
 ## 1. Pipeline Overview
 
-The compiler is organized into a modular multi-tier architecture where frontend analysis is decoupled from target code generation:
+The compiler is organized into a modular multi-tier architecture where frontend lexical parsing and semantic normalization are cleanly decoupled from intermediate lowering and backend code generation:
 
 ```mermaid
 flowchart TD
-    subgraph Frontend["Frontend Pipeline"]
+    subgraph Frontend["Frontend & Lowering Pipeline"]
         Source[".dub Source Tablet<br/>(Tablet / Scholar / Mixed)"]
         Lexer["Unicode Lexer<br/>(dubsar/lexer.py)"]
         Parser["Recursive-Descent Parser<br/>(dubsar/parser.py)"]
         AST["Unified AST<br/>(dubsar/ast.py)"]
-        Semantic["Semantic Analyzer<br/>(dubsar/semantic.py)"]
+        Normalizer["Semantic Normalization<br/>& Analysis (dubsar/semantic.py)"]
+        IRLower["Semantic IR Lowering<br/>ast_to_semantic_ir() (dubsar/semantic_ir.py)"]
         IR["Semantic IR<br/>(dubsar/semantic_ir.py)"]
 
         Source --> Lexer
         Lexer --> Parser
         Parser --> AST
-        AST --> Semantic
-        Semantic --> IR
+        AST --> Normalizer
+        Normalizer --> IRLower
+        IRLower --> IR
     end
 
     subgraph Backends["Execution Backends"]
@@ -35,6 +37,7 @@ flowchart TD
         IR --> VMComp
         IR --> WasmComp
         IR --> NativeComp
+        AST -.->|"Direct Lowering"| NativeComp
     end
 
     subgraph NativeToolchain["Native Compilation Toolchain"]
@@ -49,7 +52,7 @@ flowchart TD
         Bin["Native Binary<br/>(Mach-O / ELF)"]
         Shared["Shared Library<br/>(.dylib / .so)"]
         LLVM["Textual LLVM IR<br/>(.ll)"]
-        CSource["Standalone C99<br/>(.c)"]
+        CSource["Generated C99 Source<br/>(.c)"]
 
         HostCC --> Bin
         HostCC --> Shared
@@ -79,17 +82,18 @@ A recursive-descent parser constructs an Abstract Syntax Tree (AST) conforming t
 - **Unified AST**: Emits homogeneous AST nodes regardless of whether the source tablet was authored in Latin Scholar Mode, cuneiform Tablet Mode, or Mixed Mode.
 - **Grammar Formations**: Parses procedure recipes, problem statements, postfix calculation chains, bounded domain searches, determination records, and archival statements.
 
-### Phase 3: Semantic Analysis (`dubsar/semantic.py`)
+### Phase 3: Semantic Analysis and Normalization (`dubsar/semantic.py`, `dubsar/normalizer.py`)
 
-The semantic analyzer verifies tablet integrity prior to intermediate code emission:
+The semantic analyzer and normalization rules verify tablet integrity prior to intermediate lowering:
 
 - **Lexical Scoping**: Tracks variable establishments and procedure signatures across nested scopes.
 - **Metrological Unit Verification**: Validates dimensional compatibility (e.g. verifying that length and length can be added, but length and mass cannot without explicit conversion).
-- **Domain and Bounds Checking**: Checks bounds on loops and range expressions.
+- **Domain and Bounds Checking**: Enforces non-negative ranges on bounded repetitions and verifies static determination types.
+- **Dialect Normalization**: Canonicalizes multi-sign cuneiform tokens and transliterated keywords into a unified internal representation.
 
 ### Phase 4: Semantic IR Lowering (`dubsar/semantic_ir.py`)
 
-The AST is lowered into canonical mathematical verbs:
+The AST is lowered into canonical mathematical verbs using `ast_to_semantic_ir()`. Note that `NativeCodeGen.compile()` accepts either a pre-lowered `SemanticProgram` or a raw AST `Program` (invoking `ast_to_semantic_ir()` directly):
 
 - `EstablishVerb`: Introduces named values with optional metrological units.
 - `AssignVerb`: Destructures and assigns scalar values or procedure tuples.
@@ -102,7 +106,7 @@ The AST is lowered into canonical mathematical verbs:
 
 ### Phase 5: Native C99 Code Generation (`dubsar/native/codegen.py`)
 
-The C99 code generator (`NativeCodeGen`) walks the Semantic IR and generates clean, standard ANSI C99 source code:
+The C99 code generator (`NativeCodeGen`) walks the Semantic IR verbs and generates standard ANSI C99 source code:
 
 - **Identifier Mangling**: Converts alphanumeric and Unicode cuneiform variable names into valid C identifiers using `_mangle_name()` (e.g. mapping cuneiform characters to deterministic `_uXXXX_` escapes).
 - **Stack Machine Simulation**: Lowers postfix calculation pipelines into a fixed-depth local stack (`dubsar_val_t _stk[64]`), avoiding dynamic heap allocations for arithmetic sequences.
@@ -115,8 +119,8 @@ The compiler driver orchestrates compilation with the host toolchain:
 
 - Detects available host compilers (`clang`, `gcc`, or `cc`).
 - Configures include paths targeting `dubsar/native/runtime/`.
-- Compiles the generated C source together with `dubsar_runtime.c` and links the standard math library (`-lm`).
-- Produces the requested target artifact: standalone executable, shared dynamic library, textual LLVM IR, or clean C source code.
+- Compiles the generated C source together with `dubsar_runtime.c` and links the standard C math library (`-lm`).
+- Produces the requested target artifact: standalone machine executable (Mach-O on macOS, ELF on Linux), shared dynamic library (`.dylib`/`.so`), textual LLVM IR (`.ll`), or standalone C source code (`.c`).
 
 ---
 
@@ -151,9 +155,9 @@ The C runtime consists of two primary files:
 
 ## 4. Core Architectural Mechanics
 
-### 128-Bit Accelerated Exact Rational Arithmetic
+### Exact Rational Representation and 128-Bit Intermediate Accumulation
 
-DUB.SAR uses exact rational numbers rather than floating-point representations. The native rational type is defined as:
+DUB.SAR models numbers as exact rational values rather than IEEE 754 floating-point representations. In the native and WebAssembly runtimes, the core rational type is bounded to 64-bit signed integer components:
 
 ```c
 typedef struct {
@@ -162,7 +166,9 @@ typedef struct {
 } dubsar_rat_t;
 ```
 
-#### Hardware 128-Bit Multiplication
+This representation contrasts with the Python AST Interpreter and Bytecode VM backends, which use Python's unbounded arbitrary-precision integers (`fractions.Fraction`).
+
+#### Hardware 128-Bit Intermediate Accumulation
 
 When compiling with modern 64-bit compilers (`clang` or `gcc`), `__SIZEOF_INT128__` is defined. The runtime uses native 128-bit integers (`__int128_t`) for cross-multiplication:
 
@@ -192,7 +198,9 @@ dubsar_rat_t dubsar_rat_add(dubsar_rat_t a, dubsar_rat_t b) {
 }
 ```
 
-This 128-bit accumulator design prevents intermediate arithmetic overflow during additions, subtractions, and multiplications of large rational values before reducing by the greatest common divisor.
+This 128-bit accumulator design substantially mitigates intermediate arithmetic overflow during intermediate calculations ($a \cdot d \pm b \cdot c$ and $b \cdot d$) before reducing by the greatest common divisor.
+
+**Storage Bounds and Overflow Considerations**: After GCD reduction, the 128-bit numerator and denominator are cast back to bounded 64-bit storage `(int64_t)num` and `(int64_t)den`. The native runtime does not provide unbounded arbitrary-precision arithmetic; if the final reduced rational value exceeds 64-bit signed limits (`[-9223372036854775808, 9223372036854775807]`), numeric overflow will occur. On platforms lacking 128-bit compiler support, the runtime falls back to factorized 64-bit GCD arithmetic.
 
 #### Babylonian Square Root
 
@@ -308,11 +316,12 @@ Supports:
 
 ### Geometric and Trigonometric Primitives
 
-Mesopotamian geometry is modeled without floating-point trigonometric approximations:
+Mesopotamian geometry is modeled with exact representations for angles, slopes, and triangles:
 
-- **Right Triangles** (`dubsar_triangle_t`): Encapsulates width, length, and diagonal. `dubsar_triangle_determine()` solves for the missing third side given any two sides using the Pythagorean relation.
-- **Inclinations & Feeds** (`dubsar_inclination_t`): Models slopes as ratios of rise over run and vertical feed rates.
-- **Rational Turns & Directions** (`dubsar_turn_t`): Expresses angular rotation as exact rational fractions of a full revolution $[0, 1)$, eliminating irrational degree and radian conversions.
+- **Right Triangles** (`dubsar_triangle_t`): Encapsulates width, length, and diagonal. `dubsar_triangle_determine()` solves for the missing third side given any two sides using the Pythagorean relation, returning exact rational sides when integer squares exist or rational Babylonian approximations otherwise.
+- **Inclinations & Feeds** (`dubsar_inclination_t`): Models slopes as exact rational ratios of rise over run and vertical feed rates.
+- **Rational Turns** (`dubsar_turn_t`): Expresses angular rotation as exact rational fractions of a full revolution in $[0, 1)$, eliminating irrational degree and radian conversions. Cardinal directions (turns `0`, `1/4`, `1/2`, `3/4`) map symbolically to exact orthogonal coordinates: $(1, 0)$, $(0, 1)$, $(-1, 0)$, and $(0, -1)$.
+- **Direction Projections** (`dubsar_direction_t`): For general non-cardinal turns, `dubsar_direction_from_turn()` projects unit components using double-precision floating-point trigonometric functions (`cos`, `sin`) and quantizes the resulting coordinates into exact rational values at micro-unit ($10^{-6}$) precision (`dubsar_rat_make(c_int, 1000000)`).
 - **Directed Quantities** (`dubsar_directed_t`): Combines a magnitude, metrological unit, and direction vector, supporting rotations via `dubsar_directed_rotate()`.
 
 ### Harmonic Analysis: Discrete and Fast Fourier Transforms
@@ -328,17 +337,19 @@ Both algorithms return newly allocated working tablets containing transformed co
 
 ## 5. Backend Comparison Matrix
 
-| Feature / Metric | AST Interpreter (`ast`) | Stack Bytecode VM (`vm`) | WebAssembly (`wasm`) | Native Compiler (`native`) |
+| Feature / Dimension | AST Interpreter (`ast`) | Stack Bytecode VM (`vm`) | WebAssembly (`wasm`) | Native Compiler (`native`) |
 | :--- | :--- | :--- | :--- | :--- |
 | **Status in DUB.SAR 1.0** | **Complete** | **Complete** *(Default)* | **Complete** | **Complete** |
 | **Execution Model** | Recursive AST tree-walker | Stack-based bytecode interpreter | Ahead-of-time text/binary WASM | Ahead-of-time machine binary (Mach-O / ELF) |
+| **Execution Overhead** | Interpreted AST traversal; highest dispatch and dynamic allocation overhead | Linear instruction loop over operand stack; low dispatch overhead | Direct execution inside host WASM runtime / browser engine | Zero interpreter overhead; direct machine execution optimized by LLVM / GCC |
 | **Host Toolchain Required** | Python 3.9+ | Python 3.9+ | None (emits `.wat`) / `wat2wasm` | `clang` or `gcc` |
-| **Primary Use Case** | Reference semantics, specification verification | Development, rapid iteration, CLI execution | Web deployment, sandboxed browser execution | Production CLI utilities, high-throughput numerical batch jobs |
-| **Relative Performance** | Baseline ($1\times$) | $5\times - 10\times$ faster | $20\times - 50\times$ faster | $50\times - 100\times$ faster |
-| **Compilation Latency** | None (instant startup) | Microseconds (bytecode compilation) | Milliseconds | ~100–300 ms (host compiler invocation) |
-| **Arithmetic Precision** | Exact arbitrary-precision Python rationals | Exact arbitrary-precision Python rationals | 64-bit integer rational runtime | Exact 64-bit rationals with 128-bit hardware acceleration |
+| **Primary Use Case** | Reference semantics, specification verification | Development, rapid iteration, CLI execution | Web deployment, sandboxed browser execution | High-throughput CLI utilities, batch numerical jobs |
+| **Compilation Latency** | None (instant evaluation) | Microseconds (in-memory bytecode compile) | Milliseconds | ~100–300 ms (host C compiler invocation) |
+| **Arithmetic Precision** | Exact arbitrary-precision Python rationals | Exact arbitrary-precision Python rationals | Bounded 64-bit integer rational runtime | Bounded 64-bit rationals with 128-bit wider intermediate accumulation |
 | **Memory Footprint** | Moderate (Python object overhead) | Low (compact bytecode arrays) | Minimal (linear WebAssembly memory) | Lowest (bare-metal native binary) |
-| **SQLite Archive Persistence** | Supported (`--archive`) | Supported (`--archive`) | Not applicable (in-memory) | In-memory execution (archive ignored) |
+| **SQLite Archive Persistence** | Supported (`--archive`) | Supported (`--archive`) | Not applicable (in-memory execution) | In-memory execution (archive ignored) |
 | **Output Presentation** | Configurable (`--format`) | Configurable (`--format`) | Canonical numeric output | Canonical numeric output |
-| **External Dependencies** | None (pure Python standard library) | None (pure Python standard library) | None | Standard C99 compiler and `libm` |
+| **External Dependencies** | None (pure Python standard library) | None (pure Python standard library) | None | Standard C99 compiler and C math library (`libm`) |
+
+*Note*: Execution characteristics are qualitative. Actual throughput and memory efficiency depend on tablet complexity, loop count, host hardware, and compiler optimization flags (`-O0` through `-Oz`).
 

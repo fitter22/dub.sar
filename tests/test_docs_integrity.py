@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import re
+import shutil
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -40,6 +43,31 @@ def _extract_anchors(file_path: Path) -> set[str]:
         for m in re.finditer(r"id=[\"\']([a-zA-Z0-9_\-]+)[\"\']", line):
             anchors.add(m.group(1))
     return anchors
+
+
+def _validate_sexpr_balance(wat: str) -> bool:
+    """Verifies that parentheses in S-expressions are properly balanced and nested."""
+    depth = 0
+    in_string = False
+    escape = False
+    for ch in wat:
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+        else:
+            if ch == '"':
+                in_string = True
+            elif ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth < 0:
+                    return False
+    return depth == 0 and not in_string
 
 
 class TestDocsIntegrity(unittest.TestCase):
@@ -216,8 +244,11 @@ result
                 self.assertEqual(ret, 0, f"Native execution failed for {name}:\n{stderr}")
                 self.assertEqual(stdout, expected, f"Native output mismatch for {name}")
 
-    def test_tutorial_examples_against_wasm_compiler(self) -> None:
-        """Verifies that representative tutorial examples compile to valid WebAssembly Text (.wat)."""
+    def test_tutorial_examples_wasm_structure_and_assembly(self) -> None:
+        """Verifies that representative tutorial examples compile to structurally sound WebAssembly Text (.wat),
+
+        validating S-expression balancing and assembling with wat2wasm when available.
+        """
         test_cases = [
             """
 problem
@@ -250,13 +281,46 @@ result
         ]
 
         wc = WasmCompiler()
+        wat2wasm_bin = shutil.which("wat2wasm")
+
         for idx, code in enumerate(test_cases, 1):
             with self.subTest(case=idx):
                 ast = Parser(Lexer(code).tokenize()).parse()
                 SemanticAnalyzer().analyze(ast)
                 wat = wc.compile(ast)
-                self.assertIn("(module", wat, "Compiled WAT must contain a top-level (module) declaration")
-                self.assertIn('(func (export "run")', wat, "Compiled WAT must export a run function")
+
+                # Validate structural properties and S-expression parenthesis balancing
+                self.assertTrue(
+                    _validate_sexpr_balance(wat),
+                    f"WAT output for case #{idx} has unbalanced S-expression parentheses",
+                )
+                self.assertTrue(
+                    wat.strip().startswith("(module"),
+                    f"WAT output for case #{idx} must start with (module",
+                )
+                self.assertIn(
+                    '(func (export "run")',
+                    wat,
+                    f"WAT output for case #{idx} must export a run function",
+                )
+
+                # If wat2wasm is available (locally or via wabt in CI), assemble to binary .wasm
+                if wat2wasm_bin:
+                    with tempfile.TemporaryDirectory(prefix="dubsar_wat_test_") as tmpdir:
+                        wat_path = Path(tmpdir) / f"case_{idx}.wat"
+                        wasm_path = Path(tmpdir) / f"case_{idx}.wasm"
+                        wat_path.write_text(wat, encoding="utf-8")
+                        res = subprocess.run(
+                            [wat2wasm_bin, str(wat_path), "-o", str(wasm_path)],
+                            capture_output=True,
+                            text=True,
+                        )
+                        self.assertEqual(
+                            res.returncode,
+                            0,
+                            f"wat2wasm assembly failed for case #{idx}:\nSTDOUT: {res.stdout}\nSTDERR: {res.stderr}",
+                        )
+                        self.assertTrue(wasm_path.exists() and wasm_path.stat().st_size > 0)
 
 
 if __name__ == "__main__":

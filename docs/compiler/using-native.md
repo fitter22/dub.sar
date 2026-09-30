@@ -93,13 +93,13 @@ If `-o` is omitted, the executable is written to the source file stem in the cur
 
 #### ANSI C99 Source Code
 
-Emit clean, human-readable C99 source code with zero external library dependencies:
+Emit clean, human-readable C99 source code. The emitted source code is self-contained and requires only the DUB.SAR C runtime headers/sources and the host C math library (`-lm`), with no third-party package dependencies:
 
 ```bash
 dubsar compile tablet.dub --target=c -o tablet.c
 ```
 
-The emitted C source includes `dubsar_runtime.h` and can be compiled manually with any C99 compiler:
+The emitted C source includes `dubsar_runtime.h` and can be compiled manually with any C99 compiler by including and linking `dubsar_runtime.c` alongside `-lm`:
 
 ```bash
 clang -O3 -I/path/to/dubsar/native/runtime tablet.c /path/to/dubsar/native/runtime/dubsar_runtime.c -lm -o tablet
@@ -168,13 +168,17 @@ dubsar compile tablet.dub --target=native --opt-level=-Os -o tablet_small
 - **Math Library**: The native compiler links the standard math library (`-lm`) automatically for transcendental and geometric helpers.
 - **Architecture**: 64-bit x86_64, AArch64, and RISC-V targets provide native `__int128_t` hardware acceleration.
 
-### 128-bit Integer Hardware Acceleration
+### Rational Storage and 128-bit Intermediate Accumulation
 
-The DUB.SAR native runtime leverages hardware 128-bit integers (`__int128_t`) when supported by the compiler (`__SIZEOF_INT128__`). This ensures that rational cross-multiplication:
+The DUB.SAR native and WebAssembly runtimes store rational numbers using bounded 64-bit signed integers for both numerator and denominator (`dubsar_rat_t` with `int64_t num; int64_t den;`). This differs from the Python AST Interpreter and Bytecode VM backends, which use Python's unbounded arbitrary-precision integers.
 
-$$\frac{a}{b} + \frac{c}{d} = \frac{a \cdot d + b \cdot c}{b \cdot d}$$
+On 64-bit platforms where `__SIZEOF_INT128__` is supported by Clang or GCC, the native runtime uses 128-bit integers (`__int128_t`) for intermediate cross-product calculation:
 
-computes intermediate 128-bit numerators and denominators without intermediate 64-bit integer overflow before reducing by the greatest common divisor (GCD). If compiled on a platform without 128-bit compiler support, the runtime automatically falls back to factorized GCD arithmetic.
+$$\frac{a}{b} \pm \frac{c}{d} = \frac{a \cdot d \pm b \cdot c}{b \cdot d}, \quad \frac{a}{b} \cdot \frac{c}{d} = \frac{a \cdot c}{b \cdot d}$$
+
+This wider intermediate accumulation substantially reduces the likelihood of intermediate overflow during additions, subtractions, and multiplications prior to reduction by the greatest common divisor (GCD).
+
+However, after GCD reduction, the reduced numerator and denominator are cast back into bounded 64-bit integer storage (`int64_t`). The native runtime does not provide unbounded arbitrary-precision arithmetic; if the final reduced rational value exceeds 64-bit signed limits, numeric overflow will occur. On platforms lacking 128-bit compiler support, the runtime falls back to factorized 64-bit GCD arithmetic.
 
 ---
 

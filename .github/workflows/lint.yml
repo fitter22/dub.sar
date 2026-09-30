@@ -24,6 +24,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff mkdocs mkdocs-material
 
+      - name: Install system dependencies (wabt for WAT validation)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wabt
+
       - name: Run Ruff Linter
         run: |
           ruff check .

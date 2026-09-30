@@ -394,7 +394,7 @@ class VirtualMachine:
 
             elif op == OpCode.SQUARE_ROOT:
                 a = to_quantity(self.operand_stack.pop())
-                self.operand_stack.append(a.square_root(allow_approx=True))
+                self.operand_stack.append(a.square_root(allow_approx=False))
 
             elif op == OpCode.RIGHT_TRIANGLE:
                 b = self.operand_stack.pop()

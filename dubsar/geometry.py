@@ -155,19 +155,36 @@ class Direction:
     without requiring premature modern degrees or radians.
     """
 
-    __slots__ = ("_turn", "_name")
+    __slots__ = ("_turn", "_name", "_rise", "_run")
 
-    def __init__(self, turn: Union[Turn, Rational, int] = 0, name: Optional[str] = None) -> None:
-        self._turn = turn if isinstance(turn, Turn) else Turn(turn)
+    def __init__(
+        self,
+        turn: Union[Turn, Rational, int, None] = 0,
+        name: Optional[str] = None,
+        rise: Optional[Union[Rational, int]] = None,
+        run: Optional[Union[Rational, int]] = None,
+    ) -> None:
         self._name = name
+        if rise is not None or run is not None:
+            self._rise: Optional[Rational] = to_rational(0 if rise is None else rise)
+            self._run: Optional[Rational] = to_rational(0 if run is None else run)
+            self._turn: Optional[Turn] = None
+        else:
+            self._rise = None
+            self._run = None
+            self._turn = turn if isinstance(turn, Turn) else Turn(0 if turn is None else turn)
 
     @property
     def turn(self) -> Turn:
+        if self._turn is None:
+            raise DubSarGeometricError(
+                "This direction is an exact rise/run ratio and has no turn fraction"
+            )
         return self._turn
 
     @property
     def fraction(self) -> Rational:
-        return self._turn.fraction
+        return self.turn.fraction
 
     @classmethod
     def reference(cls) -> Direction:
@@ -216,26 +233,8 @@ class Direction:
         elif r_run > 0 and r_rise == -r_run:
             return cls(Turn(Rational(7, 8)))
 
-        # General case: compute approximate turn fraction from atan2
-        num_y, den_y = r_rise.numerator, r_rise.denominator
-        num_x, den_x = r_run.numerator, r_run.denominator
-        mb = max(num_y.bit_length(), den_y.bit_length(), num_x.bit_length(), den_x.bit_length())
-        if mb > 80:
-            sh = mb - 80
-            num_y >>= sh
-            den_y >>= sh
-            num_x >>= sh
-            den_x >>= sh
-            if den_y == 0:
-                den_y = 1
-            if den_x == 0:
-                den_x = 1
-
-        ang = math.atan2(float(num_y) / float(den_y), float(num_x) / float(den_x))
-        frac = (ang / (2.0 * math.pi)) % 1.0
-        # Convert to high-precision rational fraction
-        rat_frac = Rational(int(round(frac * 360000)), 360000)
-        return cls(Turn(rat_frac))
+        # General case stays an exact rise/run ratio. It is not converted through atan2.
+        return cls(rise=r_rise, run=r_run)
 
     @classmethod
     def from_components(cls, x: Union[Rational, int], y: Union[Rational, int]) -> Direction:
@@ -243,7 +242,15 @@ class Direction:
 
     def rotate(self, turn: Union[Turn, Rational, int]) -> Direction:
         t = turn if isinstance(turn, Turn) else Turn(turn)
-        return Direction(self._turn.rotate(t))
+        if self._turn is not None:
+            return Direction(self._turn.rotate(t))
+        # Rotate the stored rise/run pair by the turn's exact rational components.
+        # Cardinal and eighth-turn components stay rational, so this path does not call sin or cos.
+        assert self._rise is not None and self._run is not None
+        cx, cy = Direction(t).components(allow_approx=False)
+        new_run = self._run * cx - self._rise * cy
+        new_rise = self._run * cy + self._rise * cx
+        return Direction.from_components(x=new_run, y=new_rise)
 
     def perpendicular_dir(self) -> Direction:
         """Returns direction rotated by quarter-turn."""
@@ -253,11 +260,27 @@ class Direction:
         """Returns direction rotated by half-turn."""
         return self.rotate(Turn.half())
 
-    def components(self, allow_approx: bool = True) -> Tuple[Rational, Rational]:
+    def components(self, allow_approx: bool = False) -> Tuple[Rational, Rational]:
         """Returns (x, y) unit components of the direction.
 
         Exact rationals are returned for cardinal quarter-turns and attested multiples.
         """
+        if self._rise is not None and self._run is not None:
+            hyp_sq = self._rise * self._rise + self._run * self._run
+            if hyp_sq == 0:
+                raise DubSarGeometricError("Cannot determine components of a zero rise/run direction")
+            if hyp_sq.is_perfect_square():
+                hyp = hyp_sq.exact_sqrt()
+                assert hyp is not None
+                return (self._run / hyp, self._rise / hyp)
+            if not allow_approx:
+                raise DubSarGeometricError(
+                    "Rise/run direction has no exact rational unit components. Use approximate."
+                )
+            hyp = hyp_sq.sqrt_babylonian(iterations=4)
+            return (self._run / hyp, self._rise / hyp)
+
+        assert self._turn is not None
         frac = self._turn.fraction
         if frac == 0:
             return (Rational(1), Rational(0))
@@ -293,19 +316,26 @@ class Direction:
         return (rx, ry)
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, Direction):
-            return self._turn == other._turn
-        return False
+        if not isinstance(other, Direction):
+            return False
+        if self._rise is not None or other._rise is not None:
+            return self._rise == other._rise and self._run == other._run
+        return self._turn == other._turn
 
     def __hash__(self) -> int:
+        if self._turn is None:
+            return hash((self._rise, self._run))
         return hash(self._turn)
 
     def __repr__(self) -> str:
-        return f"Direction({self._turn.format()})"
+        return f"Direction({self})"
 
     def __str__(self) -> str:
         if self._name:
             return self._name
+        if self._turn is None and self._rise is not None and self._run is not None:
+            return f"direction({self._rise.format_canonical()}/{self._run.format_canonical()})"
+        assert self._turn is not None
         return f"direction({self._turn.format()})"
 
 
@@ -433,11 +463,11 @@ class DirectedQuantity:
     def __neg__(self) -> DirectedQuantity:
         return self.opposite()
 
-    def horizontal_component(self, allow_approx: bool = True) -> Quantity:
+    def horizontal_component(self, allow_approx: bool = False) -> Quantity:
         cx, _ = self._direction.components(allow_approx=allow_approx)
         return self._magnitude * cx
 
-    def vertical_component(self, allow_approx: bool = True) -> Quantity:
+    def vertical_component(self, allow_approx: bool = False) -> Quantity:
         _, cy = self._direction.components(allow_approx=allow_approx)
         return self._magnitude * cy
 

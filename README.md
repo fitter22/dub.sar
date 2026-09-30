@@ -38,7 +38,7 @@ All modes share the same computational semantics, execution runtime, and compila
 
 Here is a side-by-side comparison calculating the hypotenuse of a right triangle with width 3 meters and height 4 meters:
 
-#### Scholar Mode (`hypotenuse_scholar.dub`)
+#### Scholar Mode
 ```dubsar
 problem
     width : 3 meter
@@ -51,7 +51,7 @@ result
     hyp
 ```
 
-#### Tablet Mode (`hypotenuse.dub`)
+#### Tablet Mode
 ```dubsar
 𒂊𒁹
     𒂼 : 3 meter
@@ -65,9 +65,9 @@ result
     𒁇
 ```
 
-Both produce the exact dimensioned output:
+The runnable catalog tablets for this geometry are `examples/geometry_triangle_scholar.dub` and `examples/geometry_triangle.dub`. Both forms of the snippet below produce the exact dimensioned output:
 ```text
-5 length
+5 meter
 ```
 
 ---

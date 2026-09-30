@@ -212,6 +212,45 @@ class WasmCompiler:
             "    (local.get $num) (local.get $den)",
             "  )",
             "",
+            "  (func $isqrt64 (param $n i64) (result i64)",
+            "    (local $lo i64) (local $hi i64) (local $mid i64)",
+            "    (if (i64.le_s (local.get $n) (i64.const 0))",
+            "      (then (return (i64.const 0)))",
+            "    )",
+            "    (local.set $lo (i64.const 0))",
+            "    (local.set $hi (i64.const 3037000499))",
+            "    (if (i64.lt_u (local.get $n) (local.get $hi))",
+            "      (then (local.set $hi (local.get $n)))",
+            "    )",
+            "    (block $done",
+            "      (loop $search",
+            "        (br_if $done (i64.ge_u (local.get $lo) (local.get $hi)))",
+            "        (local.set $mid (i64.add (local.get $lo) (i64.div_u (i64.add (i64.sub (local.get $hi) (local.get $lo)) (i64.const 1)) (i64.const 2))))",
+            "        (if (i64.le_u (local.get $mid) (i64.div_u (local.get $n) (local.get $mid)))",
+            "          (then (local.set $lo (local.get $mid)))",
+            "          (else (local.set $hi (i64.sub (local.get $mid) (i64.const 1))))",
+            "        )",
+            "        (br $search)",
+            "      )",
+            "    )",
+            "    (local.get $lo)",
+            "  )",
+            "",
+            "  (func $rat_sqrt_exact (param $num i64) (param $den i64) (result i64 i64)",
+            "    (local $sn i64) (local $sd i64)",
+            "    (if (i64.lt_s (local.get $num) (i64.const 0))",
+            "      (then (unreachable))",
+            "    )",
+            "    (local.set $sn (call $isqrt64 (local.get $num)))",
+            "    (local.set $sd (call $isqrt64 (local.get $den)))",
+            "    (if (i32.or",
+            "          (i64.ne (i64.mul (local.get $sn) (local.get $sn)) (local.get $num))",
+            "          (i64.ne (i64.mul (local.get $sd) (local.get $sd)) (local.get $den)))",
+            "      (then (unreachable))",
+            "    )",
+            "    (local.get $sn) (local.get $sd)",
+            "  )",
+            "",
             "  (func $rat_cmp (param $op i32) (param $a_num i64) (param $a_den i64) (param $b_num i64) (param $b_den i64) (result i32)",
             "    (local $diff i64)",
             "    (local.set $diff (i64.sub (i64.mul (local.get $a_num) (local.get $b_den)) (i64.mul (local.get $b_num) (local.get $a_den))))",
@@ -466,6 +505,8 @@ class WasmCompiler:
                         lines.append(f"{pad}(call $rat_nearest)")
                     elif op in ("absolute", "abs", "te", "𒋼"):
                         lines.append(f"{pad}(call $rat_abs)")
+                    elif op in ("square-root", "square_root", "sqrt", "𒁀𒋛"):
+                        lines.append(f"{pad}(call $rat_sqrt_exact)")
                     elif op in ("add", "zi", "𒍣", "+"):
                         lines.append(f"{pad}(call $rat_add)")
                     elif op in ("subtract", "sub", "ta", "𒋫", "-"):
@@ -524,6 +565,9 @@ class WasmCompiler:
                 if callee in ("floor", "ceil", "nearest", "abs"):
                     self._compile_verb_expr_wat(expr.operands[0], lines, indent)
                     lines.append(f"{pad}(call $rat_{callee})")
+                elif callee in ("square-root", "square_root", "sqrt"):
+                    self._compile_verb_expr_wat(expr.operands[0], lines, indent)
+                    lines.append(f"{pad}(call $rat_sqrt_exact)")
                 else:
                     for arg in expr.operands:
                         self._compile_verb_expr_wat(arg, lines, indent)

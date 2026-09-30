@@ -26,7 +26,7 @@ result
 | **Scholar** | `problem` (or `given`) | `recipe <name>` (or `procedure <name>`) | `result` |
 | **Tablet** | `𒂊𒁹` | `𒁾𒊬 <name>` | `𒅗𒁹` |
 
-Section headers do not take a trailing colon. Statements within a section are indented by 4 spaces.
+A trailing colon after `problem` or `result` is optional and ignored. Statements within a section are indented by 4 spaces.
 
 ### Semantics
 
@@ -128,8 +128,8 @@ Multi-line stack prescription:
 
 ### Semantics
 
-- **Immutability**: Once established within a scope, an identifier cannot be reassigned or re-established. Attempting to re-establish an existing identifier causes a `DubSarSyntaxError`.
-- **Legacy Syntax**: The colon `:` is the canonical operator for all establishments. The obsolete `:=` symbol is deprecated.
+- **Re-establishment**: Establishing a name again with `:` replaces the previous quantity. `name := expression` updates that name the same way. Neither form is a syntax error.
+- **Establishment**: The colon `:` establishes a quantity. `:=` assigns to a name that already exists or creates one.
 - **Identifiers**:
   - Scholar Mode: ASCII alphanumeric identifiers and underscores (`total_area`, `side1`).
   - Tablet Mode: Valid non-reserved Unicode cuneiform sequences (`𒂼`, `𒊕`, `𒁇`). Reserved cuneiform keywords and numerals cannot be used as variable names.
@@ -152,7 +152,7 @@ result
 
 Output:
 ```text
-13 length
+13 meter
 ```
 
 ### Related Documentation
@@ -548,11 +548,11 @@ In cuneiform Tablet Mode:
 
 ### Standard Base Dimensions
 
-- **Length** (`length`): `cubit` (base unit), `finger` ($1/30\text{ cubit}$), `reed` ($6\text{ cubits}$), `nindan` ($12\text{ cubits}$), `meter`.
+- **Length** (`length`): `cubit` (base unit), `finger` ($1/30\text{ cubit}$), `reed` ($6\text{ cubits}$), `nindan` ($12\text{ cubits}$). `meter` is a separate uncalibrated dimension and does not add to the cubit.
 - **Time** (`time`): `second` (base unit), `minute` ($60\text{ s}$), `hour` ($3600\text{ s}$), `day` ($86400\text{ s}$).
 - **Mass** (`mass`): `mina` (base unit), `talent` ($60\text{ minas}$).
 - **Calendar Dimensions**: `month` and `year` represent independent abstract calendar and astronomical cycles; each has its own distinct base dimension and scale 1, and neither converts to days or to each other.
-- **Dynamic Units**: Any unrecognized unit (e.g. `copper`, `shekel`, `grain`) dynamically forms an independent base dimension.
+- **Dynamic Units**: Any unrecognized unit (e.g. `copper`, `grain`) dynamically forms an independent base dimension. `shekel` is the standard mass base.
 
 ### Semantics
 

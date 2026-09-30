@@ -72,11 +72,11 @@ class TestRationalAndQuantityGeometry(unittest.TestCase):
         q = Quantity(4, m)
         q_sq = q.square()
         self.assertEqual(q_sq.value, Rational(16))
-        self.assertEqual(q_sq.unit.dimensions, {"length": 2})
+        self.assertEqual(q_sq.unit.dimensions, {"meter": 2})
 
         q_root = q_sq.square_root()
         self.assertEqual(q_root.value, Rational(4))
-        self.assertEqual(q_root.unit.dimensions, {"length": 1})
+        self.assertEqual(q_root.unit.dimensions, {"meter": 1})
 
         # Incompatible square root without perfect square
         q_non_perf = Quantity(2, m * m)
@@ -84,7 +84,7 @@ class TestRationalAndQuantityGeometry(unittest.TestCase):
             q_non_perf.square_root(allow_approx=False)
 
         q_approx = q_non_perf.square_root(allow_approx=True)
-        self.assertEqual(q_approx.unit.dimensions, {"length": 1})
+        self.assertEqual(q_approx.unit.dimensions, {"meter": 1})
 
     def test_ratio_dimensionless_division(self):
         kus = lookup_unit("kus")

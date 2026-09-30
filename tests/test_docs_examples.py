@@ -15,20 +15,20 @@ from dubsar.vm import VirtualMachine
 
 EXPECTED_OUTPUTS: dict[str | tuple[str, int], list[str]] = {
     # Stable test IDs for documentation examples
-    "home-first-tablet-scholar": ["5 length"],
-    "home-first-tablet-cuneiform": ["5 length"],
-    "learn-first-tablet-scholar": ["5 length"],
-    "learn-first-tablet-cuneiform": ["5 length"],
+    "home-first-tablet-scholar": ["5 meter"],
+    "home-first-tablet-cuneiform": ["5 meter"],
+    "learn-first-tablet-scholar": ["5 meter"],
+    "learn-first-tablet-cuneiform": ["5 meter"],
     "learn-quantities-literals": ["12", "0;45", "1;30", "0;20"],
     "learn-quantities-metrological": ["5 time"],
     "learn-quantities-mixed": ["5 time"],
     "learn-exact-arithmetic-runnable": ["0;50", "25"],
     "learn-units-dimensional": ["2;5 nindan"],
-    "learn-pipelines-scholar": ["5 length"],
-    "learn-pipelines-cuneiform": ["5 length"],
+    "learn-pipelines-scholar": ["5 meter"],
+    "learn-pipelines-cuneiform": ["5 meter"],
     "learn-search-scholar": ["55"],
     "learn-search-cuneiform": ["55"],
-    "learn-selection-records": ["12 length^2"],
+    "learn-selection-records": ["12 meter^2"],
     "learn-selection-retain": ["25"],
     "learn-sequences-working-scholar": ["3", "12", "18"],
     "learn-sequences-working-mixed": ["3", "12", "18"],
@@ -45,7 +45,7 @@ EXPECTED_OUTPUTS: dict[str | tuple[str, int], list[str]] = {
     # Reference manual test IDs
     "ref-language-structure": ["36 length^2"],
     "ref-language-sections": ["30"],
-    "ref-language-establishment": ["13 length"],
+    "ref-language-establishment": ["13 meter"],
     "ref-language-operators": ["3;20", "2"],
     "ref-language-verbs": ["35"],
     "ref-language-determinations": ["360 length^2"],
@@ -63,7 +63,7 @@ EXPECTED_OUTPUTS: dict[str | tuple[str, int], list[str]] = {
 
     # Guide fallbacks keyed by (filename, block_idx)
     ("docs/guide/calculations.md", 1): ["35"],
-    ("docs/guide/determinations.md", 1): ["360 length^2"],
+    ("docs/guide/determinations.md", 1): ["360 meter^2"],
     ("docs/guide/domains-and-selection.md", 1): ["5050"],
     ("docs/guide/domains-and-selection.md", 2): ["7"],
     ("docs/guide/source-modes.md", 1): ["1 day"],

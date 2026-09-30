@@ -33,8 +33,9 @@ Mesopotamian astronomical and calendar calculations treat months and years as di
 
 | Unit Identifier | Alternative Aliases | Cuneiform Sign | Scale (Shekels) | Ratio to Mina |
 | :--- | :--- | :---: | :--- | :--- |
-| `mina` | `ma-na` | `𒈠𒈾` | $60$ | $1\text{ mina}$ (base unit) |
-| `talent` | `gun` | `𒄘` | $3600$ | $60\text{ mina}$ |
+| `shekel` | `gin`, `gin2` | - | $1$ | $1\text{ shekel}$ (base unit) |
+| `mina` | `ma-na` | `𒈠𒈾` | $60$ | $1\text{ mina} = 60\text{ shekel}$ |
+| `talent` | `gun` | `𒄘` | $3600$ | $60\text{ mina} = 3600\text{ shekel}$ |
 
 ### Length Units (Base Dimension: `length`)
 
@@ -46,7 +47,7 @@ The internal base unit for length is the Mesopotamian cubit (`kus` / `kùš` / `
 | `kus` | `kùš`, `cubit` | - | $1\text{ cubit}$ (base metrology unit) |
 | `gi` | `reed` | `𒄀` | $6\text{ cubits}$ |
 | `nindan` | - | - | $12\text{ cubits}$ |
-| `meter` | `m` | - | Uncalibrated SI length unit (scale = 1) |
+| `meter` | `m` | - | Separate dimension `meter` (scale = 1). Not compatible with `kus`. |
 
 > [!NOTE]
 > Historical Mesopotamian cubit lengths varied across periods and regions (such as the Classical Nippur cubit of $\approx 51.8\text{ cm}$). DUB.SAR preserves exact internal ratios within the historical sexagesimal metrology system (1 reed = 6 cubits, 1 nindan = 12 cubits), but deliberately avoids imposing an unverified conversion factor between historical cubits and modern SI meters.
@@ -55,7 +56,7 @@ The internal base unit for length is the Mesopotamian cubit (`kus` / `kùš` / `
 
 ## 2. Dynamic Custom Dimensions
 
-Any unit name not present in the standard table above (e.g., `shekel`, `silver`, `copper`, `grain`, `liter`, `step`) is dynamically recognized by the compiler and interpreter as a distinct, first-class base dimension.
+Any unit name not present in the standard table above (e.g., `silver`, `copper`, `grain`, `liter`, `step`) is dynamically recognized by the compiler and interpreter as a distinct, first-class base dimension. `shekel` is not one of these: it is the mass base unit.
 
 - **Dimensional Safety**: Quantities with dynamic units can be multiplied and divided to form composite dimensions (e.g., $10\text{ copper} \times 2\text{ silver} = 20\text{ copper}\cdot\text{silver}$).
 - **Addition & Subtraction Homogeneity**: Quantities can only be added or subtracted if they share the exact identical dimension exponents.

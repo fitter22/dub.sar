@@ -11,7 +11,7 @@
 # Expected Output:
 #   1200 length^2
 
-problem:
+problem
     width : 30 cubit
     height : 40 cubit
     area :
@@ -19,5 +19,5 @@ problem:
         height
         multiply
 
-result:
+result
     area

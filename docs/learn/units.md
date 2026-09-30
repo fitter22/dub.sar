@@ -8,11 +8,11 @@ Physical numbers in DUB.SAR carry explicit unit dimensions. Operations between q
 
 DUB.SAR provides both built-in standard units with defined conversion scales and extensible dynamic dimensions:
 
-- **Standard Length**: `meter`, `cubit` (`kus` / `kùš` / `kush3`), `finger` (`su-si` / `shu-si`), `reed` (`gi`), `nindan` (rod = 12 cubits).
+- **Cubit length**: `cubit` (`kus` / `kùš` / `kush3`), `finger` (`su-si` / `shu-si`), `reed` (`gi`, 6 cubits), `nindan` (12 cubits). `meter` is a separate uncalibrated dimension and does not add to the cubit. `gi` after a number is the reed; `gi` at the start of a statement is `consider`.
 - **Standard Time**: `second`, `minute`, `hour`, `day` (`ud` / `𒌓`).
 - **Standard Mass**: `mina` (`ma-na` / `𒈠𒈾`), `talent` (`gun` / `𒄘`).
 - **Calendar Dimensions**: `month` (`iti` / `𒌗`), `year` (`mu` / `𒈬`).
-- **Dynamic Custom Units**: User-defined unit labels (such as `shekel`, `silver`, `copper`, `sila3`, `sar`, `step`) automatically form custom base dimensions.
+- **Dynamic Custom Units**: User-defined unit labels (such as `silver`, `copper`, `sila3`, `sar`, `step`) automatically form custom base dimensions. `shekel` is the standard mass base, not a dynamic unit.
 
 ---
 

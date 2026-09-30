@@ -47,12 +47,10 @@ def builtin_ceil(x: Union[Quantity, Rational, int]) -> Quantity:
 
 
 def builtin_nearest(x: Union[Quantity, Rational, int]) -> Quantity:
-    """Returns the nearest integer.
+    """Returns the nearest integer, keeping the argument's unit.
 
-    Per Section 14.1:
-    - If argument is dimensionless, result is dimensionless integer.
-    - If argument is a quantity, result is the corresponding integer count and is dimensionless.
-    - Exact half-way cases round away from zero.
+    Per Section 14.1, exact half-way cases round away from zero.
+    A dimensioned quantity stays in that unit: nearest(2;30 day) is 3 day.
     """
     q = to_quantity(x)
     return q.nearest()
@@ -256,6 +254,7 @@ BUILTINS: Dict[str, Callable[..., Any]] = {
     "convert": builtin_convert,
     "square": builtin_square,
     "square_root": builtin_square_root,
+    "square-root": builtin_square_root,
     "sqrt": builtin_square_root,
     "right_triangle": builtin_right_triangle,
     "validate_triangle": builtin_validate_triangle,

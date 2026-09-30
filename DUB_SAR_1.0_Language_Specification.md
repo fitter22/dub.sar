@@ -101,7 +101,7 @@ ASCII technical identifiers use:
 
 Cuneiform identifiers consist of one or more cuneiform signs that are not reserved syntax tokens.
 
-Identifiers are case-sensitive in Scholar mode.
+Identifiers are case-sensitive in Scholar mode. Keywords are case-insensitive: `PROBLEM` and `problem` are the same token. A keyword spelling is not an identifier.
 
 ---
 
@@ -129,7 +129,7 @@ The following tokens are part of DUB.SAR 1.0. Their programming meanings are **D
 | `𒃲` | gal | greater than (`>`) |
 | `𒊓` | sa | equal (`==`) |
 | `𒈨` | me | copula is |
-| `nu` / `𒉡` | nu | empty sentinel / negation |
+| `nu` / `𒉡` | nu | empty sentinel. Negation is the scholar word `not`, which has no cuneiform sign |
 | `shu` / `𒋗` | šu | take operand |
 | `nam` / `𒉆` | nam | determine record |
 | `𒄀` | gi | bounded repetition / domain |
@@ -149,6 +149,21 @@ The following tokens are part of DUB.SAR 1.0. Their programming meanings are **D
 | `𒑰` | — | comment marker |
 
 The vocabulary is intentionally small. Where a modern programming concept has no defensible historical Sumerian equivalent, DUB.SAR assigns a transparent technical convention instead of pretending the term is ancient.
+
+### 4.1 Position of overloaded signs
+
+These signs are one token. The parser chooses the role from the position. Scholar spellings in the same row follow the same rule.
+
+| Sign | Scholar | After a number, same line, outside `consider` | Start of a statement | Inside a calculation pipeline | Other positions |
+|---|---|---|---|---|---|
+| `𒋼` | `te` / `retain` / `absolute` | — | `retain` | absolute value | absolute value when it is the postfix verb |
+| `𒌗` | `iti` / `through` | month unit | — | month unit when it follows a number | `through` inside `consider` |
+| `𒊭` | `ša` / `multiply` / `of` | — | — | multiply | `of` in `field of record` |
+| `𒋫` | `ta` / `subtract` / `from` / `than` | — | — | subtract | `from` in `consider ... from`, and `than` after `lesser` or `greater` |
+| `𒉡` | `nu` | — | empty sentinel in `name : nu` | empty sentinel | negation is the separate scholar word `not` |
+| `𒄀` | `gi` / `consider` | reed of 6 cubits | `consider` | reed of 6 cubits when it follows a number | `consider` |
+
+`𒂗` (`en`) is only `through`. It is not a month. `𒁾𒊬` is only a recipe. Inscription is `𒁹𒀀` / `inscribe`, not the recipe sign. `𒊬` alone, outside `𒁾𒊬`, is the inscribe verb.
 
 ---
 
@@ -178,8 +193,8 @@ The normative grammar is:
 ```ebnf
 tablet           ::= problem-section recipe-section* result-section ;
 
-problem-section  ::= ("𒂊𒁹" | "problem" | "given") block ;
-result-section   ::= ("𒅗𒁹" | "result") block ;
+problem-section  ::= ("𒂊𒁹" | "problem" | "given") ":"? block ;
+result-section   ::= ("𒅗𒁹" | "result") ":"? block ;
 recipe-section   ::= recipe ;
 
 recipe           ::= ("𒁾𒊬" | "recipe" | "procedure") identifier parameter* ":" block ;
@@ -191,6 +206,7 @@ statement        ::= declaration
                    | assignment
                    | determination
                    | retain-statement
+                   | conditional
                    | repetition
                    | determine-statement
                    | return-statement
@@ -249,7 +265,7 @@ comparison-op    ::= "==" | "!=" | "<" | "<=" | ">" | ">=" | "𒌉" | "𒃲" | "
 sum              ::= product (("+"|"-"|"𒍣"|"𒋫"|"add"|"subtract") product)* ;
 product          ::= power (("*"|"/"|"%"|"𒊭"|"𒉌"|"multiply"|"divide") power)* ;
 power            ::= unary ("**" unary)? ;
-unary            ::= ("-" | "𒉡" | "not")? primary ;
+unary            ::= ("-" | "not")? primary ;
 
 postfix-step     ::= primary | postfix-op | apply-recipe ;
 apply-recipe     ::= ("𒀝" | "apply") identifier ;
@@ -392,6 +408,8 @@ fraction :
 uses `:` to establish a derived quantity via mathematical prescription.
 
 A name established in a procedure is local to that procedure.
+
+A name may be established again in the same scope. The later quantity replaces the earlier one. `name := expression` updates the same way. Re-establishment is not a syntax error.
 
 ---
 
@@ -727,9 +745,9 @@ lcm(a,b)
 
 ### 14.1 `nearest`
 
-Returns the nearest integer. If the argument is dimensionless, the result is a dimensionless integer. If the argument is a quantity, the result is the corresponding integer count and is dimensionless.
+Returns the nearest integer and keeps the argument's unit. A dimensionless value stays dimensionless. A quantity such as `2;30 day` becomes `3 day`, not a bare count. `floor` and `ceil` follow the same unit rule.
 
-Exact half-way cases round away from zero.
+Exact half-way cases round away from zero. Prefix `nearest(x)` and postfix `nearest` are the same operation.
 
 ```text
 nearest(2.49) = 2
@@ -1513,7 +1531,7 @@ Working tablets (`kin` / `𒆥`) are mutable, temporary in-memory scratchpads. T
 
 Working tablets that are not explicitly inscribed before execution ends evaporate upon program termination.
 
-### 36.5 Inscription (*sar* / 𒁾𒊬)
+### 36.5 Inscription (*inscribe* / 𒁹𒀀)
 
 Explicit inscription is the sole mechanism by which working tablets become persistent:
 ```text
@@ -1530,18 +1548,25 @@ All tablet entries preserve DUB.SAR's exact arithmetic guarantees. Entries are s
 
 ### 36.7 Standard Scholarly Archive ("Scribal Archive 1")
 
-Every new DUB.SAR archive automatically initializes with standard scholarly reference tablets:
-1. `reciprocals`: Standard Old Babylonian reciprocal pairs ($2 \to 0;30$, $3 \to 0;20$, $4 \to 0;15$, $5 \to 0;12$, $6 \to 0;10$, $8 \to 0;07,30$, etc.).
-2. `common-fractions`: Exact sexagesimal representations of fundamental fractions ($1/2, 1/3, 2/3, 1/4, 3/4, 1/5, 5/6$).
-3. `squares`: Exact integer squares for integers $1$ through $60$.
-4. `cubes`: Exact integer cubes for integers $1$ through $30$.
-5. `square-roots`: Documented rational approximations and exact integer roots.
-6. `powers`: Powers of fundamental bases (powers of $2$ and $60$).
-7. `basic-metrology`: Attested conversion factors for length, area, and capacity.
-8. `basic-geometry`: Geometric coefficients (e.g. circle constant approximations).
-9. `ea-nasir-shipment`: Structured shipment record of copper ingots inspired by tablet UET V 72 (British Museum BM 131236), recording promised and delivered quantities, quality ratings, and transaction metadata.
+Every new DUB.SAR archive automatically initializes with the same 13 tablets created by `dubsar/archive/seed.py`. This is the only inventory. Section 38.5 does not add a second list.
 
-Each tablet carries explicit historical provenance tags: `attested` (historically attested in cuneiform corpus), `reconstructed`, or `modern`.
+| Tablet | Tag | Contents |
+|---|---|---|
+| `reciprocals` | attested | Old Babylonian reciprocal pairs ($2 \to 0;30$, $3 \to 0;20$, $4 \to 0;15$, $5 \to 0;12$, $6 \to 0;10$, $8 \to 0;07,30$, and the rest of the standard regulars). |
+| `common-fractions` | attested | Exact sexagesimal forms of $1/2$, $1/3$, $2/3$, $1/4$, $3/4$, $1/5$, $5/6$. |
+| `squares` | attested | Exact integer squares for $1$ through $60$. |
+| `cubes` | attested | Exact integer cubes for $1$ through $30$. |
+| `square-roots` | attested | Exact integer roots and the YBC 7289 approximation $1;24,51,10$. |
+| `powers` | reconstructed | Powers of $2$, $3$, and $5$ used as a computational table. |
+| `basic-metrology` | attested | Length, area, and weight ratios (1 reed = 6 cubits, 1 nindan = 12 cubits, 1 mina = 60 shekels). |
+| `basic-geometry` | attested | Geometric coefficients, including the TMS 3 and YBC 7289 diagonal coefficients. |
+| `right-triangles` | attested | Exact right triangles, including the $3$-$4$-$5$ and $5$-$12$-$13$ triples and Plimpton 322 rows. |
+| `inclinations` | attested | Ramp and wall rise/run records (BM 85194, YBC 4675). |
+| `powers-of-two` | reconstructed | Exact powers $2^0$ through $2^{16}$, keyed also as `len-1` through `len-65536`. |
+| `turn-divisions` | modern | `whole-turn`, `half-turn`, `quarter-turn`, `eighth-turn`, `sixteenth-turn` only. |
+| `ea-nasir-shipment` | modern | Fictionalized shipment record inspired by UET 5 72. It is not a transcription of that tablet. |
+
+Each tablet carries one historical tag: `attested`, `reconstructed`, or `modern`.
 
 ### 36.8 Dual-Mode Syntax Examples
 
@@ -1598,7 +1623,7 @@ Outside source execution, the `dubsar archive` CLI suite allows scholars and dev
 - `dubsar archive list`: Enumerate all tablets with current version, entry count, and metadata.
 - `dubsar archive show <name> [--version V]`: Display tablet contents and colophon.
 - `dubsar archive history <name>`: Trace complete version lineage and parent links.
-- `dubsar archive export [--out file.json]`: Export archive to a deterministic canonical JSON bundle.
+- `dubsar archive export [-o file.json]`: Export archive to a deterministic canonical JSON bundle. The flag is `--output`.
 - `dubsar archive import <file.json>`: Safely import tablets into an archive.
 - `dubsar archive render <name> [--style text|tablet|svg] [-o output]`: Render tablet layout as an ASCII/Unicode clay-style grid or vector SVG artwork.
 
@@ -1740,7 +1765,7 @@ $$\frac{60\text{ sec}}{1\text{ min}} = 1, \quad \frac{12\text{ kùš}}{6\text{ k
 Reciprocal pairs are preserved in the persistent archive tablet `reciprocals`.
 
 #### Layer C — Geometric Relations
-- **Squares and Roots**: `square` (`𒅁`) and `square-root` (`𒁀𒋛`). Exact rational roots are determined when the radicand is a rational perfect square. Non-square quantities require explicit approximation (`allow_approx=True`) or raise `DubSarMathError`.
+- **Squares and Roots**: `square` (`𒅁`) and `square-root` (`𒁀𒋛`). Exact rational roots are determined when the radicand is a rational perfect square. A non-square `square-root` raises `DubSarMathError`. The source verb for an explicit rational approximation is `approximate`, which records an `ApproximateQuantity`. Prefix `square-root(x)` and postfix `square-root` follow this rule.
 - **Right Triangles**: Structured determination `RightTriangleValue` containing `short-side`, `long-side`, `diagonal`, `inclination`, `feed`, and `area`. Given any two sides, the third is determined via the Pythagorean relation:
   $$\text{short}^2 + \text{long}^2 = \text{diagonal}^2$$
 - **Validation**: `validate-triangle` verifies exact Pythagorean consistency.
@@ -1757,7 +1782,7 @@ Directions provide exact rational Cartesian components for cardinal quarter-turn
 - Perpendicular ($1/4$ turn): $(0, 1)$
 - Opposite ($1/2$ turn): $(-1, 0)$
 - Three-quarter ($3/4$ turn): $(0, -1)$
-- Eighth-turn diagonal ($1/8$ turn): $(17/24, 17/24)$ (TMS 3 attested approximation)
+- Eighth-turn diagonal ($1/8$ turn): $(17/24, 17/24)$. This is the TMS 3 coefficient used as both components. It is not a unit vector: $2 \cdot (17/24)^2 = 289/288$. Cardinal turns $(1,0)$, $(0,1)$, $(-1,0)$, and $(0,-1)$ are exact unit components. A direction that is neither a cardinal turn, an eighth-turn diagonal, nor an exact rise/run whose hypotenuse is a rational square is not computed with `atan2`, `sin`, or `cos`. The source asks for `approximate` instead.
 
 #### Layer E — Turn System
 The parent abstraction for circular cycles and rotation is the **Turn** ($\tau \in [0, 1)$):
@@ -1774,7 +1799,7 @@ Approximations cannot participate in silent equality checks:
 #### Layer G — Directed Quantities
 A magnitude associated with a direction ($\text{magnitude} + \text{direction}$):
 - Represents vectors and harmonic components without complex primitives.
-- **Rotation**: `dq rotate turn` rotates orientation while preserving magnitude.
+- **Rotation**: `dq rotate turn` rotates orientation while preserving magnitude. A rise/run direction rotates by the turn's exact rational components (cardinal turns and eighth-turn diagonals). A turn without those components is not rotated through `sin` or `cos`.
 - **Scaling**: `dq scale factor` scales magnitude.
 - **Vector Addition**: `dq1 + dq2` combines unit components and determines resultant magnitude and direction.
 
@@ -1788,12 +1813,7 @@ The universal container for time-series and harmonic data is the **sequence tabl
 
 ### 38.5 Standard Geometric and Harmonic Archive Tablets
 
-Four standard reference tablets support geometric and Fourier computing in the Tablet Archive:
-
-1. `right-triangles`: Old Babylonian Pythagorean triples ($3\text{-}4\text{-}5$, $5\text{-}12\text{-}13$, $8\text{-}15\text{-}17$, $20\text{-}21\text{-}29$, and Plimpton 322 rows 1–3).
-2. `inclinations`: Historical ramp slopes and wall batters (BM 85194, YBC 4675).
-3. `powers-of-two`: Exact integer powers $2^0$ through $2^{16}$ for sequence length verification and domain bounds.
-4. `turn-divisions`: Regular harmonic divisions of a turn ($1, 1/2, 1/4, 1/8, 1/16$).
+Geometric and Fourier tablets are the last four rows of the single inventory in §36.7: `right-triangles`, `inclinations`, `powers-of-two` ($2^0$ through $2^{16}$), and `turn-divisions` (`whole-turn` through `sixteenth-turn`). Their tags are listed there.
 
 ---
 

@@ -171,7 +171,7 @@ dubsar compile <file.dub> [options]
 | :--- | :--- | :--- | :--- |
 | `--target` | `bytecode`, `wasm`, `wat`, `ir`, `json`, `native`, `c`, `llvm`, `ll`, `shared`, `dylib`, `so` | `bytecode` | Target compilation artifact format. |
 | `-o`, `--output` | `<file>` | `None` | Output destination file path. |
-| `--opt-level` | `-O0`, `-O1`, `-O2`, `-O3`, `-Os` | `-O3` | Optimization level passed to the native backend C compiler. |
+| `--opt-level` | `-O0`, `-O1`, `-O2`, `-O3`, `-Os`, `-Oz` | `-O3` | Optimization level passed to the native backend C compiler. |
 | `--mode` | `auto`, `tablet`, `scholar`, `mixed` | `auto` | Informational mode flag (source mode is auto-detected). |
 
 ### Practical Examples

@@ -40,6 +40,7 @@ EXPECTED_OUTPUTS: dict[str | tuple[str, int], list[str]] = {
     "learn-archive-working-cuneiform": ["42"],
     "learn-complete-example-scholar": ["128", "31", "0;0,0,2,42"],
     "learn-complete-example-cuneiform": ["128", "31", "0;0,0,2,42"],
+    "compiler-native-walkthrough": ["25"],
 
     # Reference manual test IDs
     "ref-language-structure": ["36 length^2"],

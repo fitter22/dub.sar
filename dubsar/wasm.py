@@ -175,7 +175,7 @@ class WasmCompiler:
             "    (local $q i64) (local $r i64)",
             "    (local.set $q (i64.div_s (local.get $num) (local.get $den)))",
             "    (local.set $r (i64.rem_s (local.get $num) (local.get $den)))",
-            "    (if (i64.and (i64.lt_s (local.get $num) (i64.const 0)) (i64.ne (local.get $r) (i64.const 0)))",
+            "    (if (i32.and (i64.lt_s (local.get $num) (i64.const 0)) (i64.ne (local.get $r) (i64.const 0)))",
             "      (then (local.set $q (i64.sub (local.get $q) (i64.const 1))))",
             "    )",
             "    (local.get $q) (i64.const 1)",
@@ -185,7 +185,7 @@ class WasmCompiler:
             "    (local $q i64) (local $r i64)",
             "    (local.set $q (i64.div_s (local.get $num) (local.get $den)))",
             "    (local.set $r (i64.rem_s (local.get $num) (local.get $den)))",
-            "    (if (i64.and (i64.gt_s (local.get $num) (i64.const 0)) (i64.ne (local.get $r) (i64.const 0)))",
+            "    (if (i32.and (i64.gt_s (local.get $num) (i64.const 0)) (i64.ne (local.get $r) (i64.const 0)))",
             "      (then (local.set $q (i64.add (local.get $q) (i64.const 1))))",
             "    )",
             "    (local.get $q) (i64.const 1)",
@@ -377,17 +377,21 @@ class WasmCompiler:
 
         elif isinstance(verb, RetainVerb):
             lines.append(f"{pad};; Retain {verb.candidate} into {verb.target}")
-            cand_fields = self.all_determinations.get(verb.candidate, ["cycle", "leaps", "error"])
-            self.all_determinations[verb.target] = list(cand_fields)
+            cand_fields = self.all_determinations.get(verb.candidate)
             self._compile_condition_wat(verb.condition, lines, indent)
             m_cand = self._mangle_name(verb.candidate)
             m_target = self._mangle_name(verb.target)
             lines.append(f"{pad}(if")
             lines.append(f"{pad}  (then")
-            for f in cand_fields:
-                m_f = self._mangle_name(f)
-                lines.append(f"{pad}    (local.get ${m_cand}_{m_f}_num) (local.set ${m_target}_{m_f}_num)")
-                lines.append(f"{pad}    (local.get ${m_cand}_{m_f}_den) (local.set ${m_target}_{m_f}_den)")
+            if cand_fields:
+                self.all_determinations[verb.target] = list(cand_fields)
+                for f in cand_fields:
+                    m_f = self._mangle_name(f)
+                    lines.append(f"{pad}    (local.get ${m_cand}_{m_f}_num) (local.set ${m_target}_{m_f}_num)")
+                    lines.append(f"{pad}    (local.get ${m_cand}_{m_f}_den) (local.set ${m_target}_{m_f}_den)")
+            else:
+                lines.append(f"{pad}    (local.get ${m_cand}_num) (local.set ${m_target}_num)")
+                lines.append(f"{pad}    (local.get ${m_cand}_den) (local.set ${m_target}_den)")
             lines.append(f"{pad}  )")
             lines.append(f"{pad})")
 
@@ -630,10 +634,13 @@ class WasmCompiler:
                 for f in v.fields:
                     locals_found.add(f"{v.name}_{f}")
             elif isinstance(v, RetainVerb):
-                cand_fields = self.all_determinations.get(v.candidate, ["cycle", "leaps", "error"])
-                self.all_determinations[v.target] = list(cand_fields)
-                for f in cand_fields:
-                    locals_found.add(f"{v.target}_{f}")
+                cand_fields = self.all_determinations.get(v.candidate)
+                if cand_fields:
+                    self.all_determinations[v.target] = list(cand_fields)
+                    for f in cand_fields:
+                        locals_found.add(f"{v.target}_{f}")
+                else:
+                    locals_found.add(v.target)
             elif isinstance(v, RepeatVerb):
                 if v.target not in ex:
                     locals_found.add(v.target)

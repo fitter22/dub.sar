@@ -1,0 +1,298 @@
+:root {
+  --paper: #f6f1e7;
+  --ink: #1a140f;
+  --clay: #e7d3b0;
+  --tablet: #d7b899;
+  --lapis: #234e70;
+  --oxide: #8c3a2f;
+  --line: rgba(26, 20, 15, 0.16);
+  --serif: "Fraunces", "Palatino Linotype", Palatino, serif;
+  --sans: "Noto Sans", "Noto Sans Cuneiform", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(215, 184, 153, 0.55), transparent 36rem),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+a {
+  color: var(--lapis);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--serif);
+  font-weight: 560;
+  line-height: 1.15;
+}
+
+h1 {
+  margin: 0.1em 0 0;
+  font-size: clamp(4.2rem, 12vw, 8rem);
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin-bottom: 0.4em;
+}
+
+.site-header,
+main,
+footer {
+  width: min(1080px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.2rem 0;
+}
+
+.site-header nav,
+footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.1rem;
+}
+
+.mark {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.hero {
+  padding: 2.5rem 0 1rem;
+}
+
+.eyebrow,
+.tagline {
+  letter-spacing: 0.04em;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--oxide);
+}
+
+.tagline {
+  font-family: var(--serif);
+  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  margin-top: 0.2rem;
+}
+
+.lede {
+  max-width: 40rem;
+}
+
+.actions,
+.run-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.button,
+button,
+select,
+textarea {
+  font: inherit;
+}
+
+.button,
+button {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.55rem 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button.quiet,
+button.quiet {
+  background: transparent;
+  color: var(--ink);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.explain,
+#compare,
+#playground,
+#concepts {
+  padding: 1.5rem 0 0.5rem;
+}
+
+.steps,
+.concepts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li,
+.concepts li,
+.pair article,
+.results {
+  background: rgba(255, 252, 246, 0.72);
+  border: 1px solid var(--line);
+  padding: 1rem 1.1rem;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pair header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pair h3,
+.results h3 {
+  margin: 0;
+}
+
+pre,
+.output {
+  font-family: var(--sans);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.pair pre {
+  background: var(--clay);
+  margin: 0.8rem 0 0;
+  padding: 0.9rem 1rem;
+  min-height: 16rem;
+}
+
+.latin {
+  font-variant-ligatures: none;
+}
+
+.controls,
+.run-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: end;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.grow {
+  flex: 1 1 16rem;
+}
+
+select,
+textarea {
+  background: #fffdf8;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.45rem 0.5rem;
+  width: 100%;
+}
+
+.blurb {
+  min-height: 1.4em;
+  color: #4d4036;
+}
+
+.editor {
+  height: 28rem;
+  border: 1px solid #1a140f;
+  margin: 0.4rem 0 1rem;
+}
+
+.hint,
+.status,
+.version {
+  margin: 0;
+  color: #4d4036;
+  font-size: 0.92rem;
+}
+
+.output {
+  min-height: 6rem;
+  background: #fffdf8;
+  border: 1px dashed var(--line);
+  padding: 0.8rem 1rem;
+  margin: 0.6rem 0;
+}
+
+.output pre {
+  margin: 0;
+}
+
+.diagnostic {
+  color: var(--oxide);
+}
+
+.results {
+  margin-top: 1rem;
+}
+
+footer {
+  padding: 2.5rem 0 3rem;
+  border-top: 1px solid var(--line);
+  margin-top: 2rem;
+}
+
+@media (max-width: 800px) {
+  .site-header,
+  .steps,
+  .concepts,
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .editor {
+    height: 22rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

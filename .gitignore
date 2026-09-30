@@ -12,3 +12,6 @@ build/
 *.key
 *.secret
 site/
+website/node_modules/
+website/public/catalog.json
+website/public/runtime/

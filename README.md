@@ -152,6 +152,12 @@ Full documentation, tutorials, and language references are available at the docu
 
 ---
 
+## Website
+
+The landing page and in-browser playground live in [`website/`](website/README.md). They run a tablet locally with the interpreter or the bytecode machine. That site is not deployed yet. The documentation site remains [https://fitter22.github.io/dub.sar/](https://fitter22.github.io/dub.sar/).
+
+---
+
 ## License
 
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.

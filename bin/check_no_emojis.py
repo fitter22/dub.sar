@@ -30,7 +30,16 @@ EMOJI_PATTERN = re.compile(
     flags=re.UNICODE,
 )
 
-IGNORED_DIRS = {".git", ".ruff_cache", "__pycache__", ".pytest_cache", "build", "dist", "site"}
+IGNORED_DIRS = {
+    ".git",
+    ".ruff_cache",
+    "__pycache__",
+    ".pytest_cache",
+    "build",
+    "dist",
+    "site",
+    "node_modules",
+}
 IGNORED_EXTENSIONS = {".pyc", ".db", ".png", ".jpg", ".jpeg", ".ico", ".wasm", ".o", ".a"}
 
 

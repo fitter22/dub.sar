@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DUB.SAR</title>
+    <meta
+      name="description"
+      content="Mathematical programming in the style of the tablet. Write a DUB.SAR tablet and run it in the browser."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,640&family=Noto+Sans+Cuneiform&family=Noto+Sans:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="mark" href="#top">DUB.SAR</a>
+      <nav>
+        <a href="#compare">Scholar and tablet</a>
+        <a href="#playground">Playground</a>
+        <a href="#concepts">Concepts</a>
+        <a href="https://fitter22.github.io/dub.sar/">Docs</a>
+        <a href="https://github.com/fitter22/dub.sar">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <p class="eyebrow">Executable clay tablets</p>
+        <h1>DUB.SAR</h1>
+        <p class="tagline">Mathematical programming in the style of the tablet.</p>
+        <p class="lede">
+          A tablet states a problem, carries out a recipe, and inscribes a result.
+          Quantities keep their units. Arithmetic stays exact. The same tablet can be
+          written in Latin, in cuneiform, or in both.
+        </p>
+        <p class="actions">
+          <a class="button" id="try" href="#playground">Try a tablet</a>
+          <a class="button quiet" href="https://fitter22.github.io/dub.sar/learn/">Read the tutorial</a>
+        </p>
+      </section>
+
+      <section class="explain">
+        <h2>A program is an inscription</h2>
+        <ol class="steps">
+          <li>
+            <strong>Problem.</strong>
+            Name the given quantities and the units they carry.
+          </li>
+          <li>
+            <strong>Recipe.</strong>
+            Describe the calculation. Scholar tablets name each intermediate.
+            Tablet-mode tablets stack values and apply an operation to the top of the stack.
+          </li>
+          <li>
+            <strong>Result.</strong>
+            Inscribe the conclusion. The playground prints that inscription.
+          </li>
+        </ol>
+      </section>
+
+      <section id="compare">
+        <h2>The same hypotenuse, two scribal habits</h2>
+        <p>
+          Both tablets below find the hypotenuse of a 3-by-4 right triangle.
+          Tablet mode is its own notation. It is not a Latin program with the letters swapped for signs.
+          The scholar tablet names <span class="latin">w_sq</span>, <span class="latin">h_sq</span>, and
+          <span class="latin">hyp</span>. The cuneiform tablet squares, adds, and takes a square root
+          without those names. Both inscribe <span class="latin">5 meter</span>.
+        </p>
+        <div class="pair">
+          <article>
+            <header>
+              <h3>Scholar mode</h3>
+              <button type="button" data-load="scholar-source">Open in the playground</button>
+            </header>
+            <pre id="scholar-source">problem
+    width : 3 meter
+    height : 4 meter
+    w_sq : width width multiply
+    h_sq : height height multiply
+    hyp_sq : w_sq h_sq add
+    hyp : hyp_sq square-root
+result
+    hyp
+</pre>
+          </article>
+          <article>
+            <header>
+              <h3>Tablet mode</h3>
+              <button type="button" data-load="tablet-source">Open in the playground</button>
+            </header>
+            <pre id="tablet-source">𒂊𒁹
+    𒂼 : 3 meter
+    𒊕 : 4 meter
+    𒁇 :
+        𒂼 𒅁
+        𒊕 𒅁
+        𒍣
+        𒁀𒋛
+𒅗𒁹
+    𒁇
+</pre>
+          </article>
+        </div>
+      </section>
+
+      <section id="playground">
+        <h2>Playground</h2>
+        <p>
+          Edit a tablet and run it in this browser. The interpreter and the bytecode machine
+          are the same ones used by the <span class="latin">dubsar</span> command. Nothing is sent to a server.
+        </p>
+        <div class="controls">
+          <label>
+            Mode
+            <select id="mode">
+              <option value="all">All</option>
+              <option value="scholar">Scholar</option>
+              <option value="tablet">Tablet</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </label>
+          <label>
+            Level
+            <select id="level">
+              <option value="all">All</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+              <option value="mastery">Mastery</option>
+            </select>
+          </label>
+          <label class="grow">
+            Example
+            <select id="example"></select>
+          </label>
+          <label>
+            Engine
+            <select id="backend">
+              <option value="interpreter">Interpreter</option>
+              <option value="vm">Bytecode machine</option>
+            </select>
+          </label>
+        </div>
+        <p id="blurb" class="blurb"></p>
+        <div id="editor" class="editor" aria-label="Tablet editor"></div>
+        <div class="run-row">
+          <label class="grow">
+            Input, one answer per line
+            <textarea id="stdin" rows="3" spellcheck="false"></textarea>
+          </label>
+          <div class="run-actions">
+            <button type="button" id="run">Run tablet</button>
+            <button type="button" id="reset" class="quiet">Reset</button>
+            <p class="hint">Ctrl+Enter or Cmd+Enter also runs the tablet.</p>
+          </div>
+        </div>
+        <div class="results">
+          <h3>Inscription</h3>
+          <div id="output" class="output" aria-live="polite"></div>
+          <p id="status" class="status">Choose a tablet, or write one.</p>
+          <p id="version" class="version">Runtime loads when the playground opens.</p>
+        </div>
+      </section>
+
+      <section id="concepts">
+        <h2>What the language keeps</h2>
+        <ul class="concepts">
+          <li>
+            <h3>Exact quantities</h3>
+            <p>Sexagesimal rationals, not floating point. A reciprocal that exists on a tablet stays exact.</p>
+          </li>
+          <li>
+            <h3>Units</h3>
+            <p>Meters, cubits, and derived dimensions travel with the number. A mismatched unit is an error.</p>
+          </li>
+          <li>
+            <h3>Three writings</h3>
+            <p>Scholar, tablet, and mixed modes compile to the same meaning. Mixed tablets may use cuneiform syntax with Latin names.</p>
+          </li>
+          <li>
+            <h3>Bounded search</h3>
+            <p>Iteration has a stated range. A tablet does not wander in an open loop.</p>
+          </li>
+          <li>
+            <h3>The archive</h3>
+            <p>Reference tablets, including reciprocal tables, can be consulted from the school archive.</p>
+          </li>
+          <li>
+            <h3>Several targets</h3>
+            <p>The same source runs on the interpreter, the bytecode machine, and a WebAssembly lowering.</p>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>DUB.SAR is mathematical programming in the style of the tablet.</p>
+      <nav>
+        <a href="https://fitter22.github.io/dub.sar/">Documentation</a>
+        <a href="https://fitter22.github.io/dub.sar/guide/">Language guide</a>
+        <a href="https://fitter22.github.io/dub.sar/concepts/">Concepts</a>
+        <a href="https://fitter22.github.io/dub.sar/reference/">Reference</a>
+        <a href="https://fitter22.github.io/dub.sar/compiler/">Compiler</a>
+        <a href="https://fitter22.github.io/dub.sar/examples/">Examples</a>
+        <a href="https://fitter22.github.io/dub.sar/specification/">Specification</a>
+        <a href="https://github.com/fitter22/dub.sar">GitHub</a>
+      </nav>
+    </footer>
+  </body>
+</html>

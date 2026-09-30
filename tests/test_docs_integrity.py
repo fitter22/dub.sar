@@ -192,7 +192,7 @@ problem
 result
     hyp
 """,
-                ["5"],
+                ["5 meter"],
             ),
             (
                 "learn-exact-arithmetic-addition",

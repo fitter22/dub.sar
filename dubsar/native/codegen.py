@@ -418,9 +418,9 @@ class NativeCodeGen:
                 elif op in ("absolute", "abs", "te"):
                     lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_abs({stack_var}[{sp_var} - 1]);")
                 elif op == "square":
-                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_rat(dubsar_rat_square({stack_var}[{sp_var} - 1].as.rat));")
+                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_square({stack_var}[{sp_var} - 1]);")
                 elif op == "square-root":
-                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_rat(dubsar_rat_sqrt_exact({stack_var}[{sp_var} - 1].as.rat));")
+                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_sqrt_exact({stack_var}[{sp_var} - 1]);")
                 elif op == "right-triangle":
                     lines.append(f"{pad}{sp_var} -= 2;")
                     lines.append(f"{pad}{stack_var}[{sp_var}] = dubsar_val_triangle(dubsar_triangle_determine(")
@@ -462,7 +462,7 @@ class NativeCodeGen:
                     lines.append(f"{pad}{{ dubsar_turn_t _rt = ({stack_var}[{sp_var}+1].kind == DUBSAR_VAL_TURN) ? {stack_var}[{sp_var}+1].as.turn : dubsar_turn_make(dubsar_val_to_rat({stack_var}[{sp_var}+1]).num, dubsar_val_to_rat({stack_var}[{sp_var}+1]).den); {stack_var}[{sp_var}] = dubsar_val_rotate({stack_var}[{sp_var}], _rt); }}")
                     lines.append(f"{pad}{sp_var}++;")
                 elif op == "approximate":
-                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_rat(dubsar_rat_sqrt_babylonian({stack_var}[{sp_var} - 1].as.rat, 4));")
+                    lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_approximate({stack_var}[{sp_var} - 1]);")
                 elif op == "dft":
                     lines.append(f"{pad}{stack_var}[{sp_var} - 1] = dubsar_val_tablet(dubsar_tablet_dft({stack_var}[{sp_var} - 1].as.tablet, 0));")
                 elif op == "fft":
@@ -569,8 +569,10 @@ class NativeCodeGen:
                     o1 = self._compile_expr_c(expr.operands[0], lines, indent)
                     o2 = self._compile_expr_c(expr.operands[1], lines, indent)
                     return f"(dubsar_rat_gt(({o1}).as.rat, ({o2}).as.rat) ? {o1} : {o2})"
-                elif callee == "sqrt":
-                    return f"dubsar_val_rat(dubsar_rat_sqrt_babylonian({self._compile_expr_c(expr.operands[0], lines, indent)}.as.rat, 4))"
+                elif callee in ("sqrt", "square-root", "square_root"):
+                    return f"dubsar_val_sqrt_exact({self._compile_expr_c(expr.operands[0], lines, indent)})"
+                elif callee == "approximate":
+                    return f"dubsar_val_approximate({self._compile_expr_c(expr.operands[0], lines, indent)})"
 
             elif expr.verb in ("ADD", "+"):
                 return f"dubsar_val_add({self._compile_expr_c(expr.operands[0], lines, indent)}, {self._compile_expr_c(expr.operands[1], lines, indent)})"

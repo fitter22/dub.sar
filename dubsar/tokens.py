@@ -371,7 +371,6 @@ TOKEN_TO_CUNEIFORM: Dict[TokenType, str] = {
     TokenType.MINUS: "𒋫",
     TokenType.STAR: "𒊭",
     TokenType.SLASH: "𒉌",
-    TokenType.NOT: "𒉡",
     TokenType.THROUGH: "𒌗",
     TokenType.RETAIN: "𒋼",
     TokenType.LESSER: "𒌉",

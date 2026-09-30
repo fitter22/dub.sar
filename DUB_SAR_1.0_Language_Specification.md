@@ -129,7 +129,7 @@ The following tokens are part of DUB.SAR 1.0. Their programming meanings are **D
 | `𒃲` | gal | greater than (`>`) |
 | `𒊓` | sa | equal (`==`) |
 | `𒈨` | me | copula is |
-| `nu` / `𒉡` | nu | empty sentinel / negation |
+| `nu` / `𒉡` | nu | empty sentinel. Negation is the scholar word `not`, which has no cuneiform sign |
 | `shu` / `𒋗` | šu | take operand |
 | `nam` / `𒉆` | nam | determine record |
 | `𒄀` | gi | bounded repetition / domain |
@@ -265,7 +265,7 @@ comparison-op    ::= "==" | "!=" | "<" | "<=" | ">" | ">=" | "𒌉" | "𒃲" | "
 sum              ::= product (("+"|"-"|"𒍣"|"𒋫"|"add"|"subtract") product)* ;
 product          ::= power (("*"|"/"|"%"|"𒊭"|"𒉌"|"multiply"|"divide") power)* ;
 power            ::= unary ("**" unary)? ;
-unary            ::= ("-" | "𒉡" | "not")? primary ;
+unary            ::= ("-" | "not")? primary ;
 
 postfix-step     ::= primary | postfix-op | apply-recipe ;
 apply-recipe     ::= ("𒀝" | "apply") identifier ;

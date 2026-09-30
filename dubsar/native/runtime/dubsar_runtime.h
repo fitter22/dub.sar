@@ -162,8 +162,15 @@ typedef enum {
     DUBSAR_VAL_DIRECTION,
     DUBSAR_VAL_DIRECTED,
     DUBSAR_VAL_TABLET,
-    DUBSAR_VAL_DETERMINATION
+    DUBSAR_VAL_DETERMINATION,
+    DUBSAR_VAL_APPROX
 } dubsar_val_kind_t;
+
+typedef struct {
+    dubsar_rat_t val;
+    const char *unit;
+    int precision;
+} dubsar_approx_t;
 
 typedef struct {
     char name[64];
@@ -190,6 +197,7 @@ struct dubsar_val {
         dubsar_directed_t directed;
         dubsar_tablet_t *tablet;
         dubsar_determination_t det;
+        dubsar_approx_t approx;
     } as;
 };
 
@@ -220,6 +228,9 @@ dubsar_val_t dubsar_val_abs(dubsar_val_t a);
 dubsar_val_t dubsar_val_floor(dubsar_val_t a);
 dubsar_val_t dubsar_val_ceil(dubsar_val_t a);
 dubsar_val_t dubsar_val_nearest(dubsar_val_t a);
+dubsar_val_t dubsar_val_square(dubsar_val_t a);
+dubsar_val_t dubsar_val_sqrt_exact(dubsar_val_t a);
+dubsar_val_t dubsar_val_approximate(dubsar_val_t a);
 dubsar_val_t dubsar_val_cmp_op(dubsar_val_t a, dubsar_val_t b, const char *op);
 int dubsar_val_is_truthy(dubsar_val_t v);
 dubsar_val_t dubsar_val_make_determination(const char *name, size_t count, const char **field_names, dubsar_val_t **field_ptrs);

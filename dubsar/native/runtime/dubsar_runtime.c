@@ -59,17 +59,32 @@ dubsar_rat_t dubsar_rat_reduce(dubsar_rat_t r) {
     return r;
 }
 
-dubsar_rat_t dubsar_rat_add(dubsar_rat_t a, dubsar_rat_t b) {
 #if DUBSAR_HAS_INT128
-    dubsar_int128_t num = (dubsar_int128_t)a.num * b.den + (dubsar_int128_t)b.num * a.den;
-    dubsar_int128_t den = (dubsar_int128_t)a.den * b.den;
-    if (den == 0) return (dubsar_rat_t){0, 1};
-    if (num == 0) return (dubsar_rat_t){0, 1};
+/* Pack an exact 128-bit rational into int64. Values that do not fit are halved until they do,
+   so an approximate magnitude cannot wrap to a negative square. */
+static dubsar_rat_t dubsar_rat_pack(dubsar_int128_t num, dubsar_int128_t den) {
+    if (den == 0 || num == 0) return (dubsar_rat_t){0, 1};
     dubsar_int128_t g = dubsar_gcd_128(num, den);
     num /= g;
     den /= g;
     if (den < 0) { num = -num; den = -den; }
+    while (num > INT64_MAX || num < INT64_MIN || den > INT64_MAX) {
+        num /= 2;
+        if (den > 1) den /= 2;
+        else break;
+    }
+    if (den < 1) den = 1;
+    if (num > INT64_MAX) num = INT64_MAX;
+    if (num < INT64_MIN) num = INT64_MIN;
     return (dubsar_rat_t){(int64_t)num, (int64_t)den};
+}
+#endif
+
+dubsar_rat_t dubsar_rat_add(dubsar_rat_t a, dubsar_rat_t b) {
+#if DUBSAR_HAS_INT128
+    dubsar_int128_t num = (dubsar_int128_t)a.num * b.den + (dubsar_int128_t)b.num * a.den;
+    dubsar_int128_t den = (dubsar_int128_t)a.den * b.den;
+    return dubsar_rat_pack(num, den);
 #else
     int64_t g = dubsar_gcd(a.den, b.den);
     int64_t d1 = b.den / g;
@@ -86,13 +101,7 @@ dubsar_rat_t dubsar_rat_sub(dubsar_rat_t a, dubsar_rat_t b) {
 #if DUBSAR_HAS_INT128
     dubsar_int128_t num = (dubsar_int128_t)a.num * b.den - (dubsar_int128_t)b.num * a.den;
     dubsar_int128_t den = (dubsar_int128_t)a.den * b.den;
-    if (den == 0) return (dubsar_rat_t){0, 1};
-    if (num == 0) return (dubsar_rat_t){0, 1};
-    dubsar_int128_t g = dubsar_gcd_128(num, den);
-    num /= g;
-    den /= g;
-    if (den < 0) { num = -num; den = -den; }
-    return (dubsar_rat_t){(int64_t)num, (int64_t)den};
+    return dubsar_rat_pack(num, den);
 #else
     return dubsar_rat_add(a, (dubsar_rat_t){-b.num, b.den});
 #endif
@@ -102,13 +111,7 @@ dubsar_rat_t dubsar_rat_mul(dubsar_rat_t a, dubsar_rat_t b) {
 #if DUBSAR_HAS_INT128
     dubsar_int128_t num = (dubsar_int128_t)a.num * b.num;
     dubsar_int128_t den = (dubsar_int128_t)a.den * b.den;
-    if (den == 0) return (dubsar_rat_t){0, 1};
-    if (num == 0) return (dubsar_rat_t){0, 1};
-    dubsar_int128_t g = dubsar_gcd_128(num, den);
-    num /= g;
-    den /= g;
-    if (den < 0) { num = -num; den = -den; }
-    return (dubsar_rat_t){(int64_t)num, (int64_t)den};
+    return dubsar_rat_pack(num, den);
 #else
     int64_t g1 = dubsar_gcd(a.num, b.den);
     int64_t g2 = dubsar_gcd(b.num, a.den);
@@ -240,10 +243,23 @@ dubsar_rat_t dubsar_rat_square(dubsar_rat_t a) {
 
 static int64_t isqrt64(int64_t n) {
     if (n <= 0) return 0;
-    int64_t x0 = (int64_t)sqrt((double)n);
-    while ((x0 + 1) * (x0 + 1) <= n) x0++;
-    while (x0 * x0 > n) x0--;
-    return x0;
+    uint64_t x = (uint64_t)n;
+    uint64_t lo = 0;
+    uint64_t hi = 3037000499ULL; /* floor(sqrt(INT64_MAX)) */
+    if (x < hi) hi = x;
+    while (lo < hi) {
+        uint64_t mid = lo + (hi - lo + 1) / 2;
+        if (mid <= x / mid) lo = mid;
+        else hi = mid - 1;
+    }
+    return (int64_t)lo;
+}
+
+/* True when root*root equals value. A product that does not fit in int64_t cannot equal value. */
+static int i64_square_equals(int64_t root, int64_t value) {
+    if (root < 0) return 0;
+    if (root > 0 && root > INT64_MAX / root) return 0;
+    return root * root == value;
 }
 
 int dubsar_rat_is_square(dubsar_rat_t a, dubsar_rat_t *out) {
@@ -254,7 +270,7 @@ int dubsar_rat_is_square(dubsar_rat_t a, dubsar_rat_t *out) {
     }
     int64_t sn = isqrt64(a.num);
     int64_t sd = isqrt64(a.den);
-    if (sn * sn == a.num && sd * sd == a.den) {
+    if (i64_square_equals(sn, a.num) && i64_square_equals(sd, a.den)) {
         if (out) *out = (dubsar_rat_t){sn, sd};
         return 1;
     }
@@ -385,38 +401,25 @@ dubsar_triangle_t dubsar_triangle_determine(dubsar_rat_t w, dubsar_rat_t l, dubs
                                             int has_w, int has_l, int has_d) {
     dubsar_triangle_t tri = {w, l, d, 0};
     if (has_w && has_l && !has_d) {
-        // d = sqrt(w^2 + l^2)
         dubsar_rat_t sum = dubsar_rat_add(dubsar_rat_square(w), dubsar_rat_square(l));
-        dubsar_rat_t diag;
-        if (dubsar_rat_is_square(sum, &diag)) {
-            tri.diagonal = diag;
-            tri.is_valid = 1;
-        } else {
-            tri.diagonal = dubsar_rat_sqrt_babylonian(sum, 4);
-            tri.is_valid = 0;
-        }
+        tri.diagonal = dubsar_rat_sqrt_exact(sum);
+        tri.is_valid = 1;
     } else if (has_w && has_d && !has_l) {
-        // l = sqrt(d^2 - w^2)
         dubsar_rat_t diff = dubsar_rat_sub(dubsar_rat_square(d), dubsar_rat_square(w));
-        dubsar_rat_t len;
-        if (dubsar_rat_is_square(diff, &len)) {
-            tri.length = len;
-            tri.is_valid = 1;
-        } else {
-            tri.length = dubsar_rat_sqrt_babylonian(diff, 4);
-            tri.is_valid = 0;
+        if (diff.num < 0) {
+            fprintf(stderr, "DUB.SAR Error: Diagonal must be strictly greater than the known side\n");
+            exit(1);
         }
+        tri.length = dubsar_rat_sqrt_exact(diff);
+        tri.is_valid = 1;
     } else if (has_l && has_d && !has_w) {
-        // w = sqrt(d^2 - l^2)
         dubsar_rat_t diff = dubsar_rat_sub(dubsar_rat_square(d), dubsar_rat_square(l));
-        dubsar_rat_t wid;
-        if (dubsar_rat_is_square(diff, &wid)) {
-            tri.width = wid;
-            tri.is_valid = 1;
-        } else {
-            tri.width = dubsar_rat_sqrt_babylonian(diff, 4);
-            tri.is_valid = 0;
+        if (diff.num < 0) {
+            fprintf(stderr, "DUB.SAR Error: Diagonal must be strictly greater than the known side\n");
+            exit(1);
         }
+        tri.width = dubsar_rat_sqrt_exact(diff);
+        tri.is_valid = 1;
     } else if (has_w && has_l && has_d) {
         tri.is_valid = dubsar_triangle_validate(w, l, d);
     }
@@ -502,15 +505,23 @@ dubsar_direction_t dubsar_direction_from_turn(dubsar_turn_t t) {
     } else if (f.num == 3 && f.den == 4) {
         dir.dx = (dubsar_rat_t){0, 1};
         dir.dy = (dubsar_rat_t){-1, 1};
+    } else if (f.num == 1 && f.den == 8) {
+        dir.dx = (dubsar_rat_t){17, 24};
+        dir.dy = (dubsar_rat_t){17, 24};
+    } else if (f.num == 3 && f.den == 8) {
+        dir.dx = (dubsar_rat_t){-17, 24};
+        dir.dy = (dubsar_rat_t){17, 24};
+    } else if (f.num == 5 && f.den == 8) {
+        dir.dx = (dubsar_rat_t){-17, 24};
+        dir.dy = (dubsar_rat_t){-17, 24};
+    } else if (f.num == 7 && f.den == 8) {
+        dir.dx = (dubsar_rat_t){17, 24};
+        dir.dy = (dubsar_rat_t){-17, 24};
     } else {
-        // Approximate unit components using double
-        double rad = 2.0 * 3.14159265358979323846 * ((double)f.num / (double)f.den);
-        double c = cos(rad);
-        double s = sin(rad);
-        int64_t c_int = (int64_t)round(c * 1000000.0);
-        int64_t s_int = (int64_t)round(s * 1000000.0);
-        dir.dx = dubsar_rat_make(c_int, 1000000);
-        dir.dy = dubsar_rat_make(s_int, 1000000);
+        fprintf(stderr,
+            "DUB.SAR Error: Direction with turn %lld/%lld has no exact rational components. Use approximate.\n",
+            (long long)f.num, (long long)f.den);
+        exit(1);
     }
     return dir;
 }
@@ -523,17 +534,18 @@ dubsar_directed_t dubsar_directed_make(dubsar_rat_t mag, const char *unit, dubsa
     return d;
 }
 
-dubsar_directed_t dubsar_directed_rotate(dubsar_directed_t q, dubsar_turn_t t) {
-    dubsar_turn_t cur = q.direction.has_turn ? q.direction.turn : (dubsar_turn_t){{0, 1}};
-    dubsar_turn_t next_turn = dubsar_turn_add(cur, t);
-    dubsar_direction_t next_dir = dubsar_direction_from_turn(next_turn);
-    return dubsar_directed_make(q.magnitude, q.unit, next_dir);
+dubsar_direction_t dubsar_direction_rotate(dubsar_direction_t d, dubsar_turn_t t) {
+    if (!d.has_turn) {
+        dubsar_direction_t twist = dubsar_direction_from_turn(t);
+        dubsar_rat_t new_run = dubsar_rat_sub(dubsar_rat_mul(d.dx, twist.dx), dubsar_rat_mul(d.dy, twist.dy));
+        dubsar_rat_t new_rise = dubsar_rat_add(dubsar_rat_mul(d.dx, twist.dy), dubsar_rat_mul(d.dy, twist.dx));
+        return dubsar_direction_from_run_rise(new_run, new_rise);
+    }
+    return dubsar_direction_from_turn(dubsar_turn_add(d.turn, t));
 }
 
-dubsar_direction_t dubsar_direction_rotate(dubsar_direction_t d, dubsar_turn_t t) {
-    dubsar_turn_t cur = d.has_turn ? d.turn : (dubsar_turn_t){{0, 1}};
-    dubsar_turn_t next_turn = dubsar_turn_add(cur, t);
-    return dubsar_direction_from_turn(next_turn);
+dubsar_directed_t dubsar_directed_rotate(dubsar_directed_t q, dubsar_turn_t t) {
+    return dubsar_directed_make(q.magnitude, q.unit, dubsar_direction_rotate(q.direction, t));
 }
 
 dubsar_directed_t dubsar_directed_add(dubsar_directed_t a, dubsar_directed_t b) {
@@ -784,6 +796,17 @@ void dubsar_format_val(dubsar_val_t val, char *buf, size_t max_len) {
             snprintf(buf, max_len, "determination");
             break;
         }
+        case DUBSAR_VAL_APPROX: {
+            char inner[256];
+            if (val.as.approx.unit && val.as.approx.unit[0] != '\0') {
+                dubsar_quant_t q = dubsar_quant_make(val.as.approx.val, val.as.approx.unit);
+                dubsar_quant_format(q, inner, sizeof(inner));
+            } else {
+                dubsar_format_canonical_rat(val.as.approx.val, inner, sizeof(inner));
+            }
+            snprintf(buf, max_len, "~%s", inner);
+            break;
+        }
     }
 }
 
@@ -818,6 +841,8 @@ dubsar_val_t dubsar_val_sub(dubsar_val_t a, dubsar_val_t b) {
     return unit ? dubsar_val_quant(res, unit) : dubsar_val_rat(res);
 }
 
+static const char *dubsar_unit_mul_names(const char *a, const char *b);
+
 dubsar_val_t dubsar_val_mul(dubsar_val_t a, dubsar_val_t b) {
     if (a.kind == DUBSAR_VAL_DIRECTED && (b.kind == DUBSAR_VAL_RAT || b.kind == DUBSAR_VAL_QUANT)) {
         dubsar_rat_t factor = dubsar_val_to_rat(b);
@@ -825,10 +850,13 @@ dubsar_val_t dubsar_val_mul(dubsar_val_t a, dubsar_val_t b) {
         d.magnitude = dubsar_rat_mul(d.magnitude, factor);
         return dubsar_val_directed(d);
     }
-    const char *unit = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.unit : ((b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.unit : NULL);
     dubsar_rat_t ra = dubsar_val_to_rat(a);
     dubsar_rat_t rb = dubsar_val_to_rat(b);
     dubsar_rat_t res = dubsar_rat_mul(ra, rb);
+    if (a.kind == DUBSAR_VAL_QUANT && b.kind == DUBSAR_VAL_QUANT) {
+        return dubsar_val_quant(res, dubsar_unit_mul_names(a.as.quant.unit, b.as.quant.unit));
+    }
+    const char *unit = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.unit : ((b.kind == DUBSAR_VAL_QUANT) ? b.as.quant.unit : NULL);
     return unit ? dubsar_val_quant(res, unit) : dubsar_val_rat(res);
 }
 
@@ -893,7 +921,107 @@ dubsar_val_t dubsar_val_nearest(dubsar_val_t a) {
     return dubsar_val_rat(res);
 }
 
+static void dubsar_unit_split(const char *unit, char *base, size_t base_cap, int *exp) {
+    base[0] = '\0';
+    *exp = 0;
+    if (!unit || unit[0] == '\0' || base_cap == 0) return;
+    const char *hat = strrchr(unit, '^');
+    if (hat && hat > unit) {
+        const char *p = hat + 1;
+        int sign = 1;
+        if (*p == '-') { sign = -1; p++; }
+        if (*p && strspn(p, "0123456789") == strlen(p)) {
+            size_t n = (size_t)(hat - unit);
+            if (n >= base_cap) n = base_cap - 1;
+            memcpy(base, unit, n);
+            base[n] = '\0';
+            *exp = sign * atoi(p);
+            return;
+        }
+    }
+    strncpy(base, unit, base_cap - 1);
+    base[base_cap - 1] = '\0';
+    *exp = 1;
+}
+
+static const char *dubsar_unit_join(const char *base, int exp) {
+    char buf[160];
+    if (!base || base[0] == '\0' || exp == 0) return NULL;
+    if (exp == 1) snprintf(buf, sizeof(buf), "%s", base);
+    else snprintf(buf, sizeof(buf), "%s^%d", base, exp);
+    char *out = (char *)malloc(strlen(buf) + 1);
+    if (!out) {
+        fprintf(stderr, "DUB.SAR Error: out of memory\n");
+        exit(1);
+    }
+    memcpy(out, buf, strlen(buf) + 1);
+    return out;
+}
+
+static const char *dubsar_unit_mul_names(const char *a, const char *b) {
+    char left[96], right[96];
+    int ea = 0, eb = 0;
+    dubsar_unit_split(a, left, sizeof(left), &ea);
+    dubsar_unit_split(b, right, sizeof(right), &eb);
+    if (ea == 0) return dubsar_unit_join(right, eb);
+    if (eb == 0) return dubsar_unit_join(left, ea);
+    if (strcmp(left, right) == 0) return dubsar_unit_join(left, ea + eb);
+    char buf[220];
+    snprintf(buf, sizeof(buf), "%s * %s", a ? a : "", b ? b : "");
+    char *out = (char *)malloc(strlen(buf) + 1);
+    if (!out) {
+        fprintf(stderr, "DUB.SAR Error: out of memory\n");
+        exit(1);
+    }
+    memcpy(out, buf, strlen(buf) + 1);
+    return out;
+}
+
+static const char *dubsar_unit_sqrt_name(const char *unit) {
+    char base[96];
+    int exp = 0;
+    dubsar_unit_split(unit, base, sizeof(base), &exp);
+    if (exp == 0) return NULL;
+    if (exp % 2 != 0) {
+        fprintf(stderr, "DUB.SAR Error: Cannot take square root of unit %s with odd dimension exponent\n", unit);
+        exit(1);
+    }
+    return dubsar_unit_join(base, exp / 2);
+}
+
+dubsar_val_t dubsar_val_square(dubsar_val_t a) {
+    dubsar_rat_t squared = dubsar_rat_square(dubsar_val_to_rat(a));
+    if (a.kind == DUBSAR_VAL_QUANT && a.as.quant.unit && a.as.quant.unit[0] != '\0') {
+        return dubsar_val_quant(squared, dubsar_unit_mul_names(a.as.quant.unit, a.as.quant.unit));
+    }
+    return dubsar_val_rat(squared);
+}
+
+dubsar_val_t dubsar_val_sqrt_exact(dubsar_val_t a) {
+    dubsar_rat_t root = dubsar_rat_sqrt_exact(dubsar_val_to_rat(a));
+    if (a.kind == DUBSAR_VAL_QUANT && a.as.quant.unit && a.as.quant.unit[0] != '\0') {
+        const char *rooted = dubsar_unit_sqrt_name(a.as.quant.unit);
+        if (!rooted) return dubsar_val_rat(root);
+        return dubsar_val_quant(root, rooted);
+    }
+    return dubsar_val_rat(root);
+}
+
+dubsar_val_t dubsar_val_approximate(dubsar_val_t a) {
+    dubsar_val_t v;
+    memset(&v, 0, sizeof(v));
+    v.kind = DUBSAR_VAL_APPROX;
+    v.as.approx.val = dubsar_val_to_rat(a);
+    v.as.approx.unit = (a.kind == DUBSAR_VAL_QUANT) ? a.as.quant.unit : NULL;
+    v.as.approx.precision = 6;
+    return v;
+}
+
 dubsar_val_t dubsar_val_cmp_op(dubsar_val_t a, dubsar_val_t b, const char *op) {
+    if (a.kind == DUBSAR_VAL_APPROX || b.kind == DUBSAR_VAL_APPROX) {
+        fprintf(stderr, "DUB.SAR Error: Approximate values cannot participate in exact comparison\n");
+        exit(1);
+    }
     int res = 0;
     if (a.kind == DUBSAR_VAL_EMPTY || b.kind == DUBSAR_VAL_EMPTY) {
         if (!strcmp(op, "<") || !strcmp(op, "lesser")) {

@@ -65,9 +65,8 @@ from dubsar.ast import (
 from dubsar.builtins import BUILTINS
 from dubsar.errors import (
     DubSarConsultationError,
-    DubSarDivisionByZero,
-    DubSarError,
     DubSarEntryNotFoundError,
+    DubSarError,
     DubSarImmutableTabletError,
     DubSarInputError,
     DubSarInvalidTabletError,
